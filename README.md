@@ -17,12 +17,13 @@ If you are developing a production application, we recommend using TypeScript wi
 
 # for frontend 
 # npm install react-router-dom axios dotenv
+# npm install react-icons --save
 #
 # for backend
 # npm install @supabase/supabase-js express cors dotenv
 #
-#
-#
+# Maps
+# https://www.react-simple-maps.io/?utm_source=chatgpt.com
 #
 #
 #
