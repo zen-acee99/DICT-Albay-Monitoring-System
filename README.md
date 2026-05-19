@@ -20,10 +20,20 @@ If you are developing a production application, we recommend using TypeScript wi
 # npm install react-icons --save
 #
 # for backend
-# npm install @supabase/supabase-js express cors dotenv
+# npm install @supabase/supabase-js express cors dotenv nodemon pg
 #
 # Maps
 # https://www.react-simple-maps.io/?utm_source=chatgpt.com
+# for compatible of maps need to install || npm install react@18.2.0 react-dom@18.2.0 and install
+# npm install react-simple-maps
+#
+# similar map in lookerstudio
+# npm install react-leaflet leaflet || React19 only
+# npm install react-leaflet@4 leaflet || react18
+# npm install leaflet || react18
 #
 #
+#
+# DB query
+# https://neon.com/docs/introduction/plans
 #
