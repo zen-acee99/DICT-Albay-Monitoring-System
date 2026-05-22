@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Navbar from '../Layout/Navbar'
+import axios from 'axios'
 
 import { IoSearch } from "react-icons/io5";
 import { TbRadar2 } from "react-icons/tb";
@@ -15,51 +16,60 @@ import {
   FaCogs
 } from "react-icons/fa";
 
-// import {
-//   ComposableMap,
-//   Geographies,
-//   Geography,
-//   ZoomableGroup
-// } from "react-simple-maps";
+import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
 
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-
-const geoUrl = "/map/geoLoc.json";
 
 const Dashboard = () => {
+  const [operationalData, setOperationalData] = useState([]);
+  const [liveLgus, setLiveLgus] = useState([]);
+  const [stats, setStats] = useState({ live: 0, uat: 0, training: 0, inactive: 0, ownSystem: 0, total: 0 });
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
 
-  // MAP POSITION
-  const [position, setPosition] = useState({
-    coordinates: [123.5, 13.3],
-    zoom: 1
-  });
+  const API_URL = 'http://localhost:3000';
 
-  // ZOOM IN
-  const handleZoomIn = () => {
+  useEffect(() => {
+    const fetchOperationalData = async () => {
+      try {
+        const response = await axios.get('http://localhost:3000/operational/live');
 
-    if (position.zoom >= 8) return;
+        console.log(response.data);
 
-    setPosition((pos) => ({
-      ...pos,
-      zoom: pos.zoom * 1.3
-    }));
+        setLiveLgus(response.data);
+
+      } catch (err) {
+        console.error("Fetch Error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOperationalData();
+  }, []);
+
+
+  const getColor = (status) => {
+    switch (status) {
+      case 'LIVE': return '#22c55e';
+      case 'UAT': return '#eab308';
+      case 'Training': return '#f97316';
+      case 'Inactive': return '#ef4444';
+      case '3rd Party': return '#3b82f6';
+      default: return '#6b7280';
+    }
   };
 
-  // ZOOM OUT
-  const handleZoomOut = () => {
 
-    if (position.zoom <= 1) return;
-
-    setPosition((pos) => ({
-      ...pos,
-      zoom: pos.zoom / 1.3
-    }));
-  };
-
-  // DRAG MAP
-  const handleMoveEnd = (position) => {
-    setPosition(position);
-  };
+  if (loading) {
+    return (
+      <div className='flex min-h-screen bg-[#050816] text-white items-center justify-center'>
+        <div className='flex flex-col items-center gap-4'>
+          <div className='w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin'></div>
+          <div className='text-2xl'>Loading...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
 
@@ -128,7 +138,7 @@ const Dashboard = () => {
                 </h1>
 
                 <h2 className='text-5xl font-bold text-green-400 leading-none mt-1'>
-                  58
+                  {stats.live}
                 </h2>
 
                 <p className='text-green-400 text-sm mt-2'>
@@ -162,7 +172,7 @@ const Dashboard = () => {
                 </h1>
 
                 <h2 className='text-5xl font-bold text-yellow-400 leading-none mt-1'>
-                  13
+                  {stats.uat}
                 </h2>
 
                 <p className='text-green-400 text-sm mt-2'>
@@ -196,7 +206,7 @@ const Dashboard = () => {
                 </h1>
 
                 <h2 className='text-5xl font-bold text-orange-400 leading-none mt-1'>
-                  12
+                  {stats.training}
                 </h2>
 
                 <p className='text-green-400 text-sm mt-2'>
@@ -230,7 +240,7 @@ const Dashboard = () => {
                 </h1>
 
                 <h2 className='text-5xl font-bold text-red-400 leading-none mt-1'>
-                  10
+                  {stats.inactive}
                 </h2>
 
                 <p className='text-red-400 text-sm mt-2'>
@@ -264,7 +274,7 @@ const Dashboard = () => {
                 </h1>
 
                 <h2 className='text-5xl font-bold text-blue-400 leading-none mt-1'>
-                  21
+                  {stats.thirdParty}
                 </h2>
 
                 <p className='text-green-400 text-sm mt-2'>
@@ -281,7 +291,7 @@ const Dashboard = () => {
           </div>
 
           {/* EXPORT */}
-          <div className='rounded-2xl hover:scale-105 transition-all duration-300 border border-[#1d2942] bg-[#091121] p-5 flex flex-col justify-between'>
+          <div className='rounded-2xl hover:scale-105 transition-all duration-300 p-5 flex flex-col justify-between'>
 
             <div>
 
@@ -311,67 +321,56 @@ const Dashboard = () => {
         <div className='grid grid-cols-1 xl:grid-cols-4 gap-5'>
 
           {/* MAP */}
-          <div className='border border-[#1d2942] bg-[#091121] min-h-[700px] xl:col-span-2 p-5 rounded-2xl overflow-hidden'>
+          <div className='border border-[#1d2942] bg-[#091121] min-h-[400px] xl:col-span-2 p-5 rounded-2xl overflow-hidden'>
 
             {/* MAP HEADER */}
             <div className='flex items-center justify-between mb-5'>
 
               <h1 className='font-semibold text-lg'>
-                eLGU Interactive Map
+                eLGU Overview
               </h1>
-              <div className="w-full h-[600px] rounded-xl overflow-hidden border border-[#1d2942]">
-
-  <MapContainer
-    center={[13.3, 123.5]}
-    zoom={9}
-    scrollWheelZoom={true}
-    style={{ height: "100%", width: "100%" }}
-  >
-
-    <TileLayer
-      attribution="&copy; OpenStreetMap contributors"
-      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-    />
-
-    {lguData.map((lgu, i) => (
-      <CircleMarker
-        key={i}
-        center={lgu.coords}
-        radius={8}
-        pathOptions={{
-          color: getColor(lgu.status),
-          fillColor: getColor(lgu.status),
-          fillOpacity: 0.8,
-          weight: 2
-        }}
-      >
-        <Popup>
-          <div style={{ minWidth: "160px" }}>
-            <h3 style={{ fontWeight: "bold", marginBottom: "4px" }}>
-              {lgu.name}
-            </h3>
-
-            <p style={{ fontSize: "12px" }}>
-              Status:{" "}
-              <span style={{ fontWeight: "bold", color: getColor(lgu.status) }}>
-                {lgu.status}
-              </span>
-            </p>
-          </div>
-        </Popup>
-      </CircleMarker>
-    ))}
-
-  </MapContainer>
-
-</div>
 
             </div>
 
-            {/* MAP */}
-            {/* <div className='w-full cursor-grab active:cursor-grabbing'>
+            <div className="w-full h-[350px] rounded-xl overflow-hidden border border-[#1d2942]">
 
-            </div> */}
+              <MapContainer
+                center={[13.3, 123.5]}
+                zoom={9}
+                scrollWheelZoom={true}
+                style={{ height: "100%", width: "100%" }}
+              >
+                
+
+                <TileLayer
+                  //attribution="&copy; OpenStreetMap contributors"
+                  url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                />
+
+                {liveLgus.map((lgu, i) => (
+                  <CircleMarker
+                    key={i}
+                    center={[lgu.coordinates[1], lgu.coordinates[0]]}
+                    radius={8}
+                    pathOptions={{
+                      color: getColor(lgu.status),
+                      fillColor: getColor(lgu.status),
+                      fillOpacity: 0.8,
+                      weight: 2
+                    }}
+                  >
+                    <Popup>
+                      <div>
+                        <h3>{lgu.name}</h3>
+                        <p>Status: {lgu.status}</p>
+                      </div>
+                    </Popup>
+                  </CircleMarker>
+                ))}
+
+              </MapContainer>
+
+            </div>
 
           </div>
 

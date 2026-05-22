@@ -11,6 +11,7 @@ import {
 
 import { LuSettings } from "react-icons/lu"
 import { TbBuildingCommunity } from "react-icons/tb"
+import { Link } from 'react-router-dom'
 
 const Navbar = () => {
   const [open, setOpen] = useState(true)
@@ -60,13 +61,13 @@ const Navbar = () => {
             {open && (
               <ul className='pl-6 pt-3 space-y-3 text-gray-300'>
 
-                <li className='hover:text-white transition cursor-pointer'>
+                <Link to="/#" className='hover:text-white transition cursor-pointer'>
                   Albay
-                </li>
+                </Link>
 
-                <li className='hover:text-white transition cursor-pointer'>
+                <Link to="/#" className='hover:text-white transition cursor-pointer'>
                   Region
-                </li>
+                </Link>
               </ul>
             )}
           </li>
@@ -98,10 +99,10 @@ const Navbar = () => {
           </li> */}
 
           {/* Administration */}
-          <li className='flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-[#0d1325] transition cursor-pointer text-gray-300 hover:text-white'>
+          <Link to="/administrator" className='flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-[#0d1325] transition cursor-pointer text-gray-300 hover:text-white'>
             <LuSettings className='text-2xl' />
             <span className='text-lg'>Administration</span>
-          </li>
+          </Link>
         </ul>
       </div>
 
