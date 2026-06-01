@@ -164,9 +164,10 @@ export default function AdministratorModule() {
                       <td className="p-4">{u.email}</td>
                       <td className="p-4">{u.role}</td>
                       <td className="p-4 text-right">
-                        <button onClick={() => setSelectedUser(u)}>
+{/* HIDE BUTTON FOR LIVE EDITING/*}
+                        {/* <button onClick={() => setSelectedUser(u)}>
                           <Edit size={14} /> Edit
-                        </button>
+                        </button> */}
                       </td>
                     </tr>
                   ))}

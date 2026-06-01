@@ -61,9 +61,9 @@ const Navbar = () => {
             {open && (
               <ul className='pl-6 pt-3 space-y-3 text-gray-300'>
 
-                <Link to="/#" className='hover:text-white transition cursor-pointer'>
+                {/* <Link to="/#" className='hover:text-white transition cursor-pointer'>
                   Albay
-                </Link>
+                </Link> */}
 
                 <Link to="/#" className='hover:text-white transition cursor-pointer'>
                   Region
