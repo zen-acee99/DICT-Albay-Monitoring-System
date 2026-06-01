@@ -12,7 +12,7 @@ const DownloadsCard = () => {
   const [totalUsers, setTotalUsers] = useState(0);
   const [chartData, setChartData] = useState([]);
 
-  const API_URL = "http://localhost:3001";
+  const API_URL = import.meta.env.VITE_API_URL;
 
   // GET TOTAL USERS
   useEffect(() => {

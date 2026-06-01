@@ -7,12 +7,13 @@ const OperationalActivities = () => {
     { label: "Technical Assistance", value: 0, icon: "🛠️" },
   ]);
 
+  const VITE_API_URL = import.meta.env.VITE_API_URL;
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [promoRes, actRes] = await Promise.all([
-          fetch("http://localhost:3001/egovpro/summary"),
-          fetch("http://localhost:3001/egovact/summary"),
+          fetch(`${VITE_API_URL}/egovpro/summary`),
+          fetch(`${VITE_API_URL}/egovact/summary`),
         ]);
 
         const promo = await promoRes.json();

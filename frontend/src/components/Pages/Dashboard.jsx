@@ -35,7 +35,8 @@ const Dashboard = () => {
   const [showMapModal, setShowMapModal] = useState(false);
   const [additionalInfo, setAdditionalInfo] = useState([]);
 
-  const API_URL = 'http://localhost:3001';
+  // const API_URL = 'http://localhost:3001';
+  const VITE_API_URL = import.meta.env.VITE_API_URL;
 
   const [stats, setStats] = useState({
     live: 0,
@@ -52,29 +53,37 @@ const Dashboard = () => {
 
       try {
 
-        const response = await axios.get(`${API_URL}/operational`);
+        const response = await axios.get(`${VITE_API_URL}/operational`);
 
         const data = response.data;
 
         setLiveLgus(data);
 
-        const live = data.filter(
+        const uniqueMap = new Map();
+
+        data.forEach(item => {
+          uniqueMap.set(item.name, item);
+        });
+
+        const uniqueData = Array.from(uniqueMap.values());
+
+        const live = uniqueData.filter(
           item => item.status === 'LIVE'
         ).length;
 
-        const uat = data.filter(
+        const uat = uniqueData.filter(
           item => item.status === 'UAT'
         ).length;
 
-        const training = data.filter(
+        const training = uniqueData.filter(
           item => item.status === 'Training'
         ).length;
 
-        const inactive = data.filter(
+        const inactive = uniqueData.filter(
           item => item.status === 'NO SYSTEM'
         ).length;
 
-        const thirdParty = data.filter(
+        const thirdParty = uniqueData.filter(
           item => item.status === 'OWN SYSTEM'
         ).length;
 
@@ -84,7 +93,7 @@ const Dashboard = () => {
           training,
           inactive,
           thirdParty,
-          total: data.length
+          total: uniqueData.length
         });
 
       } catch (err) {
@@ -141,7 +150,7 @@ const Dashboard = () => {
   try {
 
     const response = await axios.get(
-      `${API_URL}/additionaldescription/location/${encodeURIComponent(location)}`
+      `${VITE_API_URL}/additionaldescription/location/${encodeURIComponent(location)}`
       
     );
 
@@ -212,7 +221,7 @@ console.log(response.data);
           </div>
 
           {/* SEARCH */}
-          <div className='relative w-full md:w-auto'>
+          {/* <div className='relative w-full md:w-auto'>
 
             <IoSearch className='absolute text-gray-500 left-3 top-1/2 -translate-y-1/2 text-lg' />
 
@@ -222,7 +231,7 @@ console.log(response.data);
               className='bg-[#091121] border border-[#1d2942] pl-10 py-3 rounded-xl outline-none w-full md:w-80 text-sm focus:border-blue-500 transition'
             />
 
-          </div>
+          </div> */}
 
         </div>
 
@@ -241,7 +250,7 @@ console.log(response.data);
               <div>
 
                 <h1 className='text-green-300 text-xs font-medium'>
-                  LIVE eLGUs
+                  LIVE <br /> eLGUs
                 </h1>
 
                 <h2 className='text-5xl font-bold text-green-400 leading-none mt-1'>

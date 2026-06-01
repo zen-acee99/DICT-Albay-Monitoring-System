@@ -21,35 +21,37 @@ export default function AdministratorModule() {
     fetchEGOV();
   }, []);
 
+  const VITE_API_URL = import.meta.env.VITE_API_URL;
+
   const fetchUsers = async () => {
-    const res = await axios.get("http://localhost:3001/users");
+    const res = await axios.get(`${VITE_API_URL}/users`);
     setUsers(res.data);
   };
 
   const fetchLGUS = async () => {
-    const res = await axios.get("http://localhost:3001/operational");
+    const res = await axios.get(`${VITE_API_URL}/operational`);
     setLGUS(res.data);
   };
 
   const fetchEGOV = async () => {
-    const res = await axios.get("http://localhost:3001/egovph");
+    const res = await axios.get(`${VITE_API_URL}/egovph`);
     setEgovs(res.data);
   };
 
   const updateUser = async () => {
-    await axios.put(`http://localhost:3001/users/${selectedUser._id}`, selectedUser);
+    await axios.put(`${VITE_API_URL}/users/${selectedUser._id}`, selectedUser);
     fetchUsers();
     setSelectedUser(null);
   };
 
   const updateLGU = async () => {
-    await axios.patch(`http://localhost:3001/operational/${selectedLGU._id}`, selectedLGU);
+    await axios.patch(`${VITE_API_URL}/operational/${selectedLGU._id}`, selectedLGU);
     fetchLGUS();
     setSelectedLGU(null);
   };
 
   const updateEGOV = async () => {
-    await axios.put(`http://localhost:3001/egovph/${selectedEGOV._id}`, selectedEGOV);
+    await axios.put(`${VITE_API_URL}/egovph/${selectedEGOV._id}`, selectedEGOV);
     fetchEGOV();
     setSelectedEGOV(null);
   };

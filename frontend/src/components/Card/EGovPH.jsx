@@ -10,7 +10,7 @@ import {
 } from "recharts";
 
 const UsersCard = () => {
-    const API = "http://localhost:3001"
+    const VITE_API_URL = import.meta.env.VITE_API_URL;
 
     const [data, setData] = useState([]);
     const [totalUsers, setTotalUsers] = useState(0);
@@ -19,12 +19,12 @@ const UsersCard = () => {
     const fetchData = async () => {
       try {
         // Get total users
-        const totalRes = await fetch(`${API}/egovph/total-registered-users`);
+        const totalRes = await fetch(`${VITE_API_URL}/egovph/total-registered-users`);
         const totalData = await totalRes.json();
         setTotalUsers(totalData.total);
 
         // Get municipality data
-        const chartRes = await fetch(`${API}/egovph/user-per-municipality`);
+        const chartRes = await fetch(`${VITE_API_URL}/egovph/user-per-municipality`);
         const chartData = await chartRes.json();
 
         if (Array.isArray(chartData)) {
