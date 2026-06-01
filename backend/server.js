@@ -26,11 +26,17 @@ const egovphRoutes = require('./routes/egovphRoutes')
 const operationalRoutes = require('./routes/operationalRoutes')
 const auditTrailRoutes = require('./routes/auditTrailRoutes')
 const userRoutes = require('./routes/userRoutes')
+const EgovActRoutes = require('./routes/egovactRoutes')
+const EgovProRoutes = require('./routes/egovproRoutes')
+const additionalInfoRoutes = require('./routes/additionalInfoRoutes')
 
 app.use('/egovph', egovphRoutes);
 app.use('/operational', operationalRoutes);
 app.use('/auditTrail', auditTrailRoutes);
 app.use('/users', userRoutes);
+app.use('/egovact', EgovActRoutes)
+app.use('/egovpro', EgovProRoutes)
+app.use('/additionaldescription', additionalInfoRoutes)
 
 app.listen(3001, () => {
     console.log('Server is running on port 3001')

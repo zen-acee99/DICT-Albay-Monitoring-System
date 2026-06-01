@@ -13,6 +13,10 @@ const OperationalSchema = new mongoose.Schema({
         type: String,
         default: ""
     },
+    version: {
+        type: String,
+        default: ""
+    },
     live_status: {
         type: String,
         default: ""

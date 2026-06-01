@@ -3,10 +3,78 @@ const router = express.Router()
 
 const EgovphModel = require('../model/egovphs')
 
+// Get sum of registered users
+router.get('/total-registered-users', async (req, res) => {
+  try {
+    const result = await EgovphModel.aggregate([
+      {
+        $group: {
+          _id: null,   // ✅ MUST be _id, not id
+          totalRegisteredUsers: {
+            $sum: "$registeredUsers"
+          }
+        }
+      }
+    ]);
+
+    res.json({
+      total: result[0]?.totalRegisteredUsers || 0
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+router.get("/chart/by-province", async (req, res) => {
+  try {
+    const result = await EgovphModel.aggregate([
+      {
+        $group: {
+          _id: "$provinceName",
+          value: { $sum: "$registeredUsers" }
+        }
+      },
+      { $sort: { value: -1 } }
+    ]);
+
+    res.json(result);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+// GET users per municipality
+router.get('/user-per-municipality', async (req, res) => {
+  try {
+    const result = await EgovphModel.find({}, {
+      provinceName: 1,
+      registeredUsers: 1,
+      _id: 0
+    });
+
+    res.json(result);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
+});
 
 // GET all users
 router.get('/', (req, res) => {
-    EgovphModel.find({})
+
+    const filter = {}
+
+    if(req.query.municipalities){
+        filter.municipalities = req.query.municipalities        
+    }
+    if(req.query.provinceName) {
+        filter.provinceName = req.query.provinceName
+    }
+
+    EgovphModel.find(filter)
     .then( users => res.json(users))
     .catch( err => res.status(500).json(err))
 })

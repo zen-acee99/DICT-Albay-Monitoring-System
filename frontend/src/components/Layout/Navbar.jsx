@@ -21,12 +21,12 @@ const Navbar = () => {
 
       {/* Logo */}
       <div className='flex items-center gap-3 mb-8'>
-        <div className='w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-700 flex items-center justify-center shadow-lg shadow-cyan-500/20'>
-          <span className='font-bold text-lg'>⌘</span>
+        <div className='w-10 h-10 rounded-full flex items-center justify-center shadow-lg shadow-cyan-500/20'>
+          <img src="/DictLOGO.png" alt="" />
         </div>
 
         <h1 className='text-2xl font-semibold tracking-wide'>
-          DigiGOV <span className='text-gray-400 text-lg'>v2</span>
+          DigiGOV
         </h1>
       </div>
 
@@ -115,15 +115,11 @@ const Navbar = () => {
         {/* Circle Effect */}
         <div className='absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_bottom,rgba(59,130,246,0.6),transparent_60%)]'></div>
 
-        <div className='relative z-10 text-center'>
+        <div className='relative z-0 text-center'>
           
-          <h1 className='text-4xl font-black bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 bg-clip-text text-transparent'>
-            eLGU
-          </h1>
+          <img src="/eLGU.png" alt="" />
 
-          <h2 className='text-3xl font-bold text-blue-400 mt-1'>
-            eGOV<span className='text-white text-lg'>PH</span>
-          </h2>
+          <img src="/eGOV.png" alt="" />
 
           <p className='text-sm text-gray-300 mt-4 leading-relaxed'>
             Build. Empower. Transform.

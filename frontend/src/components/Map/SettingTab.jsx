@@ -79,7 +79,7 @@ export default function AdministratorModule() {
           >
             <div className="flex items-center gap-2">
               <Building2 size={18} />
-              LGU Management
+              DigiGOV Data
             </div>
           </button>
         </div>
@@ -148,7 +148,7 @@ export default function AdministratorModule() {
                           onClick={() => setSelectedUser(user)}
                           className="border border-blue-500 text-blue-400 px-4 py-2 rounded-lg hover:bg-blue-500/20 transition"
                         >
-                          <div className="flex items-center gap-2">
+                          <div className="flex justify-center items-center gap-2">
                             <Eye size={16} />
                             View
                           </div>
@@ -198,7 +198,7 @@ export default function AdministratorModule() {
                       <td className="p-4 text-right">
                         <button
                           onClick={() => setSelectedLGU(lgu)}
-                          className="border border-orange-500 text-orange-400 px-4 py-2 rounded-lg hover:bg-orange-500/20 transition"
+                          className="text-orange-400 px-4 py-2 rounded-lg hover:bg-orange-500/20 transition"
                         >
                           <div className="flex items-center gap-2">
                             <Edit size={16} />

@@ -16,59 +16,168 @@ import {
   FaCogs
 } from "react-icons/fa";
 
-import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  CircleMarker
+} from "react-leaflet";
 
+import DashboardCard from '../Card/DashboardCard';
+import EGovPH from '../Card/EGovPH';
+import EgovPromotional from '../Card/EgovPromotional';
 
 const Dashboard = () => {
-  const [operationalData, setOperationalData] = useState([]);
-  const [liveLgus, setLiveLgus] = useState([]);
-  const [stats, setStats] = useState({ live: 0, uat: 0, training: 0, inactive: 0, ownSystem: 0, total: 0 });
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
 
-  const API_URL = 'http://localhost:3000';
+  const [liveLgus, setLiveLgus] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const [selectedLGU, setSelectedLGU] = useState(null);
+  const [showMapModal, setShowMapModal] = useState(false);
+  const [additionalInfo, setAdditionalInfo] = useState([]);
+
+  const API_URL = 'http://localhost:3001';
+
+  const [stats, setStats] = useState({
+    live: 0,
+    uat: 0,
+    training: 0,
+    inactive: 0,
+    thirdParty: 0,
+    total: 0
+  });
 
   useEffect(() => {
+
     const fetchOperationalData = async () => {
+
       try {
-        const response = await axios.get('http://localhost:3000/operational/live');
 
-        console.log(response.data);
+        const response = await axios.get(`${API_URL}/operational`);
 
-        setLiveLgus(response.data);
+        const data = response.data;
+
+        setLiveLgus(data);
+
+        const live = data.filter(
+          item => item.status === 'LIVE'
+        ).length;
+
+        const uat = data.filter(
+          item => item.status === 'UAT'
+        ).length;
+
+        const training = data.filter(
+          item => item.status === 'Training'
+        ).length;
+
+        const inactive = data.filter(
+          item => item.status === 'NO SYSTEM'
+        ).length;
+
+        const thirdParty = data.filter(
+          item => item.status === 'OWN SYSTEM'
+        ).length;
+
+        setStats({
+          live,
+          uat,
+          training,
+          inactive,
+          thirdParty,
+          total: data.length
+        });
 
       } catch (err) {
+
         console.error("Fetch Error:", err);
+
       } finally {
+
         setLoading(false);
+
       }
+
     };
 
     fetchOperationalData();
+
+    const interval = setInterval(() => {
+      fetchOperationalData();
+    }, 5000);
+
+    return () => clearInterval(interval);
+
   }, []);
 
-
   const getColor = (status) => {
+
     switch (status) {
-      case 'LIVE': return '#22c55e';
-      case 'UAT': return '#eab308';
-      case 'Training': return '#f97316';
-      case 'Inactive': return '#ef4444';
-      case '3rd Party': return '#3b82f6';
-      default: return '#6b7280';
+
+      case 'LIVE':
+        return '#22c55e';
+
+      case 'UAT':
+        return '#eab308';
+
+      case 'Training':
+        return '#f97316';
+
+      case 'NO SYSTEM':
+        return '#ef4444';
+
+      case 'OWN SYSTEM':
+        return '#3b82f6';
+
+      default:
+        return '#6b7280';
+
     }
+
   };
+
+  const fetchAdditionalInfo = async (location) => {
+
+    console.log("Sending location:", location);
+  try {
+
+    const response = await axios.get(
+      `${API_URL}/additionaldescription/location/${encodeURIComponent(location)}`
+      
+    );
+
+    setAdditionalInfo(response.data || []);
+
+  } catch (error) {
+console.log(response.data);
+    console.error("Additional Info Error:", error);
+
+    setAdditionalInfo([]);
+  }
+  
+
+};
 
 
   if (loading) {
+
     return (
+
       <div className='flex min-h-screen bg-[#050816] text-white items-center justify-center'>
+
         <div className='flex flex-col items-center gap-4'>
+
           <div className='w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin'></div>
-          <div className='text-2xl'>Loading...</div>
+
+          <div className='text-2xl'>
+            Loading...
+          </div>
+
         </div>
+
       </div>
+
     );
+
   }
 
   return (
@@ -90,7 +199,7 @@ const Dashboard = () => {
         {/* HEADER */}
         <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
 
-          <div>
+          <div> 
 
             <h1 className='tracking-wide font-semibold text-2xl'>
               DigiGOV Dashboard
@@ -123,11 +232,9 @@ const Dashboard = () => {
           {/* LIVE */}
           <div className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl border border-green-500/30 bg-gradient-to-br from-[#071b12] to-[#041018] p-5 shadow-[0_0_25px_rgba(0,255,128,0.08)]'>
 
-            <div className='absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,197,94,0.15),transparent_45%)]'></div>
-
             <div className='relative z-10 flex items-start gap-4'>
 
-              <div className='w-16 h-16 rounded-2xl bg-green-500/10 flex items-center justify-center shadow-[0_0_20px_rgba(34,197,94,0.3)]'>
+              <div className='w-16 h-16 rounded-2xl bg-green-500/10 flex items-center justify-center'>
                 <TbRadar2 className='text-4xl text-green-400' />
               </div>
 
@@ -141,13 +248,6 @@ const Dashboard = () => {
                   {stats.live}
                 </h2>
 
-                <p className='text-green-400 text-sm mt-2'>
-                  +12%
-                  <span className='text-gray-400 ml-1'>
-                    vs last month
-                  </span>
-                </p>
-
               </div>
 
             </div>
@@ -155,13 +255,11 @@ const Dashboard = () => {
           </div>
 
           {/* UAT */}
-          <div className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl border border-yellow-500/30 bg-gradient-to-br from-[#1a1405] to-[#100b03] p-5 shadow-[0_0_25px_rgba(255,196,0,0.08)]'>
-
-            <div className='absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(250,204,21,0.15),transparent_45%)]'></div>
+          <div className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl border border-yellow-500/30 bg-gradient-to-br from-[#1a1405] to-[#100b03] p-5'>
 
             <div className='relative z-10 flex items-start gap-4'>
 
-              <div className='w-16 h-16 rounded-2xl bg-yellow-500/10 flex items-center justify-center shadow-[0_0_20px_rgba(250,204,21,0.3)]'>
+              <div className='w-16 h-16 rounded-2xl bg-yellow-500/10 flex items-center justify-center'>
                 <HiOutlineDocumentSearch className='text-4xl text-yellow-400' />
               </div>
 
@@ -175,13 +273,6 @@ const Dashboard = () => {
                   {stats.uat}
                 </h2>
 
-                <p className='text-green-400 text-sm mt-2'>
-                  +3%
-                  <span className='text-gray-400 ml-1'>
-                    vs last month
-                  </span>
-                </p>
-
               </div>
 
             </div>
@@ -189,13 +280,11 @@ const Dashboard = () => {
           </div>
 
           {/* TRAINING */}
-          <div className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl border border-orange-500/30 bg-gradient-to-br from-[#1b1007] to-[#120803] p-5 shadow-[0_0_25px_rgba(255,115,0,0.08)]'>
-
-            <div className='absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(249,115,22,0.15),transparent_45%)]'></div>
+          <div className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl border border-orange-500/30 bg-gradient-to-br from-[#1b1007] to-[#120803] p-5'>
 
             <div className='relative z-10 flex items-start gap-4'>
 
-              <div className='w-16 h-16 rounded-2xl bg-orange-500/10 flex items-center justify-center shadow-[0_0_20px_rgba(249,115,22,0.3)]'>
+              <div className='w-16 h-16 rounded-2xl bg-orange-500/10 flex items-center justify-center'>
                 <FaChalkboardTeacher className='text-4xl text-orange-400' />
               </div>
 
@@ -209,13 +298,6 @@ const Dashboard = () => {
                   {stats.training}
                 </h2>
 
-                <p className='text-green-400 text-sm mt-2'>
-                  +6%
-                  <span className='text-gray-400 ml-1'>
-                    vs last month
-                  </span>
-                </p>
-
               </div>
 
             </div>
@@ -223,13 +305,11 @@ const Dashboard = () => {
           </div>
 
           {/* INACTIVE */}
-          <div className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl border border-red-500/30 bg-gradient-to-br from-[#1a0707] to-[#100303] p-5 shadow-[0_0_25px_rgba(255,0,0,0.08)]'>
-
-            <div className='absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(239,68,68,0.15),transparent_45%)]'></div>
+          <div className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl border border-red-500/30 bg-gradient-to-br from-[#1a0707] to-[#100303] p-5'>
 
             <div className='relative z-10 flex items-start gap-4'>
 
-              <div className='w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center shadow-[0_0_20px_rgba(239,68,68,0.3)]'>
+              <div className='w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center'>
                 <FaBan className='text-4xl text-red-400' />
               </div>
 
@@ -243,46 +323,30 @@ const Dashboard = () => {
                   {stats.inactive}
                 </h2>
 
-                <p className='text-red-400 text-sm mt-2'>
-                  -2%
-                  <span className='text-gray-400 ml-1'>
-                    vs last month
-                  </span>
-                </p>
-
               </div>
 
             </div>
 
           </div>
 
-          {/* 3RD PARTY */}
-          <div className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl border border-blue-500/30 bg-gradient-to-br from-[#07101f] to-[#040916] p-5 shadow-[0_0_25px_rgba(59,130,246,0.08)]'>
-
-            <div className='absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.15),transparent_45%)]'></div>
+          {/* THIRD PARTY */}
+          <div className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl border border-blue-500/30 bg-gradient-to-br from-[#07101f] to-[#040916] p-5'>
 
             <div className='relative z-10 flex items-start gap-4'>
 
-              <div className='w-16 h-16 rounded-2xl bg-blue-500/10 flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.3)]'>
+              <div className='w-16 h-16 rounded-2xl bg-blue-500/10 flex items-center justify-center'>
                 <FaCogs className='text-4xl text-blue-400' />
               </div>
 
               <div>
 
                 <h1 className='text-blue-300 text-sm font-medium'>
-                  With OWN / 3rd Party
+                  OWN / 3rd Party
                 </h1>
 
                 <h2 className='text-5xl font-bold text-blue-400 leading-none mt-1'>
                   {stats.thirdParty}
                 </h2>
-
-                <p className='text-green-400 text-sm mt-2'>
-                  +5%
-                  <span className='text-gray-400 ml-1'>
-                    vs last month
-                  </span>
-                </p>
 
               </div>
 
@@ -291,16 +355,16 @@ const Dashboard = () => {
           </div>
 
           {/* EXPORT */}
-          <div className='rounded-2xl hover:scale-105 transition-all duration-300 p-5 flex flex-col justify-between'>
+          <div className='rounded-2xl p-5 flex flex-col justify-between'>
 
             <div>
 
               <p className='text-gray-500 text-sm'>
-                Last Updated:
+                Last Updated
               </p>
 
-              <h2 className='text-white text-md font-medium mt-1 leading-relaxed'>
-                May 13, 2026 04:23 PM
+              <h2 className='text-white text-md font-medium mt-1'>
+                May 25, 2026
               </h2>
 
             </div>
@@ -323,7 +387,6 @@ const Dashboard = () => {
           {/* MAP */}
           <div className='border border-[#1d2942] bg-[#091121] min-h-[400px] xl:col-span-2 p-5 rounded-2xl overflow-hidden'>
 
-            {/* MAP HEADER */}
             <div className='flex items-center justify-between mb-5'>
 
               <h1 className='font-semibold text-lg'>
@@ -332,7 +395,7 @@ const Dashboard = () => {
 
             </div>
 
-            <div className="w-full h-[350px] rounded-xl overflow-hidden border border-[#1d2942]">
+            <div className="w-full h-[700px] rounded-xl overflow-hidden border border-[#1d2942]">
 
               <MapContainer
                 center={[13.3, 123.5]}
@@ -340,32 +403,44 @@ const Dashboard = () => {
                 scrollWheelZoom={true}
                 style={{ height: "100%", width: "100%" }}
               >
-                
 
                 <TileLayer
-                  //attribution="&copy; OpenStreetMap contributors"
                   url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
                 />
 
                 {liveLgus.map((lgu, i) => (
+
                   <CircleMarker
                     key={i}
-                    center={[lgu.coordinates[1], lgu.coordinates[0]]}
-                    radius={8}
+                    center={[
+                      lgu.coordinates[1],
+                      lgu.coordinates[0]
+                    ]}
+                    radius={
+                      selectedLGU?.name === lgu.name
+                        ? 14
+                        : 8
+                    }
                     pathOptions={{
                       color: getColor(lgu.status),
                       fillColor: getColor(lgu.status),
                       fillOpacity: 0.8,
                       weight: 2
                     }}
-                  >
-                    <Popup>
-                      <div>
-                        <h3>{lgu.name}</h3>
-                        <p>Status: {lgu.status}</p>
-                      </div>
-                    </Popup>
-                  </CircleMarker>
+                    //
+                    eventHandlers={{
+                      click: async () => {
+
+                        setSelectedLGU(lgu);
+
+                        await fetchAdditionalInfo(lgu.name);
+
+                        setShowMapModal(true);
+
+                      }
+                    }}
+                  />
+
                 ))}
 
               </MapContainer>
@@ -374,29 +449,18 @@ const Dashboard = () => {
 
           </div>
 
-          {/* MIDDLE */}
+          {/* CARDS */}
           <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-5'>
 
-            <div className='border border-[#1d2942] bg-[#091121] min-h-[220px] p-5 rounded-2xl'>
-              Analytics Widget
-            </div>
+            <DashboardCard />
 
-            <div className='border border-[#1d2942] bg-[#091121] min-h-[220px] p-5 rounded-2xl'>
-              LGU Statistics
-            </div>
+            <EgovPromotional />
 
           </div>
 
-          {/* RIGHT */}
           <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-5'>
 
-            <div className='border border-[#1d2942] bg-[#091121] min-h-[220px] p-5 rounded-2xl'>
-              Heatmap
-            </div>
-
-            <div className='border border-[#1d2942] bg-[#091121] min-h-[220px] p-5 rounded-2xl'>
-              Activity Logs
-            </div>
+            <EGovPH />
 
           </div>
 
@@ -404,8 +468,289 @@ const Dashboard = () => {
 
       </div>
 
+      {/* FULLSCREEN MAP MODAL */}
+      {showMapModal && selectedLGU && (
+
+        <div className='fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex'>
+
+          {/* LEFT SIDE */}
+          <div className='flex-1 relative'>
+
+            {/* CLOSE BUTTON */}
+            <button
+              onClick={() => setShowMapModal(false)}
+              className='absolute top-5 right-5 z-[99999] bg-red-500 hover:bg-red-600 transition w-12 h-12 rounded-full text-white text-2xl'
+            >
+              ✕
+            </button>
+
+            {/* FULLSCREEN MAP */}
+            <MapContainer
+              center={[
+                selectedLGU.coordinates[1],
+                selectedLGU.coordinates[0]
+              ]}
+              zoom={12}
+              scrollWheelZoom={true}
+              style={{ height: "100%", width: "100%" }}
+            >
+
+              <TileLayer
+                url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+              />
+
+              {liveLgus.map((lgu, i) => (
+
+                <CircleMarker
+                  className='animate-pulse'
+                  key={i}
+                  center={[
+                    lgu.coordinates[1],
+                    lgu.coordinates[0]
+                  ]}
+                  radius={
+                    selectedLGU.name === lgu.name
+                      ? 15
+                      : 9
+                  }
+                  pathOptions={{
+                    color: getColor(lgu.status),
+                    fillColor: getColor(lgu.status),
+                    fillOpacity: 0.9,
+                    weight: 3
+                  }}
+                  eventHandlers={{
+                    click: async () => {
+
+                      setSelectedLGU(lgu);
+
+                      await fetchAdditionalInfo(lgu.name);
+
+                    }
+                  }}
+                />
+
+              ))}
+
+            </MapContainer>
+
+          </div>
+
+          {/* RIGHT PANEL */}
+          <div className='w-[420px] bg-[#091121] border-l border-[#1d2942] p-6 overflow-y-auto'>
+
+            {/* TITLE */}
+            <div className='mb-6'>
+
+              <h1 className='text-3xl font-bold text-white'>
+                {selectedLGU.name}
+              </h1>
+
+              <p className='text-gray-400 mt-2'>
+                LGU Information Details
+              </p>
+
+            </div>
+
+            {/* STATUS CARD */}
+            <div className='bg-[#111827] rounded-2xl border border-[#1d2942] p-5 mb-5'>
+
+              <p className='text-gray-400 text-sm mb-3'>
+                Current Status
+              </p>
+
+              <div
+                className='inline-flex px-5 py-2 rounded-xl text-white font-semibold'
+                style={{
+                  backgroundColor: getColor(selectedLGU.status)
+                }}
+              >
+                {selectedLGU.status}
+              </div>
+
+            </div>
+
+            {/* LGU DETAILS */}
+            <div className='bg-[#111827] rounded-2xl border border-[#1d2942] p-5 mb-5'>
+
+              <h2 className='text-xl font-semibold mb-5'>
+                Municipality Details
+              </h2>
+
+              <div className='space-y-3 text-sm'>
+
+                <div>
+                  <p className='text-gray-400'>
+                    Municipality
+                  </p>
+
+                  <p className='text-white text-lg'>
+                    {selectedLGU.name}
+                  </p>
+                </div>
+
+                <div>
+                  <p className='text-gray-400'>
+                    eLGU Version
+                  </p>
+
+                  <p className='text-white'>
+                    {selectedLGU.version || 'N/A'}
+                  </p>
+                </div>
+
+                <div>
+                  <p className='text-gray-400'>
+                    Region
+                  </p>
+
+                  <p className='text-white'>
+                    Region V - Bicol Region
+                  </p>
+                </div>
+
+                <div>
+                  <p className='text-gray-400'>
+                    Province
+                  </p>
+
+                  <p className='text-white'>
+                    {selectedLGU.name.split(',')[1]?.trim() || 'N/A'}
+                  </p>
+                </div>
+
+                <div>
+                  <p className='text-gray-400'>
+                    Coordinates
+                  </p>
+
+                  <p className='text-white'>
+                    {selectedLGU.coordinates[1]},
+                    {" "}
+                    {selectedLGU.coordinates[0]}
+                  </p>
+                </div>
+
+              </div>
+
+            </div>
+            
+            {/* EXTRA CARD */}
+            <div className='bg-[#111827] rounded-2xl border border-[#1d2942] p-5'>
+
+              <h2 className='text-xl font-semibold mb-5'>
+                Avail of Other LGU Services
+              </h2>
+
+              {/* <div className='space-y-4 text-sm'>
+
+                <div className='flex justify-between'>
+                  <span className='text-gray-400'>
+                    Transactions
+                  </span>
+
+                  <span className='text-white'>
+                    5,281
+                  </span>
+                </div>
+
+                <div className='flex justify-between'>
+                  <span className='text-gray-400'>
+                    Online Services
+                  </span>
+
+                  <span className='text-white'>
+                    12 Services
+                  </span>
+                </div>
+
+                <div className='flex justify-between'>
+                  <span className='text-gray-400'>
+                    Registered Offices
+                  </span>
+
+                  <span className='text-white'>
+                    8 Offices
+                  </span>
+                </div>
+
+              </div> */}
+              {additionalInfo.length > 0 ? (
+
+                <div className='space-y-4'>
+
+                  {additionalInfo.map((item, index) => (
+
+                    <div
+                      key={index}
+                      className='bg-[#0f172a] border border-[#1d2942] rounded-xl p-4'
+                    >
+
+                      <div className='mb-4'>
+
+                        <p className='text-xs text-gray-400 mb-1'>
+                          Agency Name
+                        </p>
+
+                        <p className='text-white font-medium'>
+                          {item.AgencyName}
+                        </p>
+
+                      </div>
+
+                      <div>
+
+                        <p className='text-xs text-gray-400 mb-2'>
+                          Available Services
+                        </p>
+
+                        <div className='flex grid-cols-1 gap-2'>
+
+                            <span
+                              className='w-auto px-3 py-1 rounded-lg bg-blue-500/20 text-blue-300 text-xs font-medium'
+                            >
+                              {item.services}
+                            </span>
+                            <span
+                              className='w-auto px-3 py-1 rounded-lg bg-blue-500/20 text-blue-300 text-xs font-medium'
+                            >
+                              {item.eventName}
+                            </span>
+
+                        </div>
+
+                      </div>
+
+                    </div>
+
+                  ))}
+
+                </div>
+
+              ) : (
+
+                <div className='text-center py-8'>
+
+                  <p className='text-gray-500'>
+                    No additional information available
+                  </p>
+
+                </div>
+
+              )}
+
+            </div>
+
+          </div>
+
+        </div>
+
+      )}
+
     </div>
+
   )
+
 }
 
 export default Dashboard

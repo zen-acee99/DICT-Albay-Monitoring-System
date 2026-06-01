@@ -4,8 +4,8 @@ const mongoose = require('mongoose')
 const AuditTrailSchema = new mongoose.Schema({
     username: String,
     module: String,
-    Timestamp: String
+    timestamp: String
 })
 
-const AuditTrailModel = mongoose.model('auditTrails', AuditTrailSchema)
+const AuditTrailModel = mongoose.model('audittrails', AuditTrailSchema)
 module.exports = AuditTrailModel
