@@ -99,10 +99,10 @@ const Navbar = () => {
           </li> */}
 
           {/* Administration */}
-          <Link to="/administrator" className='flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-[#0d1325] transition cursor-pointer text-gray-300 hover:text-white'>
+          {/* <Link to="/administrator" className='flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-[#0d1325] transition cursor-pointer text-gray-300 hover:text-white'>
             <LuSettings className='text-2xl' />
             <span className='text-lg'>Administration</span>
-          </Link>
+          </Link> */}
         </ul>
       </div>
 

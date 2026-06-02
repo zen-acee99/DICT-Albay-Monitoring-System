@@ -1,4 +1,13 @@
 import React, { useState, useEffect } from 'react'
+
+import {
+  createColumnHelper,
+  flexRender,
+  useReactTable,
+  getCoreRowModel,
+} from "@tanstack/react-table";
+
+
 import Navbar from '../Layout/Navbar'
 import axios from 'axios'
 
@@ -34,6 +43,7 @@ const Dashboard = () => {
   const [selectedLGU, setSelectedLGU] = useState(null);
   const [showMapModal, setShowMapModal] = useState(false);
   const [additionalInfo, setAdditionalInfo] = useState([]);
+  const [statShow, setStatShow] = useState(null);
 
   // const API_URL = 'http://localhost:3001';
   const VITE_API_URL = import.meta.env.VITE_API_URL;
@@ -166,6 +176,51 @@ console.log(response.data);
 
 };
 
+const filteredData = liveLgus.filter((item) => {
+    if (statShow === "live") return item.status === "LIVE";
+    if (statShow === "uat") return item.status === "UAT";
+    if (statShow === "training") return item.status === "Training";
+    if (statShow === "inactive") return item.status === "NO SYSTEM";
+    if (statShow === "thirdParty") return item.status === "OWN SYSTEM";
+    return false;
+  });
+ 
+  const columnHelper = createColumnHelper();
+  const columns = [
+    columnHelper.accessor("name", {
+      header: "LGU Name",
+      cell: (info) => (
+        <span className="text-white">{info.getValue()}</span>
+      ),
+    }),
+
+    columnHelper.accessor("status", {
+      header: "Status",
+      cell: (info) => {
+        const val = info.getValue();
+
+        const color =
+          val === "LIVE"
+            ? "text-green-400"
+            : val === "UAT"
+            ? "text-yellow-400"
+            : val === "Training"
+            ? "text-orange-400"
+            : val === "NO SYSTEM"
+            ? "text-red-400"
+            : "text-blue-400";
+
+        return <span className={color}>{val}</span>;
+      },
+    }),
+  ];
+
+  const table = useReactTable({
+    data: filteredData,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
+
 
   if (loading) {
 
@@ -239,7 +294,9 @@ console.log(response.data);
         <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6 gap-4 py-6'>
 
           {/* LIVE */}
-          <div className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl border border-green-500/30 bg-gradient-to-br from-[#071b12] to-[#041018] p-5 shadow-[0_0_25px_rgba(0,255,128,0.08)]'>
+          <button 
+            onClick={() => setStatShow("live")}
+            className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl border border-green-500/30 bg-gradient-to-br from-[#071b12] to-[#041018] p-5 shadow-[0_0_25px_rgba(0,255,128,0.08)]'>
 
             <div className='relative z-10 flex items-start gap-4'>
 
@@ -261,10 +318,12 @@ console.log(response.data);
 
             </div>
 
-          </div>
+          </button>
 
           {/* UAT */}
-          <div className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl border border-yellow-500/30 bg-gradient-to-br from-[#1a1405] to-[#100b03] p-5'>
+          <button 
+            onClick={() => setStatShow("uat")}
+            className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl border border-yellow-500/30 bg-gradient-to-br from-[#1a1405] to-[#100b03] p-5'>
 
             <div className='relative z-10 flex items-start gap-4'>
 
@@ -286,10 +345,12 @@ console.log(response.data);
 
             </div>
 
-          </div>
+          </button>
 
           {/* TRAINING */}
-          <div className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl border border-orange-500/30 bg-gradient-to-br from-[#1b1007] to-[#120803] p-5'>
+          <button 
+            onClick={() => setStatShow("training")}
+            className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl border border-orange-500/30 bg-gradient-to-br from-[#1b1007] to-[#120803] p-5'>
 
             <div className='relative z-10 flex items-start gap-4'>
 
@@ -311,10 +372,12 @@ console.log(response.data);
 
             </div>
 
-          </div>
+          </button>
 
           {/* INACTIVE */}
-          <div className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl border border-red-500/30 bg-gradient-to-br from-[#1a0707] to-[#100303] p-5'>
+          <button 
+            onClick={() => setStatShow("inactive")}
+            className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl border border-red-500/30 bg-gradient-to-br from-[#1a0707] to-[#100303] p-5'>
 
             <div className='relative z-10 flex items-start gap-4'>
 
@@ -336,10 +399,12 @@ console.log(response.data);
 
             </div>
 
-          </div>
+          </button>
 
           {/* THIRD PARTY */}
-          <div className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl border border-blue-500/30 bg-gradient-to-br from-[#07101f] to-[#040916] p-5'>
+          <button 
+            onClick={() => setStatShow("thirdParty")}
+            className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl border border-blue-500/30 bg-gradient-to-br from-[#07101f] to-[#040916] p-5'>
 
             <div className='relative z-10 flex items-start gap-4'>
 
@@ -361,7 +426,7 @@ console.log(response.data);
 
             </div>
 
-          </div>
+          </button>
 
           {/* EXPORT */}
           <div className='rounded-2xl p-5 flex flex-col justify-between'>
@@ -389,6 +454,114 @@ console.log(response.data);
           </div>
 
         </div>
+
+        {/* modal for stat start */}
+
+        {statShow && (
+          <div
+            className="fixed inset-0 p-4 bg-[#0B1020] rounded-xl border border-white/10 flex items-center justify-center z-[9999]"
+            onClick={() => setStatShow(false)}
+          >
+            <div
+              className="bg-gray-900 p-6 rounded-xl w-[600px] max-h-[80vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setStatShow(false)}
+                className="float-right text-white"
+              >
+                ✕
+              </button>
+
+              {statShow === "live" && (
+                <>
+                  <h2 className="text-green-400 text-2xl font-bold">
+                    LIVE eLGUs
+                  </h2>
+
+                  <table className="w-full text-sm mt-4">
+                    <thead className="text-slate-400 border-b border-white/10">
+                      {table.getHeaderGroups().map((headerGroup) => (
+                        <tr key={headerGroup.id}>
+                          {headerGroup.headers.map((header) => (
+                            <th key={header.id} className="text-left py-2">
+                              {flexRender(
+                                header.column.columnDef.header,
+                                header.getContext()
+                              )}
+                            </th>
+                          ))}
+                        </tr>
+                      ))}
+                    </thead>
+
+                    <tbody>
+                      {table.getRowModel().rows.map((row) => (
+                        <tr key={row.id} className="border-b border-white/10">
+                          {row.getVisibleCells().map((cell) => (
+                            <td key={cell.id} className="py-3 px-4">
+                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </>
+              )}
+
+              {statShow === "uat" && (
+                <>
+                  <h2 className="text-yellow-400 text-2xl font-bold">
+                    UAT eLGUs
+                  </h2>
+
+                  <p className="mt-4 text-gray-300">
+                    Put your UAT modal content here.
+                  </p>
+                </>
+              )}
+
+              {statShow === "training" && (
+                <>
+                  <h2 className="text-orange-400 text-2xl font-bold">
+                    Admin Training
+                  </h2>
+
+                  <p className="mt-4 text-gray-300">
+                    Put your Training modal content here.
+                  </p>
+                </>
+              )}
+
+              {statShow === "inactive" && (
+                <>
+                  <h2 className="text-red-400 text-2xl font-bold">
+                    Inactive / No eLGU
+                  </h2>
+
+                  <p className="mt-4 text-gray-300">
+                    Put your Inactive modal content here.
+                  </p>
+                </>
+              )}
+
+              {statShow === "thirdParty" && (
+                <>
+                  <h2 className="text-blue-400 text-2xl font-bold">
+                    OWN / 3rd Party
+                  </h2>
+
+                  <p className="mt-4 text-gray-300">
+                    Put your Third Party modal content here.
+                  </p>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* modal for stat end */}
 
         {/* DASHBOARD GRID */}
         <div className='grid grid-cols-1 xl:grid-cols-4 gap-5'>

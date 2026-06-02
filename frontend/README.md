@@ -18,6 +18,9 @@ If you are developing a production application, we recommend using TypeScript wi
 # for frontend 
 # npm install react-router-dom axios dotenv
 # npm install react-icons --save
+# npm install @tanstack/react-table
+#
+#
 #
 # for backend
 # npm install @supabase/supabase-js express cors dotenv nodemon pg
