@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 
 import {
   createColumnHelper,
@@ -67,34 +67,50 @@ const Dashboard = () => {
 
         const data = response.data;
 
-        setLiveLgus(data);
+        const normalized = data.map(item => ({
+          ...item,
+          status: item.status?.trim().toUpperCase(),
+        }));
+
+        setLiveLgus(normalized);
+
+        console.log(
+          normalized.map(item => ({
+            name: item.name,
+            status: item.status
+          }))
+        );
 
         const uniqueMap = new Map();
 
-        data.forEach(item => {
+        // data.forEach(item => {
+        //   uniqueMap.set(item.name, item);
+        // });
+
+        normalized.forEach(item => {
           uniqueMap.set(item.name, item);
         });
 
         const uniqueData = Array.from(uniqueMap.values());
 
         const live = uniqueData.filter(
-          item => item.status === 'LIVE'
+          item => item.status?.trim().toUpperCase() === 'LIVE'
         ).length;
 
         const uat = uniqueData.filter(
-          item => item.status === 'UAT'
+          item => item.status?.trim().toUpperCase() === 'UAT'
         ).length;
 
         const training = uniqueData.filter(
-          item => item.status === 'Training'
+          item => item.status?.trim().toUpperCase() === 'Training'
         ).length;
 
         const inactive = uniqueData.filter(
-          item => item.status === 'NO SYSTEM'
+          item => item.status?.trim().toUpperCase() === 'NO SYSTEM'
         ).length;
 
         const thirdParty = uniqueData.filter(
-          item => item.status === 'OWN SYSTEM'
+          item => item.status?.trim().toUpperCase() === 'OWN SYSTEM'
         ).length;
 
         setStats({
@@ -129,16 +145,14 @@ const Dashboard = () => {
   }, []);
 
   const getColor = (status) => {
-
     switch (status) {
-
       case 'LIVE':
         return '#22c55e';
 
       case 'UAT':
         return '#eab308';
 
-      case 'Training':
+      case 'TRAINING':
         return '#f97316';
 
       case 'NO SYSTEM':
@@ -149,9 +163,7 @@ const Dashboard = () => {
 
       default:
         return '#6b7280';
-
     }
-
   };
 
   const fetchAdditionalInfo = async (location) => {
@@ -176,15 +188,6 @@ console.log(response.data);
 
 };
 
-const filteredData = liveLgus.filter((item) => {
-    if (statShow === "live") return item.status === "LIVE";
-    if (statShow === "uat") return item.status === "UAT";
-    if (statShow === "training") return item.status === "Training";
-    if (statShow === "inactive") return item.status === "NO SYSTEM";
-    if (statShow === "thirdParty") return item.status === "OWN SYSTEM";
-    return false;
-  });
- 
   const columnHelper = createColumnHelper();
   const columns = [
     columnHelper.accessor("name", {
@@ -215,11 +218,51 @@ const filteredData = liveLgus.filter((item) => {
     }),
   ];
 
+  const filteredData = useMemo(() => {
+  if (!statShow) return liveLgus;
+
+  // 1. Get the target status from config
+  const targetStatus = statusConfig[statShow]?.status;
+  
+  if (!targetStatus) return liveLgus;
+
+  // 2. Filter by comparing Uppercase + Trimmed values
+  return liveLgus.filter(item => {
+    const itemStatus = item.status?.trim().toUpperCase();
+    const compareStatus = targetStatus.trim().toUpperCase();
+    return itemStatus === compareStatus;
+  });
+
+}, [statShow, liveLgus]);
+
   const table = useReactTable({
-    data: filteredData,
+    data: filteredData, // IMPORTANT: Pass filtered data here
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
+
+  // const table = useReactTable({
+  //   data: liveLgus,
+  //   columns,
+  //   getCoreRowModel: getCoreRowModel(),
+  // });
+
+
+  // const table = useReactTable({
+  //   data: filteredData,
+  //   columns,
+  //   getCoreRowModel: getCoreRowModel(),
+  // });
+
+  const statusConfig = {
+    live: { title: "LIVE eLGUs", color: "text-green-400", status: "LIVE" },
+    uat: { title: "UAT eLGUs", color: "text-yellow-400", status: "UAT" },
+    training: { title: "Admin Training", color: "text-orange-400", status: "TRAINING" }, // FIX: "TRAINING"
+    inactive: { title: "Inactive / No eLGU", color: "text-red-400", status: "NO SYSTEM" },
+    thirdParty: { title: "OWN / 3rd Party", color: "text-blue-400", status: "OWN SYSTEM" },
+  };
+
+  const current = statusConfig[statShow];
 
 
   if (loading) {
@@ -459,11 +502,11 @@ const filteredData = liveLgus.filter((item) => {
 
         {statShow && (
           <div
-            className="fixed inset-0 p-4 bg-[#0B1020] rounded-xl border border-white/10 flex items-center justify-center z-[9999]"
+            className="fixed inset-0 p-4 bg-black/10 flex items-center justify-center z-[9999]"
             onClick={() => setStatShow(false)}
           >
             <div
-              className="bg-gray-900 p-6 rounded-xl w-[600px] max-h-[80vh] overflow-y-auto"
+              className="bg-gray-900 p-6 rounded-xl w-[600px] max-h-[80vh]"
               onClick={(e) => e.stopPropagation()}
             >
               <button
@@ -473,90 +516,51 @@ const filteredData = liveLgus.filter((item) => {
                 ✕
               </button>
 
-              {statShow === "live" && (
-                <>
-                  <h2 className="text-green-400 text-2xl font-bold">
-                    LIVE eLGUs
-                  </h2>
+              {/* <h2 className={`${current.color} text-2xl font-bold`}>
+                {current.title}
+              </h2> */}
+              <h2>ACE POGI</h2>
+              {/* <p className="text-white">
+                Rows: {filteredData.length}
+              </p> */}
+              <p>TEST 123</p>
 
-                  <table className="w-full text-sm mt-4">
-                    <thead className="text-slate-400 border-b border-white/10">
-                      {table.getHeaderGroups().map((headerGroup) => (
-                        <tr key={headerGroup.id}>
-                          {headerGroup.headers.map((header) => (
-                            <th key={header.id} className="text-left py-2">
-                              {flexRender(
-                                header.column.columnDef.header,
-                                header.getContext()
-                              )}
-                            </th>
-                          ))}
-                        </tr>
-                      ))}
-                    </thead>
+              <div className="max-h-[400px] overflow-y-auto rounded-lg">
+                <table className="w-full text-sm">
+                  <thead className="sticky top-0 bg-gray-900 z-10">
+                    {table.getHeaderGroups().map((headerGroup) => (
+                      <tr key={headerGroup.id}>
+                        {headerGroup.headers.map((header) => (
+                          <th
+                            key={header.id}
+                            className="text-left py-3 px-4 text-slate-400 border-b border-white/10"
+                          >
+                            {flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                          </th>
+                        ))}
+                      </tr>
+                    ))}
+                  </thead>
 
-                    <tbody>
-                      {table.getRowModel().rows.map((row) => (
-                        <tr key={row.id} className="border-b border-white/10">
-                          {row.getVisibleCells().map((cell) => (
-                            <td key={cell.id} className="py-3 px-4">
-                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </>
-              )}
-
-              {statShow === "uat" && (
-                <>
-                  <h2 className="text-yellow-400 text-2xl font-bold">
-                    UAT eLGUs
-                  </h2>
-
-                  <p className="mt-4 text-gray-300">
-                    Put your UAT modal content here.
-                  </p>
-                </>
-              )}
-
-              {statShow === "training" && (
-                <>
-                  <h2 className="text-orange-400 text-2xl font-bold">
-                    Admin Training
-                  </h2>
-
-                  <p className="mt-4 text-gray-300">
-                    Put your Training modal content here.
-                  </p>
-                </>
-              )}
-
-              {statShow === "inactive" && (
-                <>
-                  <h2 className="text-red-400 text-2xl font-bold">
-                    Inactive / No eLGU
-                  </h2>
-
-                  <p className="mt-4 text-gray-300">
-                    Put your Inactive modal content here.
-                  </p>
-                </>
-              )}
-
-              {statShow === "thirdParty" && (
-                <>
-                  <h2 className="text-blue-400 text-2xl font-bold">
-                    OWN / 3rd Party
-                  </h2>
-
-                  <p className="mt-4 text-gray-300">
-                    Put your Third Party modal content here.
-                  </p>
-                </>
-              )}
+                  <tbody>
+                    {table.getRowModel().rows.map((row) => (
+                      <tr key={row.id} className="border-b border-white/10">
+                        {row.getVisibleCells().map((cell) => (
+                          <td key={cell.id} className="py-3 px-4">
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
