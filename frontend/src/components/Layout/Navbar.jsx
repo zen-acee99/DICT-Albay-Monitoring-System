@@ -68,9 +68,20 @@ const Navbar = () => {
                   Albay
                 </Link>
                 <Link to="/#" className='hover:text-white transition cursor-pointer'>
-                  Albay
+                  Sorsogon
                 </Link>
-
+                <Link to="/#" className='hover:text-white transition cursor-pointer'>
+                  Cam Norte
+                </Link>
+                <Link to="/#" className='hover:text-white transition cursor-pointer'>
+                  Cam Sur
+                </Link>
+                <Link to="/#" className='hover:text-white transition cursor-pointer'>
+                  Masbate
+                </Link>
+                <Link to="/#" className='hover:text-white transition cursor-pointer'>
+                  Catanduanes
+                </Link>
               </ul>
             )}
           </li>

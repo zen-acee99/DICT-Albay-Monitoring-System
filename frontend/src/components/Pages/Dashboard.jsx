@@ -1,4 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react'
+import { toPng } from "html-to-image";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import {
   createColumnHelper,
@@ -88,7 +91,8 @@ const Dashboard = () => {
         // });
 
         normalized.forEach(item => {
-          uniqueMap.set(item.name, item);
+          uniqueMap.set(item.name + "_" + item.status, item);
+          // uniqueMap.set(item._id, item);
         });
 
         const uniqueData = Array.from(uniqueMap.values());
@@ -273,9 +277,54 @@ console.log(response.data);
 
   }
 
+  const handleExportImage = async () => {
+    // setShowMapModal(false);
+    // setStatShow(null);
 
-    <div className='flex min-h-screen overflow-x-hidden bg-[#050816] text-white'>
+    const element = document.getElementById("dashboard-export");
 
+    if (!element) return
+
+    toast.info("Preparing your dashboard report...", { autoClose: 2000 });
+
+    try {
+      const dataUrl = await toPng(element, {
+        cacheBust: true,
+        backgroundColor: "#050816",
+        pixelRatio: 2,
+      })
+
+      const link = document.createElement("a");
+      link.download = "DigiGOV-Monitoring-Dashboard.png";
+      link.href = dataUrl;
+      link.click();
+
+      toast.success("Dashboard report downloaded!", { autoClose: 2000 });
+    } catch (err) {
+      toast.error("Failed to export Dashboard")
+      console.error("Export Error:", err);
+    }
+    
+    
+    // setTimeout(async () => {
+    //   const element = document.getElementById("dashboard-export");
+
+    //   const dataUrl = await toPng(element, {
+    //     backgroundColor: "#050816",
+    //     pixelRatio: 2,
+    //   });
+
+    //   const link = document.createElement("a");
+    //   link.download = "DigiGOV-Monitoring-Dashboard.png";
+    //   link.href = dataUrl;
+    //   link.click();
+    // }, 300);
+  };
+
+  return (
+
+    <div id="dashboard-export" className='flex min-h-screen overflow-x-hidden bg-[#050816] text-white'>
+      <ToastContainer position="top-right" autoClose={3000} />
       {/* SIDEBAR */}
       <div className='hidden lg:block lg:w-[250px] lg:shrink-0'>
 
@@ -340,7 +389,11 @@ console.log(response.data);
 
                 <h2 className='text-5xl font-bold text-green-400 leading-none mt-1'>
                   {stats.live}
+                  
                 </h2>
+                {/* <h3 className='text-gray-400 text-sm mt-1'>
+                  V1: {stats.v1}
+                </h3> */}
 
               </div>
 
@@ -471,7 +524,7 @@ console.log(response.data);
 
             </div>
 
-            <button className='mt-5 border border-blue-500/30 hover:bg-blue-500/10 transition rounded-xl py-3 flex items-center justify-center gap-2 text-blue-300 font-medium'>
+            <button onClick={handleExportImage} className='mt-5 border border-blue-500/30 hover:bg-blue-500/10 transition rounded-xl py-3 flex items-center justify-center gap-2 text-blue-300 font-medium'>
 
               <HiOutlineDownload className='text-lg' />
 
@@ -853,7 +906,7 @@ console.log(response.data);
 
                     <div
                       key={index}
-                      className='bg-[#0f172a] border border-[#1d2942] rounded-xl p-4'
+                      className=''
                     >
 
                       <div className='mb-4'>
@@ -869,10 +922,10 @@ console.log(response.data);
                       </div>
 
                       <div>
-
+{/* 
                         <p className='text-xs text-gray-400 mb-2'>
                           Available Services
-                        </p>
+                        </p> */}
 
                         <div className='flex grid-cols-1 gap-2'>
 
