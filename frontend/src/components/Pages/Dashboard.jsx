@@ -273,7 +273,6 @@ console.log(response.data);
 
   }
 
-  return (
 
     <div className='flex min-h-screen overflow-x-hidden bg-[#050816] text-white'>
 
