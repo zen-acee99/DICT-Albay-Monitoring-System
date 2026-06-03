@@ -218,6 +218,16 @@ console.log(response.data);
     }),
   ];
 
+  const statusConfig = {
+    live: { title: "LIVE eLGUs", color: "text-green-400", status: "LIVE" },
+    uat: { title: "UAT eLGUs", color: "text-yellow-400", status: "UAT" },
+    training: { title: "Admin Training", color: "text-orange-400", status: "TRAINING" }, // FIX: "TRAINING"
+    inactive: { title: "Inactive / No eLGU", color: "text-red-400", status: "NO SYSTEM" },
+    thirdParty: { title: "OWN / 3rd Party", color: "text-blue-400", status: "OWN SYSTEM" },
+  };
+
+  const current = statusConfig[statShow];
+
   const filteredData = useMemo(() => {
   if (!statShow) return liveLgus;
 
@@ -240,30 +250,6 @@ console.log(response.data);
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
-
-  // const table = useReactTable({
-  //   data: liveLgus,
-  //   columns,
-  //   getCoreRowModel: getCoreRowModel(),
-  // });
-
-
-  // const table = useReactTable({
-  //   data: filteredData,
-  //   columns,
-  //   getCoreRowModel: getCoreRowModel(),
-  // });
-
-  const statusConfig = {
-    live: { title: "LIVE eLGUs", color: "text-green-400", status: "LIVE" },
-    uat: { title: "UAT eLGUs", color: "text-yellow-400", status: "UAT" },
-    training: { title: "Admin Training", color: "text-orange-400", status: "TRAINING" }, // FIX: "TRAINING"
-    inactive: { title: "Inactive / No eLGU", color: "text-red-400", status: "NO SYSTEM" },
-    thirdParty: { title: "OWN / 3rd Party", color: "text-blue-400", status: "OWN SYSTEM" },
-  };
-
-  const current = statusConfig[statShow];
-
 
   if (loading) {
 
@@ -506,7 +492,7 @@ console.log(response.data);
             onClick={() => setStatShow(false)}
           >
             <div
-              className="bg-gray-900 p-6 rounded-xl w-[600px] max-h-[80vh]"
+              className="bg-gray-900 p-6 rounded-xl w-[600px] max-h-[100vh]"
               onClick={(e) => e.stopPropagation()}
             >
               <button
@@ -516,14 +502,13 @@ console.log(response.data);
                 ✕
               </button>
 
-              {/* <h2 className={`${current.color} text-2xl font-bold`}>
+              <h2 className={`${current.color} text-2xl font-bold`}>
                 {current.title}
-              </h2> */}
-              <h2>ACE POGI</h2>
-              {/* <p className="text-white">
+              </h2>
+{/* 
+              <p className="text-white">
                 Rows: {filteredData.length}
               </p> */}
-              <p>TEST 123</p>
 
               <div className="max-h-[400px] overflow-y-auto rounded-lg">
                 <table className="w-full text-sm">
