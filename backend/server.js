@@ -22,6 +22,7 @@ const userRoutes = require('./routes/userRoutes')
 const EgovActRoutes = require('./routes/egovactRoutes')
 const EgovProRoutes = require('./routes/egovproRoutes')
 const additionalInfoRoutes = require('./routes/additionalInfoRoutes')
+const wifiRoutes = require('./routes/wifiRoutes')
 
 app.use('/egovph', egovphRoutes);
 app.use('/operational', operationalRoutes);
@@ -30,6 +31,7 @@ app.use('/users', userRoutes);
 app.use('/egovact', EgovActRoutes)
 app.use('/egovpro', EgovProRoutes)
 app.use('/additionaldescription', additionalInfoRoutes)
+app.use('/wifiData', wifiRoutes)
 
 
 app.get('/', (req, res) => {

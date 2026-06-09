@@ -14,7 +14,8 @@ import { TbBuildingCommunity } from "react-icons/tb"
 import { Link } from 'react-router-dom'
 
 const Navbar = () => {
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
+  const [openSettings, setOpenSettings] = useState(false)
 
   return (
     <div className="w-full h-screen bg-[#050816] text-white px-4 py-5 border-r border-[#1b2440] flex flex-col">
@@ -61,25 +62,25 @@ const Navbar = () => {
             {open && (
               <ul className='flex flex-col pl-6 pt-3 space-y-3 text-gray-300'>
 
-                <Link to="/#" className='hover:text-white transition cursor-pointer'>
+                <Link to="/" className='hover:text-white transition cursor-pointer'>
                   Region
                 </Link>
-                <Link to="/#" className='hover:text-white transition cursor-pointer'>
+                <Link to="/albay" className='hover:text-white transition cursor-pointer'>
                   Albay
                 </Link>
-                <Link to="/#" className='hover:text-white transition cursor-pointer'>
+                <Link to="/sorsogon" className='hover:text-white transition cursor-pointer'>
                   Sorsogon
                 </Link>
-                <Link to="/#" className='hover:text-white transition cursor-pointer'>
+                <Link to="/camnorte" className='hover:text-white transition cursor-pointer'>
                   Cam Norte
                 </Link>
-                <Link to="/#" className='hover:text-white transition cursor-pointer'>
+                <Link to="/camsur" className='hover:text-white transition cursor-pointer'>
                   Cam Sur
                 </Link>
-                <Link to="/#" className='hover:text-white transition cursor-pointer'>
+                <Link to="/masbate" className='hover:text-white transition cursor-pointer'>
                   Masbate
                 </Link>
-                <Link to="/#" className='hover:text-white transition cursor-pointer'>
+                <Link to="/catanduanes" className='hover:text-white transition cursor-pointer'>
                   Catanduanes
                 </Link>
               </ul>
@@ -113,10 +114,52 @@ const Navbar = () => {
           </li> */}
 
           {/* Administration */}
-          {/* <Link to="/administrator" className='flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-[#0d1325] transition cursor-pointer text-gray-300 hover:text-white'>
-            <LuSettings className='text-2xl' />
-            <span className='text-lg'>Administration</span>
-          </Link> */}
+            <button
+              onClick={() => setOpenSettings(!openSettings)}
+              className='w-full flex items-center justify-between px-1 py-2 rounded-2xl bg-gradient-to-r '
+            >
+              <div className='flex items-center gap-3'>
+                <LuSettings className={`text-xl transition-transform duration-300 ${
+                  openSettings ? 'rotate-180' : ''
+                }`} />
+
+                <span className='font-medium text-lg'>
+                  Settings
+                </span>
+              </div>
+              
+              <BiChevronDown
+                className={`text-xl transition-transform duration-300 ${
+                  openSettings ? 'rotate-180' : ''
+                }`}
+              />
+            </button>
+
+            {openSettings && (
+              <ul className='flex flex-col pl-6 pt-3 space-y-3 text-gray-300'>
+                <Link to="/settings/user" className='hover:text-white transition cursor-pointer'>
+                  USERS
+                </Link>
+                <Link to="/settings/elgu" className='hover:text-white transition cursor-pointer'>
+                  eLGU
+                </Link>
+                <Link to="/settings/wifi" className='hover:text-white transition cursor-pointer'>
+                  WIFI
+                </Link>
+                <Link to="/settings/pnpki" className='hover:text-white transition cursor-pointer'>
+                  PNPKI
+                </Link>
+                <Link to="/settings/ilcdb" className='hover:text-white transition cursor-pointer'>
+                  ILCDB
+                </Link>
+                <Link to="/settings/cybersecurity" className='hover:text-white transition cursor-pointer'>
+                  CYBERSECURITY
+                </Link>
+                <Link to="/settings/egov" className='hover:text-white transition cursor-pointer'>
+                  eGOVPH
+                </Link>
+              </ul>
+            )}
         </ul>
       </div>
 

@@ -25,7 +25,9 @@ import {
 import {
   FaChalkboardTeacher,
   FaBan,
-  FaCogs
+  FaCogs,
+  FaShieldAlt,
+  FaGlobe
 } from "react-icons/fa";
 
 import {
@@ -38,7 +40,7 @@ import DashboardCard from '../Card/DashboardCard';
 import EGovPH from '../Card/EGovPH';
 import EgovPromotional from '../Card/EgovPromotional';
 
-const Dashboard = () => {
+const Albay = () => {
 
   const [liveLgus, setLiveLgus] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -70,19 +72,15 @@ const Dashboard = () => {
 
         const data = response.data;
 
-        const normalized = data.map(item => ({
+        const normalized = data
+        .filter(item => {
+          const parts = item.name?.split(",").map(s => s.trim().toLowerCase());
+          return parts?.[1] === "albay";
+        })
+        .map(item => ({
           ...item,
           status: item.status?.trim().toUpperCase(),
         }));
-
-        setLiveLgus(normalized);
-
-        console.log(
-          normalized.map(item => ({
-            name: item.name,
-            status: item.status
-          }))
-        );
 
         const uniqueMap = new Map();
 
@@ -94,8 +92,9 @@ const Dashboard = () => {
           uniqueMap.set(item.name + "_" + item.status, item);
           // uniqueMap.set(item._id, item);
         });
-        
-        console.log(normalized)
+
+        setLiveLgus(normalized)
+
         const uniqueData = Array.from(uniqueMap.values());
 
         const live = uniqueData.filter(
@@ -105,13 +104,7 @@ const Dashboard = () => {
         const DATA = uniqueData.filter(
           item => item.status?.trim().toUpperCase() === 'BUILDUP - GLP'
         ).length;
-        // const DATA2 = uniqueData.filter(
-        //   item => item.status?.trim().toUpperCase() === 'DATA BUILDUP - GLP'
-        // ).length;
 
-        // console.log("data",DATA)
-        // console.log("data2",DATA2)
-        // console.log(TotalData)
         const uat = uniqueData.filter(
           item => item.status?.trim().toUpperCase() === 'UAT'
         ).length;
@@ -123,14 +116,12 @@ const Dashboard = () => {
         const nosystem = uniqueData.filter(
           item => item.status?.trim().toUpperCase() === 'NO SYSTEM'
         ).length;
+        const inactive = uniqueData.filter(
+          item => item.status?.trim().toUpperCase() === 'INACTIVE'
+        ).length;
 
         const thirdParty = uniqueData.filter(
           item => item.status?.trim().toUpperCase() === 'OWN SYSTEM'
-        ).length;
-
-
-        const inactive = uniqueData.filter(
-          item => item.status?.trim().toUpperCase() === 'INACTIVE'
         ).length;
 
         setStats({
@@ -166,13 +157,77 @@ const Dashboard = () => {
 
   }, []);
 
+  const [statsWIFI, setStatsWIFI] = useState({
+    liveWIFI: 0
+  })
+  const [liveWIFI, setLiveWIFI] = useState([])
+  const [loadingWIFI, setLoadingWIFI] = useState(true);
+
+  useEffect(() => {
+    const fetchWIFIData = async () => {
+      try {
+
+        const response = await axios.get(`${VITE_API_URL}/wifiData`);
+
+        const dataWIFI = response.dataWIFI;
+
+        const normalizedWIFI = dataWIFI
+        .filter(item => {
+          const parts = item.Province?.map(s => s.trim().toLowerCase());
+          return parts?.[1] === "Albay";
+        })
+        .map(item => ({
+          ...item,
+          Province: item.Province?.trim().toUpperCase(),
+        }));
+
+        const uniqueMap = new Map();
+
+        normalizedWIFI.forEach(item => {
+          // uniqueMap.set(item.name + "_" + item.Province, item);
+          uniqueMap.set(item._id, item);
+        });
+
+        setLiveWIFI(normalizedWIFI)
+
+        const uniqueWIFIData = Array.from(uniqueMap.values());
+
+        const liveWIFI = uniqueWIFIData.filter(
+          item => item.Province?.trim().toUpperCase() === 'ALBAY'
+        ).length;
+
+
+        setStatsWIFI({
+          liveWIFI,
+          total: uniqueWIFIData.length
+        });
+
+      } catch (err) {
+
+        console.error("Fetch Error:", err);
+
+      } finally {
+
+        setLoadingWIFI(false);
+
+      }
+
+    };
+
+    fetchWIFIData();
+
+    const interval = setInterval(() => {
+      fetchWIFIData();
+    }, 5000);
+
+    return () => clearInterval(interval);
+
+  }, []);
+
   const getColor = (status) => {
     switch (status) {
       case 'LIVE':
         return '#22c55e';
-
-      case 'TotalData':
-        return '#9ACD32';
 
       case 'UAT':
         return '#eab308';
@@ -236,9 +291,7 @@ console.log(response.data);
             ? "text-orange-400"
             : val === "NO SYSTEM"
             ? "text-red-400"
-            : "text-blue-400"
-            ? val === "TotalData"
-            : "lime-400";
+            : "text-blue-400";
 
         return <span className={color}>{val}</span>;
       },
@@ -327,21 +380,6 @@ console.log(response.data);
       toast.error("Failed to export Dashboard")
       console.error("Export Error:", err);
     }
-    
-    
-    // setTimeout(async () => {
-    //   const element = document.getElementById("dashboard-export");
-
-    //   const dataUrl = await toPng(element, {
-    //     backgroundColor: "#050816",
-    //     pixelRatio: 2,
-    //   });
-
-    //   const link = document.createElement("a");
-    //   link.download = "DigiGOV-Monitoring-Dashboard.png";
-    //   link.href = dataUrl;
-    //   link.click();
-    // }, 300);
   };
 
   return (
@@ -363,39 +401,26 @@ console.log(response.data);
         {/* HEADER */}
         <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
 
-            <div>
+          <div> 
+
+            <div className='flex items-center justify-center gap-10'>
               <h1 className='tracking-wide font-semibold text-2xl'>
-                DigiGOV Dashboard
+                ALBAY - PROVINCIAL
               </h1>
-
-              <span className='text-sm text-gray-400'>
-                Region V - Bicol Region
-              </span>
-            </div>
-
-            <div>
-              <button onClick={handleExportImage} className='mt-5 border border-blue-500/30 hover:bg-blue-500/10 transition rounded-xl py-3 px-5 flex items-center justify-center gap-2 text-blue-300 font-medium'>
+              <button onClick={handleExportImage} className='border border-blue-500/30 hover:bg-blue-500/10 transition rounded-xl py-1 px-5 flex items-center justify-center gap-2 text-blue-300 font-medium'>
 
                 <HiOutlineDownload className='text-lg' />
 
-                Export Report
+                Export Report - Data
 
               </button>
             </div>
 
-          {/* SEARCH */}
-          {/* <div className='relative w-full md:w-auto'>
+            <span className='text-sm text-gray-400'>
+              Region V - Bicol Region
+            </span>
 
-            <IoSearch className='absolute text-gray-500 left-3 top-1/2 -translate-y-1/2 text-lg' />
-
-            <input
-              type="text"
-              placeholder="Search LGU..."
-              className='bg-[#091121] border border-[#1d2942] pl-10 py-3 rounded-xl outline-none w-full md:w-80 text-sm focus:border-blue-500 transition'
-            />
-
-          </div> */}
-
+          </div>
         </div>
 
         {/* CARDS */}
@@ -404,21 +429,21 @@ console.log(response.data);
           {/* LIVE */}
           <button 
             onClick={() => setStatShow("live")}
-            className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl border border-green-500/30 bg-gradient-to-br from-[#071b12] to-[#041018] p-5 shadow-[0_0_25px_rgba(0,255,128,0.08)]'>
+            className='relative hover:scale-105 transition-all h-20 duration-300 overflow-hidden rounded-2xl border border-green-500/30 bg-gradient-to-br from-[#071b12] to-[#041018] p-5 shadow-[0_0_25px_rgba(0,255,128,0.08)]'>
 
             <div className='relative z-10 flex items-start gap-4'>
 
-              <div className='w-16 h-16 rounded-2xl bg-green-500/10 flex items-center justify-center'>
-                <TbRadar2 className='text-4xl text-green-400' />
+              <div className='w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center'>
+                <TbRadar2 className='text-2xl text-green-400' />
               </div>
 
               <div>
 
                 <h1 className='text-green-300 text-xs font-medium'>
-                  LIVE <br /> eLGUs
+                  LIVE eLGUs
                 </h1>
 
-                <h2 className='text-5xl font-bold text-green-400 leading-none mt-1'>
+                <h2 className='text-2xl font-bold text-green-400 leading-none mt-1'>
                   {stats.live}
                   
                 </h2>
@@ -432,24 +457,24 @@ console.log(response.data);
 
           </button>
 
-          {/* Date Buildup */}
+          {/* BUILDUP */}
           <button 
             onClick={() => setStatShow("uat")}
-            className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl border border-yellow-500/30 bg-gradient-to-br from-[#1a1405] to-[#100b03] p-5'>
+            className='relative hover:scale-105 transition-all h-20 duration-300 overflow-hidden rounded-2xl border border-yellow-500/30 bg-gradient-to-br from-[#1a1405] to-[#100b03] p-5'>
 
             <div className='relative z-10 flex items-start gap-4'>
 
-              <div className='w-16 h-16 rounded-2xl bg-yellow-500/10 flex items-center justify-center'>
-                <HiOutlineDocumentSearch className='text-4xl text-yellow-400' />
+              <div className='w-12 h-12 rounded-full bg-yellow-500/10 flex items-center justify-center'>
+                <HiOutlineDocumentSearch className='text-2xl text-yellow-400' />
               </div>
 
               <div>
 
-                <h1 className='text-yellow-300 text-xs'>
-                  Data Buildup /Go Live Up
+                <h1 className='text-yellow-300 text-sm font-medium'>
+                  BUILD UP
                 </h1>
 
-                <h2 className='text-5xl font-bold text-yellow-400 leading-none mt-1'>
+                <h2 className='text-2xl font-bold text-yellow-400 leading-none mt-1'>
                   {stats.DATA}
                 </h2>
 
@@ -459,25 +484,107 @@ console.log(response.data);
 
           </button>
 
+
           {/* UAT */}
           <button 
             onClick={() => setStatShow("uat")}
-            className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl border border-yellow-500/30 bg-gradient-to-br from-[#1a1405] to-[#100b03] p-5'>
+            className='relative hover:scale-105 transition-all h-20 duration-300 overflow-hidden rounded-2xl border border-yellow-500/30 bg-gradient-to-br from-[#1a1405] to-[#100b03] p-5'>
 
             <div className='relative z-10 flex items-start gap-4'>
 
-              <div className='w-16 h-16 rounded-2xl bg-yellow-500/10 flex items-center justify-center'>
-                <HiOutlineDocumentSearch className='text-4xl text-yellow-400' />
+              <div className='w-12 h-12 rounded-full bg-yellow-500/10 flex items-center justify-center'>
+                <HiOutlineDocumentSearch className='text-2xl text-yellow-400' />
               </div>
 
               <div>
 
-                <h1 className='text-yellow-300 text-xs'>
-                  UAT
+                <h1 className='text-yellow-300 text-sm font-medium'>
+                  UAT eLGUs
                 </h1>
 
-                <h2 className='text-5xl font-bold text-yellow-400 leading-none mt-1'>
+                <h2 className='text-2xl font-bold text-yellow-400 leading-none mt-1'>
                   {stats.uat}
+                </h2>
+
+              </div>
+
+            </div>
+
+          </button>
+
+          {/* TRAINING */}
+          {/* <button 
+            onClick={() => setStatShow("training")}
+            className='relative hover:scale-105 transition-all h-20 duration-300 overflow-hidden rounded-2xl border border-orange-500/30 bg-gradient-to-br from-[#1b1007] to-[#120803] p-5'>
+
+            <div className='relative z-10 flex items-start gap-4'>
+
+              <div className='w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center'>
+                <FaChalkboardTeacher className='text-2xl text-orange-400' />
+              </div>
+
+              <div>
+
+                <h1 className='text-orange-300 text-sm font-medium'>
+                  Admin Training
+                </h1>
+
+                <h2 className='text-2xl font-bold text-orange-400 leading-none mt-1'>
+                  {stats.training}
+                </h2>
+
+              </div>
+
+            </div>
+
+          </button> */}
+
+          {/* INACTIVE */}
+          <button 
+            onClick={() => setStatShow("inactive")}
+            className='relative hover:scale-105 transition-all h-20 duration-300 overflow-hidden rounded-2xl border border-red-500/30 bg-gradient-to-br from-[#1a0707] to-[#100303] p-5'>
+
+            <div className='relative z-10 flex items-start gap-4'>
+
+              <div className='w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center'>
+                <FaBan className='text-2xl text-red-400' />
+              </div>
+
+              <div>
+
+                <h1 className='text-red-300 text-sm font-medium'>
+                  Inactive
+                </h1>
+
+                <h2 className='text-2xl font-bold text-red-400 leading-none mt-1'>
+                  {stats.inactive}
+                </h2>
+
+              </div>
+
+            </div>
+
+          </button>
+
+          {/* no system */}
+          <button 
+            onClick={() => setStatShow("inactive")}
+            className='relative hover:scale-105 transition-all h-20 duration-300 overflow-hidden rounded-2xl border border-red-500/30 bg-gradient-to-br from-[#1a0707] to-[#100303] p-5'>
+
+            <div className='relative z-10 flex items-start gap-4'>
+
+              <div className='w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center'>
+                <FaBan className='text-2xl text-red-400' />
+              </div>
+
+              <div>
+
+                <h1 className='text-red-300 text-sm font-medium'>
+                  NO SYSTEM
+                </h1>
+
+                <h2 className='text-2xl font-bold text-red-400 leading-none mt-1'>
+                  {stats.nosystem}
                 </h2>
 
               </div>
@@ -489,21 +596,21 @@ console.log(response.data);
           {/* THIRD PARTY */}
           <button 
             onClick={() => setStatShow("thirdParty")}
-            className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl border border-blue-500/30 bg-gradient-to-br from-[#07101f] to-[#040916] p-5'>
+            className='relative hover:scale-105 transition-all h-20 duration-300 overflow-hidden rounded-2xl border border-blue-500/30 bg-gradient-to-br from-[#07101f] to-[#040916] p-5'>
 
             <div className='relative z-10 flex items-start gap-4'>
 
-              <div className='w-16 h-16 rounded-2xl bg-blue-500/10 flex items-center justify-center'>
-                <FaCogs className='text-4xl text-blue-400' />
+              <div className='w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center'>
+                <FaCogs className='text-2xl text-blue-400' />
               </div>
 
               <div>
 
                 <h1 className='text-blue-300 text-sm font-medium'>
-                  OWN / 3rd Party
+                  OWN SYS
                 </h1>
 
-                <h2 className='text-5xl font-bold text-blue-400 leading-none mt-1'>
+                <h2 className='text-2xl font-bold text-blue-400 leading-none mt-1'>
                   {stats.thirdParty}
                 </h2>
 
@@ -513,115 +620,116 @@ console.log(response.data);
 
           </button>
 
-          {/* instance but inactive */}
+          {/* 2nd card Start*/}
+          {/* WIFI */}
           <button 
-            onClick={() => setStatShow("training")}
-            className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl border border-orange-500/30 bg-gradient-to-br from-[#1b1007] to-[#120803] p-5'>
+            onClick={() => setStatShow("wifi")}
+            className='relative hover:scale-105 transition-all h-20 duration-300 overflow-hidden rounded-2xl border border-sky-400/30 bg-gradient-to-br from-sky-900/40 to-slate-950 p-5'>
 
             <div className='relative z-10 flex items-start gap-4'>
 
-              <div className='w-16 h-16 rounded-2xl bg-orange-500/10 flex items-center justify-center'>
-                <FaChalkboardTeacher className='text-4xl text-orange-400' />
+              <div className='w-12 h-12 rounded-full bg-sky-500/10 flex items-center justify-center'>
+                <TbRadar2 className='text-2xl text-sky-300' />
               </div>
 
               <div>
-
-                <h1 className='text-orange-300 text-sm font-medium'>
-                  Instance Inactive
-                </h1>
-
-                <h2 className='text-5xl font-bold text-orange-400 leading-none mt-1'>
-                  {stats.inactive}
+                <h1 className='text-sky-300 text-xs font-medium'>WIFI</h1>
+                <h2 className='text-2xl font-bold text-sky-300 leading-none mt-1'>
+                  {statsWIFI.liveWIFI}
                 </h2>
-
               </div>
 
             </div>
-
           </button>
 
-          {/* INACTIVE */}
+
+          {/* PNPKI */}
           <button 
-            onClick={() => setStatShow("inactive")}
-            className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl border border-red-500/30 bg-gradient-to-br from-[#1a0707] to-[#100303] p-5'>
+            onClick={() => setStatShow("pnpki")}
+            className='relative hover:scale-105 transition-all h-20 duration-300 overflow-hidden rounded-2xl border border-amber-400/30 bg-gradient-to-br from-amber-900/30 to-slate-950 p-5'>
 
             <div className='relative z-10 flex items-start gap-4'>
 
-              <div className='w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center'>
-                <FaBan className='text-4xl text-red-400' />
+              <div className='w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center'>
+                <HiOutlineDocumentSearch className='text-2xl text-amber-300' />
               </div>
 
               <div>
-
-                <h1 className='text-red-300 text-sm font-medium'>
-                  Inactive / No eLGU
-                </h1>
-
-                <h2 className='text-5xl font-bold text-red-400 leading-none mt-1'>
-                  {stats.nosystem}
+                <h1 className='text-amber-300 text-xs font-medium'>PNPKI</h1>
+                <h2 className='text-2xl font-bold text-amber-300 leading-none mt-1'>
+                  {stats.pnpki}
                 </h2>
-
               </div>
 
             </div>
-
           </button>
 
-          
 
-          {/* <button 
-            onClick={() => setStatShow("thirdParty")}
-            className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl border border-blue-500/30 bg-gradient-to-br from-[#07101f] to-[#040916] p-5'>
+          {/* ILCDB */}
+          <button 
+            onClick={() => setStatShow("ilcdb")}
+            className='relative hover:scale-105 transition-all h-20 duration-300 overflow-hidden rounded-2xl border border-violet-400/30 bg-gradient-to-br from-violet-900/30 to-slate-950 p-5'>
 
             <div className='relative z-10 flex items-start gap-4'>
 
-              <div className='w-16 h-16 rounded-2xl bg-blue-500/10 flex items-center justify-center'>
-                <FaCogs className='text-4xl text-blue-400' />
+              <div className='w-12 h-12 rounded-full bg-violet-500/10 flex items-center justify-center'>
+                <FaChalkboardTeacher className='text-2xl text-violet-300' />
               </div>
 
               <div>
-
-                <h1 className='text-blue-300 text-sm font-medium'>
-                  OWN / 3rd Party
-                </h1>
-
-                <h2 className='text-5xl font-bold text-blue-400 leading-none mt-1'>
-                  {stats.thirdParty}
+                <h1 className='text-violet-300 text-xs font-medium'>ILCDB</h1>
+                <h2 className='text-2xl font-bold text-violet-300 leading-none mt-1'>
+                  {stats.ilcdb}
                 </h2>
-
               </div>
 
             </div>
-
           </button>
 
+
+          {/* CYBERSECURITY */}
           <button 
-            onClick={() => setStatShow("thirdParty")}
-            className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl border border-blue-500/30 bg-gradient-to-br from-[#07101f] to-[#040916] p-5'>
+            onClick={() => setStatShow("cybersecurity")}
+            className='relative hover:scale-105 transition-all h-20 duration-300 overflow-hidden rounded-2xl border border-red-400/30 bg-gradient-to-br from-red-900/30 to-slate-950 p-5'>
 
             <div className='relative z-10 flex items-start gap-4'>
 
-              <div className='w-16 h-16 rounded-2xl bg-blue-500/10 flex items-center justify-center'>
-                <FaCogs className='text-4xl text-blue-400' />
+              <div className='w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center'>
+                <FaShieldAlt className='text-2xl text-red-300' />
               </div>
 
               <div>
-
-                <h1 className='text-blue-300 text-sm font-medium'>
-                  OWN / 3rd Party
-                </h1>
-
-                <h2 className='text-5xl font-bold text-blue-400 leading-none mt-1'>
-                  {stats.thirdParty}
+                <h1 className='text-red-300 text-xs font-medium'>Cybersecurity</h1>
+                <h2 className='text-2xl font-bold text-red-300 leading-none mt-1'>
+                  {stats.cybersecurity}
                 </h2>
-
               </div>
 
             </div>
+          </button>
 
-          </button> */}
 
-          {/* EXPORT */}
+          {/* EGOV PH */}
+          <button 
+            onClick={() => setStatShow("egov")}
+            className='relative hover:scale-105 transition-all h-20 duration-300 overflow-hidden rounded-2xl border border-fuchsia-400/30 bg-gradient-to-br from-fuchsia-900/30 to-slate-950 p-5'>
+
+            <div className='relative z-10 flex items-start gap-4'>
+
+              <div className='w-12 h-12 rounded-full bg-fuchsia-500/10 flex items-center justify-center'>
+                <FaGlobe className='text-2xl text-fuchsia-300' />
+              </div>
+
+              <div>
+                <h1 className='text-fuchsia-300 text-xs font-medium'>eGOV PH</h1>
+                <h2 className='text-2xl font-bold text-fuchsia-300 leading-none mt-1'>
+                  {stats.egov}
+                </h2>
+              </div>
+
+            </div>
+          </button>
+          {/* 2nd card End*/}
 
         </div>
 
@@ -1065,4 +1173,4 @@ console.log(response.data);
 
 }
 
-export default Dashboard
+export default Albay
