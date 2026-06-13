@@ -133,7 +133,7 @@ const SettingsILCDB = () => {
         <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6'>
           <div>
             <h1 className='tracking-wide font-semibold text-2xl uppercase text-slate-100'>
-              Albay - User Management
+              Albay - ILCDB
             </h1>
             <p className='text-xs text-slate-400 mt-1'>Region V - Bicol Region</p>
           </div>
@@ -141,7 +141,7 @@ const SettingsILCDB = () => {
             onClick={handleOpenAddModal}
             className="md:self-end px-4 py-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-sm font-medium rounded-lg transition-colors shadow-sm"
           >
-            + Add New User
+            + Add New ILCDB
           </button>
         </div>
 
@@ -216,7 +216,7 @@ const SettingsILCDB = () => {
                             <div className='flex items-center justify-end gap-2'>
                               <button 
                                 onClick={() => handleOpenEditModal(user)}
-                                title="Edit User"
+                                title="Edit ILCDB"
                                 className='p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition-colors'
                               >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -225,7 +225,7 @@ const SettingsILCDB = () => {
                               </button>
                               <button 
                                 onClick={() => handleDeleteUser(user.id)}
-                                title="Delete User"
+                                title="Archive ILCDB"
                                 className='p-1.5 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded transition-colors'
                               >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -310,7 +310,7 @@ const SettingsILCDB = () => {
               {/* Modal Dynamic Header */}
               <div className='p-6 border-b border-[#1E293B] flex justify-between items-center bg-gradient-to-r from-[#0B112C] to-[#161233] rounded-t-xl'>
                 <h2 className='text-lg font-bold text-white tracking-wide'>
-                  {modalMode === 'edit' ? 'Edit User' : 'Add New User'}
+                  {modalMode === 'edit' ? 'Edit ILCDB' : 'Add New ILCDB'}
                 </h2>
                 <button 
                   onClick={() => setIsModalOpen(false)} 
@@ -369,81 +369,6 @@ const SettingsILCDB = () => {
                       placeholder="••••••••••••" 
                       className='w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8B5CF6] text-slate-200 placeholder-slate-600' 
                     />
-                  </div>
-                </div>
-
-                {/* Permissions Subsection */}
-                <div className='pt-4 border-t border-[#1E293B]/60'>
-                  <h3 className='text-sm font-semibold text-white mb-0.5'>User Permissions</h3>
-                  <p className='text-xs text-slate-400 mb-4'>Select what a user can see or do in the app</p>
-
-                  <div className='overflow-x-auto'>
-                    <table className='w-full text-left text-xs'>
-                      <thead>
-                        <tr className='text-slate-400 border-b border-[#1E293B]'>
-                          <th className='pb-2 font-semibold'>Section</th>
-                          <th className='pb-2 font-semibold text-center'>Read</th>
-                          <th className='pb-2 font-semibold text-center'>Edit</th>
-                          <th className='pb-2 font-semibold text-center'>Import</th>
-                          <th className='pb-2 font-semibold text-center'>Export</th>
-                        </tr>
-                      </thead>
-                      <tbody className='divide-y divide-[#1E293B]/30'>
-                        {permissions.map((sec) => (
-                          <tr key={sec.id} className='text-slate-300'>
-                            <td className='py-2.5 max-w-[140px] truncate pr-2 font-medium'>{sec.label}</td>
-                            
-                            {/* Read Toggle */}
-                            <td className='py-2.5 text-center'>
-                              {sec.read !== null ? (
-                                <button 
-                                  onClick={() => handleToggle(sec.id, 'read')}
-                                  className={`mx-auto w-8 h-4 flex items-center rounded-full p-0.5 transition-colors ${sec.read ? 'bg-[#8B5CF6]' : 'bg-slate-700'}`}
-                                >
-                                  <div className={`bg-white w-3 h-3 rounded-full shadow-md transform duration-200 ${sec.read ? 'translate-x-4' : 'translate-x-0'}`} />
-                                </button>
-                              ) : <span className="text-slate-600">-</span>}
-                            </td>
-
-                            {/* Edit Toggle */}
-                            <td className='py-2.5 text-center'>
-                              {sec.edit !== null ? (
-                                <button 
-                                  onClick={() => handleToggle(sec.id, 'edit')}
-                                  className={`mx-auto w-8 h-4 flex items-center rounded-full p-0.5 transition-colors ${sec.edit ? 'bg-[#8B5CF6]' : 'bg-slate-700'}`}
-                                >
-                                  <div className={`bg-white w-3 h-3 rounded-full shadow-md transform duration-200 ${sec.edit ? 'translate-x-4' : 'translate-x-0'}`} />
-                                </button>
-                              ) : <span className="text-slate-600">-</span>}
-                            </td>
-
-                            {/* Import Toggle */}
-                            <td className='py-2.5 text-center'>
-                              {sec.import !== null ? (
-                                <button 
-                                  onClick={() => handleToggle(sec.id, 'import')}
-                                  className={`mx-auto w-8 h-4 flex items-center rounded-full p-0.5 transition-colors ${sec.import ? 'bg-[#8B5CF6]' : 'bg-slate-700'}`}
-                                >
-                                  <div className={`bg-white w-3 h-3 rounded-full shadow-md transform duration-200 ${sec.import ? 'translate-x-4' : 'translate-x-0'}`} />
-                                </button>
-                              ) : <span className="text-slate-600">-</span>}
-                            </td>
-
-                            {/* Export Toggle */}
-                            <td className='py-2.5 text-center'>
-                              {sec.export !== null ? (
-                                <button 
-                                  onClick={() => handleToggle(sec.id, 'export')}
-                                  className={`mx-auto w-8 h-4 flex items-center rounded-full p-0.5 transition-colors ${sec.export ? 'bg-[#8B5CF6]' : 'bg-slate-700'}`}
-                                >
-                                  <div className={`bg-white w-3 h-3 rounded-full shadow-md transform duration-200 ${sec.export ? 'translate-x-4' : 'translate-x-0'}`} />
-                                </button>
-                              ) : <span className="text-slate-600">-</span>}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
                   </div>
                 </div>
               </div>

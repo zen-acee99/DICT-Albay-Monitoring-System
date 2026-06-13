@@ -1,112 +1,347 @@
-import React, { useState } from 'react'
+import React, { useState,useEffect, useRef } from 'react'
+import axios from 'axios'
+import * as XLSX from 'xlsx' 
 import Navbar from '../Layout/Navbar'
 
-// Configuration for Pagination
-const ITEMS_PER_PAGE = 5; 
+const ITEMS_PER_PAGE = 9; 
 
-// Mock initial data based on your design
-const INITIAL_USERS = [
-  { id: 1, name: 'Marvin McKinney', email: 'thomas55@example.com', role: 'Admin', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=60' },
-  { id: 2, name: 'Cameron Williamson', email: 'thomas55@example.com', role: 'Admin', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=60' },
-  { id: 3, name: 'Devon Lane', email: 'thomas55@example.com', role: 'Admin', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=60' },
-  { id: 4, name: 'Brooklyn Simmons', email: 'thomas55@example.com', role: 'User', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=60' },
-  { id: 5, name: 'Floyd Miles', email: 'thomas55@example.com', role: 'User', avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=100&auto=format&fit=crop&q=60' },
-  { id: 6, name: 'Arlene McCoy', email: 'thomas55@example.com', role: 'User', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&auto=format&fit=crop&q=60' },
-  { id: 7, name: 'Courtney Henry', email: 'thomas55@example.com', role: 'User', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&auto=format&fit=crop&q=60' },
-]
-
-const PERMISSION_SECTIONS = [
-  { id: 'dashboard', label: 'Dashboard', read: true, edit: null, import: null, export: null },
-  { id: 'catalog', label: 'My Catalog', read: false, edit: true, import: null, export: false },
-  { id: 'competitors', label: 'Competitors - Competitors', read: true, edit: false, import: null, export: null },
-  { id: 'monitored_urls', label: 'Competitors Monitored Urls', read: false, edit: false, import: false, export: false },
-  { id: 'competitors_di', label: 'Competitors - Competitors Di...', read: false, edit: false, import: null, export: null },
-  { id: 'map_infringement', label: 'Competitors - MAP Infringem...', read: false, edit: false, import: null, export: false },
-  { id: 'repricing', label: 'Repricing', read: false, edit: false, import: null, export: null },
-  { id: 'settings', label: 'Settings - General', read: false, edit: false, import: null, export: null },
-  { id: 'alerts', label: 'Alerts', read: false, edit: false, import: null, export: null },
-]
 
 const SettingsPNPKI = () => {
-  const [users, setUsers] = useState(INITIAL_USERS)
   const [searchQuery, setSearchQuery] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
-  const [isModalOpen, setIsModalOpen] = useState(true)
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState('edit')
   
-  // Form States
-  const [formData, setFormData] = useState({
-    id: 1,
-    name: 'Marvin',
-    surname: 'McKinney',
-    email: 'thomas55@example.com',
-    password: 'password123'
-  })
-  const [permissions, setPermissions] = useState(PERMISSION_SECTIONS)
+  const fileInputRef = useRef(null)
 
   // Trigger Add Mode
   const handleOpenAddModal = () => {
-    setModalMode('add')
-    setFormData({ id: null, name: '', surname: '', email: '', password: '' })
-    setPermissions(PERMISSION_SECTIONS.map(p => ({ ...p })))
-    setIsModalOpen(true)
-  }
+    setModalMode('add');
+    setSelectedPNPKI(null);
+
+    setFormData({
+      id: null,
+      Province: '',
+      Date: '',
+      Raa: '',
+      Region: '',
+      LastName_firstName_Sign: '',
+      fullName: '',
+      EmailAddress: '',
+      ContactNumber: '',
+      Municipality: '',
+      CongressionalDistrict: '',
+      AgencyName: '',
+      followS_NConvention: '',
+      Tax: '',
+      Status: ''
+    });
+
+    setInputprovince('');
+    setInputdate('');
+    setInputraa('');
+    setInputregion('');
+    setInputLastName_firstName_Sign('');
+    setInputfullName('');
+    setInputEmailAddress('');
+    setInputContactNumber('');
+    setInputMunicipality('');
+    setInputCongressionalDistrict('');
+    setInputAgencyName('');
+    setInputfollowS_NConvention('');
+    setInputtax('');
+    setInputstatus('');
+    setValue(''); 
+    setError('');   
+
+    setIsModalOpen(true);
+  };
+
 
   // Trigger Edit Mode populated with row data
-  const handleOpenEditModal = (user) => {
-    setModalMode('edit')
-    const [firstName, ...lastNameArr] = user.name.split(' ')
+
+  const handleOpenEditModal = (pnpki) => {
+    setModalMode('edit');
+
+    setSelectedPNPKI(pnpki);
+
     setFormData({
-      id: user.id,
-      name: firstName || '',
-      surname: lastNameArr.join(' ') || '',
-      email: user.email,
-      password: '••••••••••••'
-    })
-    setIsModalOpen(true)
-  }
+      id: pnpki.id || '',
+      Province: pnpki.Province || '',
+      Date: pnpki.Date || '',
+      Raa: pnpki.Raa || '',
+      Region: pnpki.Region || '',
+      LastName_firstName_Sign: pnpki.LastName_firstName_Sign || '',
+      fullName: pnpki.fullName || '',
+      EmailAddress: pnpki.EmailAddress || '',
+      ContactNumber: pnpki.ContactNumber || '',
+      Municipality: pnpki.Municipality || '',
+      CongressionalDistrict: pnpki.CongressionalDistrict || '',
+      AgencyName: pnpki.AgencyName || '',
+      followS_NConvention: pnpki.followS_NConvention || '',
+      Tax: pnpki.Tax || '',
+      Status: pnpki.Status || ''
+    });
+
+    setInputprovince(pnpki.Province || ''),
+    setInputdate(pnpki.Date || ''),
+    setInputraa(pnpki.Raa || ''),
+    setInputregion(pnpki.Region || ''),
+    setInputLastName_firstName_Sign(pnpki.LastName_firstName_Sign || ''),
+    setInputfullName(pnpki.fullName || ''),
+    setInputEmailAddress(pnpki.EmailAddress || ''),
+    setInputContactNumber(pnpki.ContactNumber || ''),
+    setInputMunicipality(pnpki.Municipality || ''),
+    setInputCongressionalDistrict(pnpki.CongressionalDistrict || ''),
+    setInputAgencyName(pnpki.AgencyName || ''),
+    setInputfollowS_NConvention(pnpki.followS_NConvention || ''),
+    setInputtax(pnpki.Tax || ''),
+    setInputstatus(pnpki.Status || '')
+
+    if (Array.isArray(pnpki.coordinates)) {
+      setValue(pnpki.coordinates.join(', '));
+    } else {
+      setValue(pnpki.coordinates || '');
+    }
+
+    setIsModalOpen(true);
+  };
 
   // Handle row deletion
-  const handleDeleteUser = (userId) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
-      setUsers(prev => prev.filter(u => u.id !== userId))
+  const handleDeleteUser = async (userId) => {
+    if (!window.confirm("Are you sure you want to terminate this pnpki?")) {
+      return;
+    }
+
+    try {
+      await axios.patch(
+        `${VITE_API_URL}/pnpki/${userId}`,
+        {
+          status: "TERMINATED"
+        }
+      );
+
+      await fetchPNPKI();
+
       if (formData.id === userId) {
-        setIsModalOpen(false)
+        setIsModalOpen(false);
       }
-      // Readjust pagination page if current page becomes empty
-      setCurrentPage(1)
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // const handleInputChange = (e) => {
+  //   const { name, value } = e.target
+  //   setFormData(prev => ({ ...prev, [name]: value }))
+  // }
+
+  // const handleToggle = (sectionId, field) => {
+  //   setPermissions(prev =>
+  //     prev.map(sec =>
+  //       sec.id === sectionId ? { ...sec, [field]: !sec[field] } : sec
+  //     )
+  //   )
+  // }
+
+//#region UPDATE
+  const VITE_API_URL = import.meta.env.VITE_API_URL
+  const [livePNPKI, setLivePNPKI] = useState([]);
+  const [loading, setLoading] = useState(true)
+  const [selectedPNPKI, setSelectedPNPKI] = useState(null)
+
+  const updatePNPKI = async () => {
+  try {
+    const coordinatesArray = value
+    .split(",")
+    .map(coord => Number(coord.trim()));
+    const payload = {
+      Province: inputprovince,
+      Date: inputdate,
+      Raa: inputraa,
+      Region: inputregion,
+      LastName_firstName_Sign: inputLastName_firstName_Sign,
+      fullName: inputfullName,
+      EmailAddress: inputEmailAddress,
+      ContactNumber: inputContactNumber,
+      Municipality: inputMunicipality,
+      CongressionalDistrict: inputCongressionalDistrict,
+      AgencyName: inputAgencyName,
+      followS_NConvention: inputfollowS_NConvention,
+      Tax: inputtax,
+      Status: inputstatus
+    };
+
+    await axios.patch(
+      `${VITE_API_URL}/pnpki/${selectedPNPKI.id}`,
+      payload
+    );
+
+    await fetchPNPKI();
+    setIsModalOpen(false);
+
+  } catch (err) {
+    console.error("ERROR:", err);
+
+    if (err.response) {
+      console.error("STATUS:", err.response.status);
+      console.error("DATA:", err.response.data);
     }
   }
+};
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
+  useEffect(() => {
+    fetchPNPKI()
+  }, [])
+
+//#endregion
+
+
+//#region FETCH DATA
+  
+  const fetchPNPKI = async () => {
+    try{
+      const response = await axios.get(`${VITE_API_URL}/pnpki`)
+      const data = response.data
+      console.log("API DATA:", response.data);
+      const normalized = data
+      .filter(item => item.Province === "ALBAY")
+      .map(item => ({
+        id: item._id,
+        Province: item.Province,
+        Date: item.Date,
+        Raa: item.Raa,
+        Region: item.Region,
+        LastName_firstName_Sign: item.LastName_firstName_Sign,
+        fullName: item.fullName,
+        EmailAddress: item.EmailAddress,
+        ContactNumber: item.ContactNumber,
+        Municipality: item.Municipality,
+        CongressionalDistrict: item.CongressionalDistrict,
+        AgencyName: item.AgencyName,
+        followS_NConvention: item.followS_NConvention,
+        Tax: item.Tax,
+        Status: item.Status,
+      }));
+
+      console.log("filter",normalized)
+      setLivePNPKI(normalized)
+      } catch(err) {
+        console.error(err)
+      } finally {
+        setLoading(false)
+    }
+  }
+//#endregion
+
+
+//#region FILE IMPORT
+  // Handle Excel File Import/Parsing
+  const handleExcelImport = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = (evt) => {
+      try {
+        const bstr = evt.target.result;
+        const wb = XLSX.read(bstr, { type: 'binary' });
+        const wsname = wb.SheetNames[0];
+        const ws = wb.Sheets[wsname];
+        const data = XLSX.utils.sheet_to_json(ws);
+
+        console.log("Imported Excel Data Rows:", data);
+
+        if (data.length > 0) {
+          const row = data[0];
+
+          setInputData(row.name || '');
+          setInputStatus(row.status || '');
+          setInputVersion(row.version || '');
+          setValue(row.coordinates || '');
+        }
+
+      } catch (error) {
+        console.error("Error reading excel file:", error);
+      }
+    };
+
+    reader.readAsBinaryString(file);
+    e.target.value = '';
+  };
+
+  // // Handle Excel Export Functionality
+  const handleExcelExport = () => {
+    if (filteredPNPKI.length === 0) {
+      alert("No data available to export.")
+      return
+    }
+
+    // Map rows to custom object layout to exclude UI artifacts like avatar URLs
+    const exportData = filteredPNPKI.map(pnpki => ({
+      'pnpki Name': pnpki.name,
+      'Full Name': pnpki.version,
+      'Email Address': pnpki.status,
+      'Account Role': pnpki.coordinates
+    }))
+
+    // Generate sheet structures and download workbook
+    const worksheet = XLSX.utils.json_to_sheet(exportData)
+    const workbook = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Users List")
+    
+    // Trigger localized file download system
+    XLSX.writeFile(workbook, "pnpki_export.xlsx")
   }
 
-  const handleToggle = (sectionId, field) => {
-    setPermissions(prev =>
-      prev.map(sec =>
-        sec.id === sectionId ? { ...sec, [field]: !sec[field] } : sec
-      )
-    )
-  }
-
+  // Form States
+    const [formData, setFormData] = useState({
+      id: null,
+      name: '',
+      status: '',
+      version: '',  
+      coordinates: ''
+    })
   // Search logic
-  const filteredUsers = users.filter(user => {
-    const query = searchQuery.toLowerCase()
+  
+ const regex = /^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$/;
+
+    const filteredPNPKI = livePNPKI.filter((item) => {
+    const query = searchQuery.toLowerCase();
+
     return (
-      user.name.toLowerCase().includes(query) ||
-      user.email.toLowerCase().includes(query) ||
-      user.role.toLowerCase().includes(query)
-    )
-  })
+      item.Date?.toLowerCase().includes(query) ||
+      item.Raa?.toLowerCase().includes(query) ||
+      item.Region?.toLowerCase().includes(query) ||
+      item.LastName_firstName_Sign?.toLowerCase().includes(query) ||
+      item.fullName?.toLowerCase().includes(query) ||
+      item.EmailAddress?.toLowerCase().includes(query) ||
+      item.ContactNumber?.toLowerCase().includes(query) ||
+      item.Municipality?.toLowerCase().includes(query) ||
+      item.CongressionalDistrict?.toLowerCase().includes(query) ||
+      item.AgencyName?.toLowerCase().includes(query) ||
+      item.followS_NConvention?.toLowerCase().includes(query) ||
+      item.Tax?.toLowerCase().includes(query) ||
+      item.Status?.toLowerCase().includes(query) ||
+      item.coordinates?.join(", ").toLowerCase().includes(query)
+    );
+  });
+
+console.log("SEARCH QUERY:", searchQuery)
+console.log("FILTERED:", filteredPNPKI)
 
   // Pagination Calculation Core Logic
-  const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE)
+  const totalPages = Math.ceil(filteredPNPKI.length / ITEMS_PER_PAGE)
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
   const endIndex = startIndex + ITEMS_PER_PAGE
-  const paginatedUsers = filteredUsers.slice(startIndex, endIndex)
+  const paginatedPNPKI = filteredPNPKI.slice(startIndex, endIndex)
 
+  console.log("livePNPKI:", livePNPKI)
+  console.log("filteredPNPKI:", filteredPNPKI)
+  console.log("Paginated:", paginatedPNPKI)
+
+  
   const handlePageChange = (pageNumber) => {
     if (pageNumber >= 1 && pageNumber <= totalPages) {
       setCurrentPage(pageNumber)
@@ -117,6 +352,60 @@ const SettingsPNPKI = () => {
     setSearchQuery(e.target.value)
     setCurrentPage(1) // Reset back to first page when filtering
   }
+
+//   data for input
+  const [inputprovince , setInputprovince] = useState("")
+  const [inputdate , setInputdate] = useState("")
+  const [inputraa , setInputraa] = useState("")
+  const [inputregion , setInputregion] = useState("")
+  const [inputLastName_firstName_Sign , setInputLastName_firstName_Sign] = useState("")
+  const [inputfullName , setInputfullName] = useState("")
+  const [inputEmailAddress , setInputEmailAddress] = useState("")
+  const [inputContactNumber , setInputContactNumber] = useState("")
+  const [inputMunicipality , setInputMunicipality] = useState("")
+  const [inputCongressionalDistrict , setInputCongressionalDistrict] = useState("")
+  const [inputAgencyName , setInputAgencyName] = useState("")
+  const [inputfollowS_NConvention , setInputfollowS_NConvention] = useState("")
+  const [inputtax , setInputtax] = useState("")
+  const [inputstatus , setInputstatus] = useState("")
+
+  const [value, setValue] = useState("");
+  const [error, setError] = useState("");
+
+const handleChange = (e) => {
+  const input = e.target.value;
+  setValue(input);
+
+  if(input.trim() == ""){
+    setError("")
+    return  
+  }
+
+  const regex = /^\d+,\d+,\s?\d+,\d+$/;
+
+  if (!regex.test(input)) {
+      setError("Invalid format. Use: 123,12345, 12,1234");
+    } else {
+      setError("");
+      }
+      console.log(input);
+  console.log(regex.test(input));
+  };
+
+
+  // const filteredStatus = status.filter(item =>(
+  //   item.toLowerCase().includes(inputStatus.toLowerCase())
+  // ))
+  // const filteredVersion = version.filter(item =>(
+  //   item.toLowerCase().includes(inputVersion.toLowerCase())
+  // ))
+  // const filtered = municipalities.filter(item =>
+  //   item.toLowerCase().includes(inputData.toLowerCase())
+  // )
+
+  const [ShowDropdown, setShowDropdown] = useState(true)
+  const [ShowStatus, setShowStatus] = useState(true)
+  const [ShowVersion, setShowVersion] = useState(true)
 
   return (
     <div id="dashboard-export" className='flex min-h-screen overflow-x-hidden bg-[#050816] text-white font-sans'>
@@ -132,8 +421,8 @@ const SettingsPNPKI = () => {
         {/* Header */}
         <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6'>
           <div>
-            <h1 className='tracking-wide font-semibold text-2xl uppercase text-slate-100'>
-              Albay - User Management
+            <h1 className='tracking-wide font-semibold text-2xl text-slate-100'>
+              ALBAY - PNPKI
             </h1>
             <p className='text-xs text-slate-400 mt-1'>Region V - Bicol Region</p>
           </div>
@@ -141,7 +430,7 @@ const SettingsPNPKI = () => {
             onClick={handleOpenAddModal}
             className="md:self-end px-4 py-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-sm font-medium rounded-lg transition-colors shadow-sm"
           >
-            + Add New User
+            + Add New PNPKI
           </button>
         </div>
 
@@ -153,70 +442,103 @@ const SettingsPNPKI = () => {
             <div>
               <div className='flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6'>
                 <h2 className='text-lg font-medium text-slate-200'>
-                  {searchQuery ? `Search Results (${filteredUsers.length})` : `Current Users (${users.length})`}
+                  {searchQuery ? `Search Results (${filteredPNPKI.length})` : `Current PNPKI (${livePNPKI.length})`}
                 </h2>
                 
-                {/* Table Search Input */}
-                <div className='relative w-full sm:w-64'>
-                  <span className='absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500'>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                  </span>
-                  <input 
-                    type="text" 
-                    value={searchQuery}
-                    onChange={handleSearchChange}
-                    placeholder="Search name, email, or role..." 
-                    className='w-full bg-[#050816] border border-[#1E293B] rounded-lg pl-9 pr-4 py-2 text-xs focus:outline-none focus:border-[#8B5CF6] text-slate-200 placeholder-slate-500 transition-colors'
-                  />
-                  {searchQuery && (
-                    <button 
-                      onClick={() => { setSearchQuery(''); setCurrentPage(1); }}
-                      className='absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-500 hover:text-slate-300'
-                    >
+                {/* Search & Export Controls Row */}
+                <div className='flex items-center gap-3 w-full sm:w-auto'>
+                  {/* Table Search Input */}
+                  <div className='relative flex-1 sm:w-64 sm:flex-initial'>
+                    <span className='absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500'>
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
-                    </button>
-                  )}
+                    </span>
+                    <input 
+                      type="text" 
+                      value={searchQuery}
+                      onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+                      placeholder="Search name, email, or role..." 
+                      className='w-full bg-[#050816] border border-[#1E293B] rounded-lg pl-9 pr-4 py-2 text-xs focus:outline-none focus:border-[#8B5CF6] text-slate-200 placeholder-slate-500 transition-colors'
+                    />
+                    {searchQuery && (
+                      <button 
+                        onClick={() => { setSearchQuery(''); setCurrentPage(1); }}
+                        className='absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-500 hover:text-slate-300'
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Export Excel Action Button */}
+                  <button 
+                    onClick={handleExcelExport}
+                    title="Export Current Results to Excel"
+                    className='flex items-center justify-center gap-1.5 px-3 py-2 border border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-xs rounded-lg transition-all font-medium h-[34px] shrink-0'
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                    </svg>
+                    Export Excel
+                  </button>
                 </div>
               </div>
               
               <div className='overflow-x-auto'>
-                {paginatedUsers.length > 0 ? (
+                {livePNPKI.length > 0 ? (
                   <table className='w-full text-left border-collapse'>
                     <thead>
                       <tr className='text-xs font-semibold text-slate-400 border-b border-[#1E293B] pb-3'>
-                        <th className='pb-3 w-16'>User</th>
-                        <th className='pb-3'>Name</th>
-                        <th className='pb-3'>Email</th>
-                        <th className='pb-3'>Role</th>
+                        <th className='pb-3 text-wrap'>ID</th>
+                        <th className='pb-3 text-wrap'>Province</th>
+                        <th className='pb-3 text-wrap'>Date</th>
+                        <th className='pb-3 text-wrap'>Raa</th>
+                        <th className='pb-3 text-wrap'>Region</th>
+                        <th className='pb-3 text-wrap'>L_FName_Sign</th>
+                        <th className='pb-3 text-wrap'>fullName</th>
+                        <th className='pb-3 text-wrap'>EmailAddress</th>
+                        <th className='pb-3 text-wrap'>ContactNumber</th>
+                        <th className='pb-3 text-wrap'>Municipality</th>
+                        <th className='pb-3 text-wrap'>Congres District</th>
+                        <th className='pb-3 text-wrap'>AgencyName</th>
+                        <th className='pb-3 text-wrap'>followS_NConvention</th>
+                        <th className='pb-3 text-wrap'>Tax</th>
+                        <th className='pb-3 text-wrap'>Status</th>
+                        {/* <th className='pb-3 text-wrap'>Coordinates</th> */}
                         <th className='pb-3 w-24 text-right'>Actions</th>
                       </tr>
                     </thead>
                     <tbody className='divide-y divide-[#1E293B]/50 text-sm'>
-                      {paginatedUsers.map((user) => (
-                        <tr key={user.id} className={`hover:bg-[#111A3E]/50 transition-colors group ${formData.id === user.id && isModalOpen ? 'bg-[#111A3E]/30' : ''}`}>
-                          <td className='py-3.5'>
-                            <img src={user.avatar} alt={user.name} className='w-9 h-9 rounded-full object-cover border border-slate-700' />
-                          </td>
-                          <td className='py-3.5 font-medium text-[#60A5FA] group-hover:text-blue-400'>
-                            {user.name} {user.role === 'Admin' && <span className='text-xs ml-1'>👑</span>}
-                          </td>
-                          <td className='py-3.5 text-slate-300 font-mono text-xs'>{user.email}</td>
-                          <td className='py-3.5'>
-                            <span className={`px-2.5 py-1 rounded-md text-xs font-medium ${
-                              user.role === 'Admin' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' : 'bg-slate-500/10 text-slate-400'
-                            }`}>
-                              {user.role}
-                            </span>
-                          </td>
+                      {paginatedPNPKI.map((pnpki) => (
+                        <tr key={pnpki.id} className={`hover:bg-[#111A3E]/50 transition-colors group ${formData.id === pnpki.id && isModalOpen ? 'bg-[#111A3E]/30' : ''}`}>
+                          
+                          <td className='py-3.5 text-slate-300 font-mono text-xs'>{pnpki.id}</td>
+                          <td className='py-3.5 text-slate-300 font-mono text-xs'>{pnpki.Province}</td>
+                          <td className='py-3.5 text-slate-300 font-mono text-xs'>{pnpki.Date}</td>
+                          <td className='py-3.5 text-slate-300 font-mono text-xs'>{pnpki.Raa}</td>
+                          <td className='py-3.5 text-slate-300 font-mono text-xs'>{pnpki.Region}</td>
+                          <td className='py-3.5 text-slate-300 font-mono text-xs'>{pnpki.LastName_firstName_Sign}</td>
+                          <td className='py-3.5 text-slate-300 font-mono text-xs'>{pnpki.fullName}</td>
+                          <td className='py-3.5 text-slate-300 font-mono text-xs'>{pnpki.EmailAddress}</td>
+                          <td className='py-3.5 text-slate-300 font-mono text-xs'>{pnpki.ContactNumber}</td>
+                          <td className='py-3.5 text-slate-300 font-mono text-xs'>{pnpki.Municipality}</td>
+                          <td className='py-3.5 text-slate-300 font-mono text-xs'>{pnpki.CongressionalDistrict}</td>
+                          <td className='py-3.5 text-slate-300 font-mono text-xs'>{pnpki.AgencyName}</td>
+                          <td className='py-3.5 text-slate-300 font-mono text-xs'>{pnpki.followS_NConvention}</td>
+                          <td className='py-3.5 text-slate-300 font-mono text-xs'>{pnpki.Tax}</td>
+                          <td className='py-3.5 text-slate-300 font-mono text-xs'>{pnpki.Status}</td>
+                          {/* <td className='py-3.5 text-slate-300 font-mono text-xs'>{Array.isArray(pnpki.Coordinates)
+                            ? pnpki.Coordinates.join(', ')
+                            : pnpki.Coordinates}
+                          </td> */}
                           <td className='py-3.5 text-right'>
                             <div className='flex items-center justify-end gap-2'>
                               <button 
-                                onClick={() => handleOpenEditModal(user)}
-                                title="Edit User"
+                                onClick={() => handleOpenEditModal(pnpki)}
+                                title="Edit eLGU"
                                 className='p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition-colors'
                               >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -224,8 +546,8 @@ const SettingsPNPKI = () => {
                                 </svg>
                               </button>
                               <button 
-                                onClick={() => handleDeleteUser(user.id)}
-                                title="Delete User"
+                                onClick={() => handleDeleteUser(pnpki.id)}
+                                title="Deactive eLGU"
                                 className='p-1.5 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded transition-colors'
                               >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -243,59 +565,43 @@ const SettingsPNPKI = () => {
                     <svg className="mx-auto h-8 w-8 text-slate-600 mb-3" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                     </svg>
-                    <p className='text-sm text-slate-400 font-medium'>No users found matching "{searchQuery}"</p>
-                    <p className='text-xs text-slate-500 mt-1'>Try adjusting your keywords or clearing the search box.</p>
+                    <p className='text-sm text-slate-400 font-medium'>No pnpki found matching "{searchQuery}"</p>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Pagination UI Controls */}
+            {/* Pagination Controls */}
             {totalPages > 1 && (
               <div className='flex items-center justify-between border-t border-[#1E293B] pt-4 mt-6 text-xs text-slate-400'>
                 <div>
                   Showing <span className='font-medium text-slate-200'>{startIndex + 1}</span> to{' '}
                   <span className='font-medium text-slate-200'>
-                    {endIndex > filteredUsers.length ? filteredUsers.length : endIndex}
+                    {endIndex > filteredPNPKI.length ? filteredPNPKI.length : endIndex}
                   </span>{' '}
-                  of <span className='font-medium text-slate-200'>{filteredUsers.length}</span> entries
+                  of <span className='font-medium text-slate-200'>{filteredPNPKI.length}</span> entries
                 </div>
-                
                 <div className='flex items-center gap-1.5'>
                   <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className={`px-2.5 py-1.5 rounded-md border border-[#1E293B] font-medium transition-colors ${
-                      currentPage === 1 
-                        ? 'text-slate-600 border-slate-800/40 cursor-not-allowed' 
-                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                    }`}
+                    className={`px-2.5 py-1.5 rounded-md border border-[#1E293B] transition-colors ${currentPage === 1 ? 'text-slate-600 cursor-not-allowed' : 'text-slate-300 hover:bg-slate-800'}`}
                   >
                     Prev
                   </button>
-
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                     <button
                       key={page}
                       onClick={() => handlePageChange(page)}
-                      className={`w-7 h-7 rounded-md text-center transition-colors font-medium ${
-                        currentPage === page
-                          ? 'bg-[#8B5CF6] text-white'
-                          : 'border border-[#1E293B] text-slate-400 hover:bg-slate-800 hover:text-white'
-                      }`}
+                      className={`w-7 h-7 rounded-md transition-colors ${currentPage === page ? 'bg-[#8B5CF6] text-white' : 'border border-[#1E293B] text-slate-400 hover:bg-slate-800'}`}
                     >
                       {page}
                     </button>
                   ))}
-
                   <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className={`px-2.5 py-1.5 rounded-md border border-[#1E293B] font-medium transition-colors ${
-                      currentPage === totalPages 
-                        ? 'text-slate-600 border-slate-800/40 cursor-not-allowed' 
-                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                    }`}
+                    className={`px-2.5 py-1.5 rounded-md border border-[#1E293B] transition-colors ${currentPage === totalPages ? 'text-slate-600 cursor-not-allowed' : 'text-slate-300 hover:bg-slate-800'}`}
                   >
                     Next
                   </button>
@@ -304,160 +610,251 @@ const SettingsPNPKI = () => {
             )}
           </div>
 
-          {/* Right Panel: Side Modal/Form */}
+          {/* Right Panel: Side Modal Form */}
           {isModalOpen && (
             <div className='w-full lg:w-[480px] shrink-0 bg-[#0B112C] border border-[#1E293B] rounded-xl flex flex-col justify-between transition-all duration-300'>
-              {/* Modal Dynamic Header */}
+              {/* Modal Header */}
               <div className='p-6 border-b border-[#1E293B] flex justify-between items-center bg-gradient-to-r from-[#0B112C] to-[#161233] rounded-t-xl'>
-                <h2 className='text-lg font-bold text-white tracking-wide'>
-                  {modalMode === 'edit' ? 'Edit User' : 'Add New User'}
-                </h2>
-                <button 
-                  onClick={() => setIsModalOpen(false)} 
-                  className='text-slate-400 hover:text-white transition-colors p-1'
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
+                <div>
+                  <h2 className='text-lg font-bold text-white tracking-wide'>
+                    {modalMode === 'edit' ? 'Edit PNPKI' : 'Add New PNPKI'}
+                  </h2>
+                </div>
+                
+                {/* Excel Import button */}
+                <div className='flex items-center gap-3'>
+                  <input 
+                    type="file" 
+                    ref={fileInputRef}
+                    onChange={handleExcelImport}
+                    accept=".xlsx, .xls"
+                    className="hidden" 
+                  />
+                  <button 
+                    onClick={() => fileInputRef.current.click()}
+                    title="Upload Excel Document"
+                    className='flex items-center gap-1.5 px-2.5 py-1.5 border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs rounded-lg transition-all font-medium'
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+                    </svg>
+                    Import Excel
+                  </button>
+
+                  <button onClick={() => setIsModalOpen(false)} className='text-slate-400 hover:text-white transition-colors p-1'>
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                  </button>
+                </div>
               </div>
 
-              {/* Modal Body & Inputs */}
+              {/* Modal Body Fields */}
               <div className='p-6 space-y-4 max-h-[calc(100vh-280px)] overflow-y-auto custom-scrollbar'>
-                <div className='grid grid-cols-2 gap-4'>
-                  <div>
-                    <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>Name</label>
-                    <input 
-                      type="text" 
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      placeholder="Enter your name" 
-                      className='w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8B5CF6] text-slate-200 placeholder-slate-600' 
-                    />
-                  </div>
-                  <div>
-                    <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>Surname</label>
-                    <input 
-                      type="text" 
-                      name="surname"
-                      value={formData.surname}
-                      onChange={handleInputChange}
-                      placeholder="Enter your surname" 
-                      className='w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8B5CF6] text-slate-200 placeholder-slate-600' 
-                    />
-                  </div>
+                {/* PROVINCE */}
+                <div>
+                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>PROVINCE</label>
+                  <input
+                      type="text"
+                      value={inputprovince}
+                      onChange={(e) => {
+                          setInputprovince(e.target.value);
+                          setShowDropdown(true);
+                      }}
+                      placeholder="Search pnpki..."
+                      className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+                {/* DATE */}
+                <div>
+                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>DATE</label>
+                  <input
+                      type="text"
+                      value={inputdate}
+                      onChange={(e) => {
+                          setInputdate(e.target.value);
+                          setShowDropdown(true);
+                      }}
+                      placeholder="Search pnpki..."
+                      className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+                {/* RAA */}
+                <div>
+                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>RAA</label>
+                  <input
+                      type="text"
+                      value={inputraa}
+                      onChange={(e) => {
+                          setInputraa(e.target.value);
+                          setShowDropdown(true);
+                      }}
+                      placeholder="Search pnpki..."
+                      className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+                {/* REGION */}
+                <div>
+                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>REGION</label>
+                  <input
+                      type="text"
+                      value={inputregion}
+                      onChange={(e) => {
+                          setInputregion(e.target.value);
+                          setShowDropdown(true);
+                      }}
+                      placeholder="Search pnpki..."
+                      className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+                {/* LastName_firstName_Sign */}
+                <div>
+                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>LastName_firstName_Sign</label>
+                  <input
+                      type="text"
+                      value={inputLastName_firstName_Sign}
+                      onChange={(e) => {
+                          setInputLastName_firstName_Sign(e.target.value);
+                          setShowDropdown(true);
+                      }}
+                      placeholder="Search pnpki..."
+                      className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+                {/* fullName */}
+                <div>
+                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>fullName</label>
+                  <input
+                      type="text"
+                      value={inputfullName}
+                      onChange={(e) => {
+                          setInputfullName(e.target.value);
+                          setShowDropdown(true);
+                      }}
+                      placeholder="Search pnpki..."
+                      className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+                {/* EmailAddress */}
+                <div>
+                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>EmailAddress</label>
+                  <input
+                      type="text"
+                      value={inputEmailAddress}
+                      onChange={(e) => {
+                          setInputEmailAddress(e.target.value);
+                          setShowDropdown(true);
+                      }}
+                      placeholder="Search pnpki..."
+                      className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+                {/* ContactNumber */}
+                <div>
+                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>ContactNumber</label>
+                  <input
+                      type="text"
+                      value={inputContactNumber}
+                      onChange={(e) => {
+                          setInputContactNumber(e.target.value);
+                          setShowDropdown(true);
+                      }}
+                      placeholder="Search pnpki..."
+                      className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+                {/* MUNICIPALITIES */}
+                <div>
+                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>MUNICIPALITIES</label>
+                  <input
+                      type="text"
+                      value={inputMunicipality}
+                      onChange={(e) => {
+                          setInputMunicipality(e.target.value);
+                          setShowDropdown(true);
+                      }}
+                      placeholder="Search pnpki..."
+                      className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+                {/* CongressionalDistrict */}
+                <div>
+                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>CongressionalDistrict</label>
+                  <input
+                      type="text"
+                      value={inputCongressionalDistrict}
+                      onChange={(e) => {
+                          setInputCongressionalDistrict(e.target.value);
+                          setShowDropdown(true);
+                      }}
+                      placeholder="Search pnpki..."
+                      className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+                {/* AgencyName */}
+                <div>
+                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>AgencyName</label>
+                  <input
+                      type="text"
+                      value={inputAgencyName}
+                      onChange={(e) => {
+                          setInputAgencyName(e.target.value);
+                          setShowDropdown(true);
+                      }}
+                      placeholder="Search pnpki..."
+                      className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+                {/* followS_NConvention */}
+                <div>
+                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>followS_NConvention</label>
+                  <input
+                      type="text"
+                      value={inputfollowS_NConvention}
+                      onChange={(e) => {
+                          setInputfollowS_NConvention(e.target.value);
+                          setShowDropdown(true);
+                      }}
+                      placeholder="Search pnpki..."
+                      className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+                {/* Tax */}
+                <div>
+                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>Tax</label>
+                  <input
+                      type="text"
+                      value={inputtax}
+                      onChange={(e) => {
+                          setInputtax(e.target.value);
+                          setShowDropdown(true);
+                      }}
+                      placeholder="Search pnpki..."
+                      className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+                {/* Status */}
+                <div>
+                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>Status</label>
+                  <input
+                      type="text"
+                      value={inputstatus}
+                      onChange={(e) => {
+                          setInputstatus(e.target.value);
+                          setShowDropdown(true);
+                      }}
+                      placeholder="Search pnpki..."
+                      className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
+                  />
                 </div>
 
-                <div className='grid grid-cols-2 gap-4'>
-                  <div>
-                    <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>Email</label>
-                    <input 
-                      type="email" 
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      placeholder="Enter your email" 
-                      className='w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8B5CF6] text-slate-200 placeholder-slate-600' 
-                    />
-                  </div>
-                  <div>
-                    <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>Password</label>
-                    <input 
-                      type="password" 
-                      name="password"
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      placeholder="••••••••••••" 
-                      className='w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8B5CF6] text-slate-200 placeholder-slate-600' 
-                    />
-                  </div>
-                </div>
-
-                {/* Permissions Subsection */}
-                <div className='pt-4 border-t border-[#1E293B]/60'>
-                  <h3 className='text-sm font-semibold text-white mb-0.5'>User Permissions</h3>
-                  <p className='text-xs text-slate-400 mb-4'>Select what a user can see or do in the app</p>
-
-                  <div className='overflow-x-auto'>
-                    <table className='w-full text-left text-xs'>
-                      <thead>
-                        <tr className='text-slate-400 border-b border-[#1E293B]'>
-                          <th className='pb-2 font-semibold'>Section</th>
-                          <th className='pb-2 font-semibold text-center'>Read</th>
-                          <th className='pb-2 font-semibold text-center'>Edit</th>
-                          <th className='pb-2 font-semibold text-center'>Import</th>
-                          <th className='pb-2 font-semibold text-center'>Export</th>
-                        </tr>
-                      </thead>
-                      <tbody className='divide-y divide-[#1E293B]/30'>
-                        {permissions.map((sec) => (
-                          <tr key={sec.id} className='text-slate-300'>
-                            <td className='py-2.5 max-w-[140px] truncate pr-2 font-medium'>{sec.label}</td>
-                            
-                            {/* Read Toggle */}
-                            <td className='py-2.5 text-center'>
-                              {sec.read !== null ? (
-                                <button 
-                                  onClick={() => handleToggle(sec.id, 'read')}
-                                  className={`mx-auto w-8 h-4 flex items-center rounded-full p-0.5 transition-colors ${sec.read ? 'bg-[#8B5CF6]' : 'bg-slate-700'}`}
-                                >
-                                  <div className={`bg-white w-3 h-3 rounded-full shadow-md transform duration-200 ${sec.read ? 'translate-x-4' : 'translate-x-0'}`} />
-                                </button>
-                              ) : <span className="text-slate-600">-</span>}
-                            </td>
-
-                            {/* Edit Toggle */}
-                            <td className='py-2.5 text-center'>
-                              {sec.edit !== null ? (
-                                <button 
-                                  onClick={() => handleToggle(sec.id, 'edit')}
-                                  className={`mx-auto w-8 h-4 flex items-center rounded-full p-0.5 transition-colors ${sec.edit ? 'bg-[#8B5CF6]' : 'bg-slate-700'}`}
-                                >
-                                  <div className={`bg-white w-3 h-3 rounded-full shadow-md transform duration-200 ${sec.edit ? 'translate-x-4' : 'translate-x-0'}`} />
-                                </button>
-                              ) : <span className="text-slate-600">-</span>}
-                            </td>
-
-                            {/* Import Toggle */}
-                            <td className='py-2.5 text-center'>
-                              {sec.import !== null ? (
-                                <button 
-                                  onClick={() => handleToggle(sec.id, 'import')}
-                                  className={`mx-auto w-8 h-4 flex items-center rounded-full p-0.5 transition-colors ${sec.import ? 'bg-[#8B5CF6]' : 'bg-slate-700'}`}
-                                >
-                                  <div className={`bg-white w-3 h-3 rounded-full shadow-md transform duration-200 ${sec.import ? 'translate-x-4' : 'translate-x-0'}`} />
-                                </button>
-                              ) : <span className="text-slate-600">-</span>}
-                            </td>
-
-                            {/* Export Toggle */}
-                            <td className='py-2.5 text-center'>
-                              {sec.export !== null ? (
-                                <button 
-                                  onClick={() => handleToggle(sec.id, 'export')}
-                                  className={`mx-auto w-8 h-4 flex items-center rounded-full p-0.5 transition-colors ${sec.export ? 'bg-[#8B5CF6]' : 'bg-slate-700'}`}
-                                >
-                                  <div className={`bg-white w-3 h-3 rounded-full shadow-md transform duration-200 ${sec.export ? 'translate-x-4' : 'translate-x-0'}`} />
-                                </button>
-                              ) : <span className="text-slate-600">-</span>}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
               </div>
 
               {/* Modal Footer Controls */}
               <div className='p-4 border-t border-[#1E293B] bg-[#090E24] flex justify-between items-center rounded-b-xl'>
-                <button 
-                  onClick={() => setIsModalOpen(false)}
-                  className='px-4 py-2 border border-[#1E293B] text-slate-300 hover:text-white rounded-lg text-sm font-medium transition-colors hover:bg-slate-800'
-                >
+                <button onClick={() => setIsModalOpen(false)} className='px-4 py-2 border border-[#1E293B] text-slate-300 hover:text-white rounded-lg text-sm font-medium transition-colors hover:bg-slate-800'>
                   Discard
                 </button>
-                <button className='px-5 py-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-lg text-sm font-medium transition-colors'>
-                  {modalMode === 'edit' ? 'Save Changes' : 'Create User'}
+                <button onClick={updatePNPKI} className='px-5 py-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-lg text-sm font-medium transition-colors'>
+                  {modalMode === 'edit' ? 'Save Changes' : 'Create '}
                 </button>
               </div>
             </div>

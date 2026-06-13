@@ -1,0 +1,18 @@
+.wifi-marker-wrapper {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(56, 189, 248, 0.2);
+    box-shadow:
+      0 0 10px #38bdf8,
+      0 0 20px #38bdf8,
+      0 0 30px #38bdf8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .wifi-marker-wrapper img {
+    width: 20px;
+    height: 20px;
+  }

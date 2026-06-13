@@ -23,6 +23,7 @@ const EgovActRoutes = require('./routes/egovactRoutes')
 const EgovProRoutes = require('./routes/egovproRoutes')
 const additionalInfoRoutes = require('./routes/additionalInfoRoutes')
 const wifiRoutes = require('./routes/wifiRoutes')
+const pnpkiRoutes = require('./routes/pnpkiRoutes')
 
 app.use('/egovph', egovphRoutes);
 app.use('/operational', operationalRoutes);
@@ -32,6 +33,7 @@ app.use('/egovact', EgovActRoutes)
 app.use('/egovpro', EgovProRoutes)
 app.use('/additionaldescription', additionalInfoRoutes)
 app.use('/wifiData', wifiRoutes)
+app.use('/pnpki', pnpkiRoutes)
 
 
 app.get('/', (req, res) => {
@@ -42,7 +44,7 @@ app.use((req, res) => {
     res.status(404).json({ message: 'Endpoint not found' });
 })
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3002;
 mongoose.connect(process.env.MONGO_URI)
 .then(() => {
     console.log("MongoDB Connected");
