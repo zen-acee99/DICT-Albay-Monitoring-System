@@ -102,79 +102,112 @@ const SettingsLGU = () => {
   //   )
   // }
 
+
+  const createLGU = async () => {
+    try {
+      // 1. Convert the coordinates string into an array of numbers
+      const coordinatesArray = value
+        .split(",")
+        .map(coord => Number(coord.trim()));
+
+      // 2. Build your payload
+      const payload = {
+        name: inputData,
+        status: inputStatus,
+        version: inputVersion,
+        coordinates: coordinatesArray
+      };
+
+      // 3. Send a POST request to create the new entry
+      await axios.post(
+        `${VITE_API_URL}/operational`,
+        payload
+      );
+
+      // 4. Refresh the list and close the modal
+      await fetchLGUs();
+      setIsModalOpen(false);
+
+    } catch (err) {
+      console.error("ERROR CREATING LGU:", err);
+
+      if (err.response) {
+        console.error("STATUS:", err.response.status);
+        console.error("DATA:", err.response.data);
+      }
+    }
+  };
+
+
   const VITE_API_URL = import.meta.env.VITE_API_URL
   const [liveLgus, setLiveLgus] = useState([]);
   const [loading, setLoading] = useState(true)
   const [selectedLGU, setSelectedLGU] = useState(null)
 
-  const updateLGU = async () => {
-  try {
-    const coordinatesArray = value
-    .split(",")
-    .map(coord => Number(coord.trim()));
-    const payload = {
-      name: inputData,
-      status: inputStatus,
-      version: inputVersion,
-      coordinates: coordinatesArray
-    };
+  const updateLGUs = async () => {
+    try {
+      const coordinatesArray = value
+      .split(",")
+      .map(coord => Number(coord.trim()));
+      const payload = {
+        name: inputData,
+        status: inputStatus,
+        version: inputVersion,
+        coordinates: coordinatesArray
+      };
 
-    await axios.patch(
-      `${VITE_API_URL}/operational/${selectedLGU.id}`,
-      payload
-    );
+      await axios.patch(
+        `${VITE_API_URL}/operational/${selectedLGU.id}`,
+        payload
+      );
 
-    await fetchLGUs();
-    setIsModalOpen(false);
+      await fetchLGUs();
+      setIsModalOpen(false);
 
-  } catch (err) {
-    console.error("ERROR:", err);
+    } catch (err) {
+      console.error("ERROR:", err);
 
-    if (err.response) {
-      console.error("STATUS:", err.response.status);
-      console.error("DATA:", err.response.data);
+      if (err.response) {
+        console.error("STATUS:", err.response.status);
+        console.error("DATA:", err.response.data);
+      }
     }
-  }
-};
+  };
 
-  useEffect(() => {
-    fetchLGUs()
-  }, [])
-
-  
+  const [selectedRegion, setSelectedRegion] = useState("ALL")
   const fetchLGUs = async () => {
-    try{
-      const response = await axios.get(`${VITE_API_URL}/operational`)
-      const data = response.data
-  
-      const normalized = data
-      .filter(item => {
-        const parts = item.name?.split(",").map(s => s.trim().toLowerCase());
-        return parts?.[1] === "albay";
-      })
-      .map(item => ({
-        id: item._id,
-        name: item.name,
-        status: item.status?.trim(),
-        version: item.version,
-        coordinates: item.coordinates,
-      }));
+    try {
+      setLoading(true);
+      const response = await axios.get(`${VITE_API_URL}/operational`);
+      const data = response.data;
 
-//       const normalized = data.map(item => ({
-//   id: item._id,
-//   name: item.name,
-//   status: item.status?.trim(),
-//   version: item.version,
-//   coordinates: item.coordinates,
-// }))
-      console.log("filter",normalized)
-      setLiveLgus(normalized)
-    } catch(err) {
-      console.error(err)
+      const normalized = data
+        .filter(item => {
+          if (selectedRegion === "ALL") return true;
+
+          const parts = item.name?.split(",").map(s => s.trim().toLowerCase());
+          return parts?.[1] === selectedRegion.toLowerCase();
+        })
+        .map(item => ({
+          id: item._id,
+          name: item.name,
+          status: item.status?.trim(),
+          version: item.version,
+          coordinates: item.coordinates,
+        }));
+
+      console.log("Filtered Data:", normalized);
+      setLiveLgus(normalized);
+    } catch (err) {
+      console.error(err);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
+
+    useEffect(() => {
+      fetchLGUs()
+    }, [selectedRegion])
 
   // Handle Excel File Import/Parsing
   const handleExcelImport = (e) => {
@@ -213,26 +246,30 @@ const SettingsLGU = () => {
 
   // // Handle Excel Export Functionality
   const handleExcelExport = () => {
-    if (filteredLgus.length === 0) {
+    if (!liveLgus || liveLgus.length === 0) {
       alert("No data available to export.")
       return
     }
 
-    // Map rows to custom object layout to exclude UI artifacts like avatar URLs
-    const exportData = filteredLgus.map(lgu => ({
-      'LGU Name': lgu.name,
-      'Full Name': lgu.version,
-      'Email Address': lgu.status,
-      'Account Role': lgu.coordinates
+    const exportData = liveLgus.map(lgu => ({
+      "LGU Name": lgu.name || "",
+      Version: lgu.version || "",
+      Status: lgu.status || "",
+      Coordinates: Array.isArray(lgu.coordinates)
+        ? lgu.coordinates.join(", ")
+        : (lgu.coordinates || "")
     }))
 
-    // Generate sheet structures and download workbook
     const worksheet = XLSX.utils.json_to_sheet(exportData)
     const workbook = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Users List")
-    
-    // Trigger localized file download system
-    XLSX.writeFile(workbook, "user_management_export.xlsx")
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      worksheet,
+      "LGU Operational List"
+    )
+
+    XLSX.writeFile(workbook, "lgu_operational_export.xlsx")
   }
 
   // Form States
@@ -302,15 +339,15 @@ const handleChange = (e) => {
     return  
   }
 
-  const regex = /^\d+,\d+,\s?\d+,\d+$/;
+  // const regex = /^\d+,\d+,\s?\d+,\d+$/;
 
-  if (!regex.test(input)) {
-      setError("Invalid format. Use: 123,12345, 12,1234");
-    } else {
-      setError("");
-      }
-      console.log(input);
-  console.log(regex.test(input));
+  // if (!regex.test(input)) {
+  //     setError("Invalid format. Use: 123,12345, 12,1234");
+  //   } else {
+  //     setError("");
+  //     }
+  //     console.log(input);
+  // console.log(regex.test(input));
   };
 
   const municipalities = [
@@ -508,12 +545,25 @@ const handleChange = (e) => {
                 {/* Search & Export Controls Row */}
                 <div className='flex items-center gap-3 w-full sm:w-auto'>
                   {/* Table Search Input */}
+                    <div className='flex space-x-5 '>
+                      <h1 className='text-gray-600'>Select Province:</h1>
+                      <select name="" id="" value={selectedRegion} onChange={(e) => setSelectedRegion(e.target.value)} className='text-white bg-transparent outline-none border-0'>
+                        <option className='bg-[#050816] text-white' value="ALL">ALL</option>
+                        <option className='bg-[#050816] text-white' value="albay">ALBAY</option>
+                        <option className='bg-[#050816] text-white' value="Camarines Sur">CAM SUR</option>
+                        <option className='bg-[#050816] text-white' value="Camarines Norte">CAM NOR</option>
+                        <option className='bg-[#050816] text-white' value="Sorsogon">SORSOGON</option>
+                        <option className='bg-[#050816] text-white' value="Masbate">MASBATE</option>
+                        <option className='bg-[#050816] text-white' value="Catanduanes">CATANDUANES</option>
+                      </select>
+                    </div>
                   <div className='relative flex-1 sm:w-64 sm:flex-initial'>
                     <span className='absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500'>
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
                     </span>
+                    
                     <input 
                       type="text" 
                       value={searchQuery}
@@ -582,7 +632,7 @@ const handleChange = (e) => {
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
                                 </svg>
                               </button>
-                              <button 
+                              {/* <button 
                                 onClick={() => handleDeleteUser(lgu.id)}
                                 title="Deactive eLGU"
                                 className='p-1.5 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded transition-colors'
@@ -590,7 +640,7 @@ const handleChange = (e) => {
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                                 </svg>
-                              </button>
+                              </button> */}
                             </div>
                           </td>
                         </tr>
@@ -856,8 +906,8 @@ const handleChange = (e) => {
                 <button onClick={() => setIsModalOpen(false)} className='px-4 py-2 border border-[#1E293B] text-slate-300 hover:text-white rounded-lg text-sm font-medium transition-colors hover:bg-slate-800'>
                   Discard
                 </button>
-                <button onClick={updateLGU} className='px-5 py-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-lg text-sm font-medium transition-colors'>
-                  {modalMode === 'edit' ? 'Save Changes' : 'Create User'}
+                <button onClick={modalMode === 'edit' ? updateLGUs : createLGU} className='px-5 py-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-lg text-sm font-medium transition-colors'>
+                  {modalMode === 'edit' ? 'Save Changes' : 'Create '}
                 </button>
               </div>
             </div>

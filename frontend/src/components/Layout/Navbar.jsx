@@ -13,9 +13,24 @@ import { LuSettings } from "react-icons/lu"
 import { TbBuildingCommunity } from "react-icons/tb"
 import { Link } from 'react-router-dom'
 
+import { signOut } from "firebase/auth";
+import { auth } from "../Pages/firebase"; // adjust path if needed
+import { useNavigate } from "react-router-dom";
+
 const Navbar = () => {
   const [open, setOpen] = useState(false)
   const [openSettings, setOpenSettings] = useState(false)
+
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate("/login"); // redirect after logout
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
 
   return (
     <div className="w-full h-screen bg-[#050816] text-white px-4 py-5 border-r border-[#1b2440] flex flex-col">
@@ -62,6 +77,9 @@ const Navbar = () => {
             {open && (
               <ul className='flex flex-col pl-6 pt-3 space-y-3 text-gray-300'>
 
+                <Link to="/calendar" className='hover:text-white transition cursor-pointer'>
+                  Calendar
+                </Link>
                 <Link to="/" className='hover:text-white transition cursor-pointer'>
                   Region
                 </Link>
@@ -160,6 +178,9 @@ const Navbar = () => {
                 </Link>
               </ul>
             )}
+          <Link onClick={handleLogout} className='hover:text-white transition cursor-pointer'>
+            Log out
+          </Link>
         </ul>
       </div>
 
@@ -174,7 +195,7 @@ const Navbar = () => {
 
         <div className='relative z-0 text-center'>
           
-          <img src="/eLGU.png" alt="" />
+          <img src="/1.png" alt="" />
 
           <img src="/eGOV.png" alt="" />
 

@@ -4,29 +4,6 @@ import Navbar from '../Layout/Navbar'
 // Configuration for Pagination
 const ITEMS_PER_PAGE = 5; 
 
-// Mock initial data based on your design
-const INITIAL_USERS = [
-  { id: 1, name: 'Marvin McKinney', email: 'thomas55@example.com', role: 'Admin', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=60' },
-  { id: 2, name: 'Cameron Williamson', email: 'thomas55@example.com', role: 'Admin', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=60' },
-  { id: 3, name: 'Devon Lane', email: 'thomas55@example.com', role: 'Admin', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=60' },
-  { id: 4, name: 'Brooklyn Simmons', email: 'thomas55@example.com', role: 'User', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=60' },
-  { id: 5, name: 'Floyd Miles', email: 'thomas55@example.com', role: 'User', avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=100&auto=format&fit=crop&q=60' },
-  { id: 6, name: 'Arlene McCoy', email: 'thomas55@example.com', role: 'User', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&auto=format&fit=crop&q=60' },
-  { id: 7, name: 'Courtney Henry', email: 'thomas55@example.com', role: 'User', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&auto=format&fit=crop&q=60' },
-]
-
-const PERMISSION_SECTIONS = [
-  { id: 'dashboard', label: 'Dashboard', read: true, edit: null, import: null, export: null },
-  { id: 'catalog', label: 'My Catalog', read: false, edit: true, import: null, export: false },
-  { id: 'competitors', label: 'Competitors - Competitors', read: true, edit: false, import: null, export: null },
-  { id: 'monitored_urls', label: 'Competitors Monitored Urls', read: false, edit: false, import: false, export: false },
-  { id: 'competitors_di', label: 'Competitors - Competitors Di...', read: false, edit: false, import: null, export: null },
-  { id: 'map_infringement', label: 'Competitors - MAP Infringem...', read: false, edit: false, import: null, export: false },
-  { id: 'repricing', label: 'Repricing', read: false, edit: false, import: null, export: null },
-  { id: 'settings', label: 'Settings - General', read: false, edit: false, import: null, export: null },
-  { id: 'alerts', label: 'Alerts', read: false, edit: false, import: null, export: null },
-]
-
 const SettingsUser = () => {
   const [users, setUsers] = useState(INITIAL_USERS)
   const [searchQuery, setSearchQuery] = useState('')
@@ -223,7 +200,7 @@ const SettingsUser = () => {
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
                                 </svg>
                               </button>
-                              <button 
+                              {/* <button 
                                 onClick={() => handleDeleteUser(user.id)}
                                 title="Delete User"
                                 className='p-1.5 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded transition-colors'
@@ -231,7 +208,7 @@ const SettingsUser = () => {
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                                 </svg>
-                              </button>
+                              </button> */}
                             </div>
                           </td>
                         </tr>

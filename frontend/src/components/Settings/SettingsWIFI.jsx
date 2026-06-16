@@ -17,7 +17,7 @@ const SettingsWIFI = () => {
   // Trigger Add Mode
   const handleOpenAddModal = () => {
     setModalMode('add');
-    setSelectedPNPKI(null);
+    setSelectedWIFI(null);
 
     setFormData({
       id: null,
@@ -37,20 +37,20 @@ const SettingsWIFI = () => {
       NationWideID: ''
     });
 
-    setSiteType('')
-    setLocationName('')
-    setfundSource('')
-    setProjectName('')
-    setContact('')
-    setLinkType('')
-    setApCount('')
-    setCoordinates('')
-    setLocationCode('')
-    setBarangay('')
-    setMunicipality('')
-    setProvince('')
-    setRemarks('')
-    setNationWideID('')
+    setInputSiteType('')
+    setInputLocationName('')
+    setInputFundSource('')
+    setInputProjectName('')
+    setInputContact('')
+    setInputLinkType('')
+    setInputApCount('')
+    setInputCoordinates('')
+    setInputLocationCode('')
+    setInputBarangay('')
+    setInputMunicipality('')
+    setInputProvince('')
+    setInputRemarks('')
+    setInputNationWideID('')
     setValue('') 
     setError('')
     setIsModalOpen(true)    
@@ -58,73 +58,71 @@ const SettingsWIFI = () => {
   };
 
 
-  // Trigger Edit Mode populated with row data
+  //#region Trigger Edit Mode populated with row data
 
-  const handleOpenEditModal = (pnpki) => {
+  const handleOpenEditModal = (wifi) => {
     setModalMode('edit');
 
-    setSelectedPNPKI(pnpki);
+    setSelectedWIFI(wifi);
 
     setFormData({
-      id: pnpki.id || '',
-      Province: pnpki.Province || '',
-      Date: pnpki.Date || '',
-      Raa: pnpki.Raa || '',
-      Region: pnpki.Region || '',
-      LastName_firstName_Sign: pnpki.LastName_firstName_Sign || '',
-      fullName: pnpki.fullName || '',
-      EmailAddress: pnpki.EmailAddress || '',
-      ContactNumber: pnpki.ContactNumber || '',
-      Municipality: pnpki.Municipality || '',
-      CongressionalDistrict: pnpki.CongressionalDistrict || '',
-      AgencyName: pnpki.AgencyName || '',
-      followS_NConvention: pnpki.followS_NConvention || '',
-      Tax: pnpki.Tax || '',
-      Status: pnpki.Status || ''
+      id: wifi.id || '',
+      SiteType: wifi.SiteType || '',
+      LocationName: wifi.LocationName || '',
+      fundSource: wifi.fundSource || '',
+      ProjectName: wifi.ProjectName || '',
+      Contact: wifi.Contact || '',
+      LinkType: wifi.LinkType || '',
+      ApCount: wifi.ApCount || '',
+      Coordinates: wifi.Coordinates || '',
+      LocationCode: wifi.LocationCode || '',
+      Barangay: wifi.Barangay || '',
+      Municipality: wifi.Municipality || '',
+      Province: wifi.Province || '',
+      Remarks: wifi.Remarks || '',
+      NationWideID: wifi.NationWideID || ''
     });
 
-    setInputSiteType(Wifi. || ''),
-    setInputLocationName(Wifi. || ''),
-    setInputfundSource(Wifi. || ''),
-    setInputProjectName(Wifi. || ''),
-    setInputContact(Wifi. || ''),
-    setInputLinkType(Wifi. || ''),
-    setInputApCount(Wifi. || ''),
-    setInputCoordinates(Wifi. || ''),
-    setInputLocationCode(Wifi. || ''),
-    setInputBarangay(Wifi. || ''),
-    setInputMunicipality(Wifi. || ''),
-    setInputProvince(Wifi. || ''),
-    setInputRemarks(Wifi. || ''),
-    setInputNationWideID(Wifi. || ''),
-    setInputValue(Wifi. || ''),
-    setInputError(Wifi. || ''),
-    setInputIsModalOpen(Wifi. || '')
+    setInputSiteType(wifi.SiteType || ''),
+    setInputLocationName(wifi.LocationName || ''),
+    setInputFundSource(wifi.fundSource || ''),
+    setInputProjectName(wifi.ProjectName || ''),
+    setInputContact(wifi.Contact || ''),
+    setInputLinkType(wifi.LinkType || ''),
+    setInputApCount(wifi.ApCount || ''),
+    setInputCoordinates(wifi.Coordinates || ''),
+    setInputLocationCode(wifi.LocationCode || ''),
+    setInputBarangay(wifi.Barangay || ''),
+    setInputMunicipality(wifi.Municipality || ''),
+    setInputProvince(wifi.Province || ''),
+    setInputRemarks(wifi.Remarks || ''),
+    setInputNationWideID(wifi.NationWideID || '')
 
-    if (Array.isArray(pnpki.coordinates)) {
-      setValue(pnpki.coordinates.join(', '));
+    if (Array.isArray(wifi.coordinates)) {
+      setValue(wifi.coordinates.join(', '));
     } else {
-      setValue(pnpki.coordinates || '');
+      setValue(wifi.coordinates || '');
     }
 
     setIsModalOpen(true);
+
   };
 
   // Handle row deletion
   const handleDeleteUser = async (userId) => {
-    if (!window.confirm("Are you sure you want to terminate this pnpki?")) {
+    if (!window.confirm("Are you sure you want to terminate this wifi?")) {
       return;
     }
 
     try {
       await axios.patch(
-        `${VITE_API_URL}/pnpki/${userId}`,
+        `${VITE_API_URL}/wifiData/${userId}`,
         {
           status: "TERMINATED"
         }
       );
 
-      await fetchPNPKI();
+      await fetchWIFI();
 
       if (formData.id === userId) {
         setIsModalOpen(false);
@@ -149,38 +147,38 @@ const SettingsWIFI = () => {
 
 //#region UPDATE
   const VITE_API_URL = import.meta.env.VITE_API_URL
-  const [liveWIFI, setLivePNPKI] = useState([]);
+  const [liveWIFI, setLiveWIFI] = useState([]);
   const [loading, setLoading] = useState(true)
-  const [selectedPNPKI, setSelectedPNPKI] = useState(null)
+  const [selectedWIFI, setSelectedWIFI] = useState(null)
 
-  const updatePNPKI = async () => {
+  const updateWIFI = async () => {
   try {
     const coordinatesArray = value
     .split(",")
     .map(coord => Number(coord.trim()));
     const payload = {
-      Province: inputprovince,
-      Date: inputdate,
-      Raa: inputraa,
-      Region: inputregion,
-      LastName_firstName_Sign: inputLastName_firstName_Sign,
-      fullName: inputfullName,
-      EmailAddress: inputEmailAddress,
-      ContactNumber: inputContactNumber,
+      SiteType: inputSiteType,
+      LocationName: inputLocationName,
+      FundSource: inputFundSource,
+      ProjectName: inputProjectName,
+      Contact: inputContact,
+      LinkType: inputLinkType,
+      ApCount: inputApCount,
+      Coordinates: inputCoordinates,
+      LocationCode: inputLocationCode,
+      Barangay: inputBarangay,
       Municipality: inputMunicipality,
-      CongressionalDistrict: inputCongressionalDistrict,
-      AgencyName: inputAgencyName,
-      followS_NConvention: inputfollowS_NConvention,
-      Tax: inputtax,
-      Status: inputstatus
+      Province: inputProvince,
+      Remarks: inputRemarks,
+      NationWideID: inputNationWideID
     };
 
     await axios.patch(
-      `${VITE_API_URL}/pnpki/${selectedPNPKI.id}`,
+      `${VITE_API_URL}/wifiData/${selectedWIFI.id}`,
       payload
     );
 
-    await fetchPNPKI();
+    await fetchWIFI();
     setIsModalOpen(false);
 
   } catch (err) {
@@ -194,41 +192,84 @@ const SettingsWIFI = () => {
 };
 
   useEffect(() => {
-    fetchPNPKI()
+    fetchWIFI()
   }, [])
 
 //#endregion
 
 
+
+//#region CREATE
+const createWIFI = async () => {
+  try {
+    // 1. Prepare your payload exactly like updateWIFI
+    const payload = {
+      SiteType: inputSiteType,
+      LocationName: inputLocationName,
+      FundSource: inputFundSource,
+      ProjectName: inputProjectName,
+      Contact: inputContact,
+      LinkType: inputLinkType,
+      ApCount: inputApCount,
+      Coordinates: inputCoordinates, // Note: If Coordinates needs to be an array from 'value', use coordinatesArray here
+      LocationCode: inputLocationCode,
+      Barangay: inputBarangay,
+      Municipality: inputMunicipality,
+      Province: inputProvince,
+      Remarks: inputRemarks,
+      NationWideID: inputNationWideID
+    };
+
+    // 2. CHANGE: Use axios.post instead of patch, and remove the /${selectedWIFI.id} from the URL
+    await axios.post(
+      `${VITE_API_URL}/wifiData`,
+      payload
+    );
+
+    // 3. Refresh data and close modal
+    await fetchWIFI();
+    setIsModalOpen(false);
+
+  } catch (err) {
+    console.error("ERROR CREATING:", err);
+    if (err.response) {
+      console.error("STATUS:", err.response.status);
+      console.error("DATA:", err.response.data);
+    }
+  }
+};
+
+
+
 //#region FETCH DATA
   
-  const fetchPNPKI = async () => {
+  const fetchWIFI = async () => {
     try{
-      const response = await axios.get(`${VITE_API_URL}/pnpki`)
+      const response = await axios.get(`${VITE_API_URL}/wifiData`)
       const data = response.data
       console.log("API DATA:", response.data);
       const normalized = data
-      .filter(item => item.Province === "ALBAY")
+      .filter(item => item.Province === "Albay" || item.Province === "ALBAY")
       .map(item => ({
         id: item._id,
-        Province: item.Province,
-        Date: item.Date,
-        Raa: item.Raa,
-        Region: item.Region,
-        LastName_firstName_Sign: item.LastName_firstName_Sign,
-        fullName: item.fullName,
-        EmailAddress: item.EmailAddress,
-        ContactNumber: item.ContactNumber,
+        SiteType: item.SiteType,
+        LocationName: item.LocationName,
+        fundSource: item.fundSource,
+        ProjectName: item.ProjectName,
+        Contact: item.Contact,
+        LinkType: item.LinkType,
+        ApCount: item.ApCount,
+        Coordinates: item.Coordinates,
+        LocationCode: item.LocationCode,
+        Barangay: item.Barangay,
         Municipality: item.Municipality,
-        CongressionalDistrict: item.CongressionalDistrict,
-        AgencyName: item.AgencyName,
-        followS_NConvention: item.followS_NConvention,
-        Tax: item.Tax,
-        Status: item.Status,
+        Province: item.Province,
+        Remarks: item.Remarks,
+        NationWideID: item.NationWideID,
       }));
 
       console.log("filter",normalized)
-      setLivePNPKI(normalized)
+      setLiveWIFI(normalized)
       } catch(err) {
         console.error(err)
       } finally {
@@ -282,29 +323,49 @@ const SettingsWIFI = () => {
     }
 
     // Map rows to custom object layout to exclude UI artifacts like avatar URLs
-    const exportData = filteredWIFI.map(pnpki => ({
-      'pnpki Name': pnpki.name,
-      'Full Name': pnpki.version,
-      'Email Address': pnpki.status,
-      'Account Role': pnpki.coordinates
+    const exportData = filteredWIFI.map(wifi => ({
+      'SiteType': wifi.SiteType,
+      'LocationName': wifi.LocationName,
+      'fundSource': wifi.fundSource,
+      'ProjectName': wifi.ProjectName,
+      'Contact': wifi.Contact,
+      'LinkType': wifi.LinkType,
+      'ApCount': wifi.ApCount,
+      'Coordinates': wifi.Coordinates,
+      'LocationCode': wifi.LocationCode,
+      'Barangay': wifi.Barangay,
+      'Municipality': wifi.Municipality,
+      'Province': wifi.Province,
+      'Remarks': wifi.Remarks,
+      'NationWideID': wifi.NationWideID,
     }))
 
     // Generate sheet structures and download workbook
     const worksheet = XLSX.utils.json_to_sheet(exportData)
     const workbook = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Users List")
+    XLSX.utils.book_append_sheet(workbook, worksheet, "WIFI List")
     
     // Trigger localized file download system
-    XLSX.writeFile(workbook, "pnpki_export.xlsx")
+    XLSX.writeFile(workbook, "wifi_export_format.xlsx")
   }
 
   // Form States
     const [formData, setFormData] = useState({
       id: null,
-      name: '',
-      status: '',
-      version: '',  
-      coordinates: ''
+      SiteType: '',
+      LocationName: '',
+      fundSource: '',
+      ProjectName: '',
+      Contact: '',
+      LinkType: '',
+      ApCount: '',
+      Coordinates: '',
+      LocationCode: '',
+      Barangay: '',
+      Municipality: '',
+      Province: '',
+      Remarks: '',
+      NationWideID: ''
     })
   // Search logic
   
@@ -314,20 +375,20 @@ const SettingsWIFI = () => {
     const query = searchQuery.toLowerCase();
 
     return (
-      item.Date?.toLowerCase().includes(query) ||
-      item.Raa?.toLowerCase().includes(query) ||
-      item.Region?.toLowerCase().includes(query) ||
-      item.LastName_firstName_Sign?.toLowerCase().includes(query) ||
-      item.fullName?.toLowerCase().includes(query) ||
-      item.EmailAddress?.toLowerCase().includes(query) ||
-      item.ContactNumber?.toLowerCase().includes(query) ||
+      item.SiteType?.toLowerCase().includes(query) ||
+      item.LocationName?.toLowerCase().includes(query) ||
+      item.fundSource?.toLowerCase().includes(query) ||
+      item.ProjectName?.toLowerCase().includes(query) ||
+      item.Contact?.toLowerCase().includes(query) ||
+      item.LinkType?.toLowerCase().includes(query) ||
+      item.ApCount?.toLowerCase().includes(query) ||
+      item.Coordinates?.join(", ").toLowerCase().includes(query) ||
+      item.LocationCode?.toLowerCase().includes(query) ||
+      item.Barangay?.toLowerCase().includes(query) ||
       item.Municipality?.toLowerCase().includes(query) ||
-      item.CongressionalDistrict?.toLowerCase().includes(query) ||
-      item.AgencyName?.toLowerCase().includes(query) ||
-      item.followS_NConvention?.toLowerCase().includes(query) ||
-      item.Tax?.toLowerCase().includes(query) ||
-      item.Status?.toLowerCase().includes(query) ||
-      item.coordinates?.join(", ").toLowerCase().includes(query)
+      item.Province?.toLowerCase().includes(query) ||
+      item.Remarks?.toLowerCase().includes(query) ||
+      item.NationWideID?.includes(query)
     );
   });
 
@@ -338,11 +399,11 @@ console.log("FILTERED:", filteredWIFI)
   const totalPages = Math.ceil(filteredWIFI.length / ITEMS_PER_PAGE)
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
   const endIndex = startIndex + ITEMS_PER_PAGE
-  const paginatedPNPKI = filteredWIFI.slice(startIndex, endIndex)
+  const paginatedWIFI = filteredWIFI.slice(startIndex, endIndex)
 
   console.log("liveWIFI:", liveWIFI)
   console.log("filteredWIFI:", filteredWIFI)
-  console.log("Paginated:", paginatedPNPKI)
+  console.log("Paginated:", paginatedWIFI)
 
   
   const handlePageChange = (pageNumber) => {
@@ -357,20 +418,21 @@ console.log("FILTERED:", filteredWIFI)
   }
 
 //   data for input
-  const [SiteType, setSiteType] = useState("")
-  const [LocationName, setLocationName] = useState("")
-  const [fundSource, setfundSource] = useState("")
-  const [ProjectName, setProjectName] = useState("")
-  const [Contact, setContact] = useState("")
-  const [LinkType, setLinkType] = useState("")
-  const [ApCount, setApCount] = useState("")
-  const [Coordinates, setCoordinates] = useState("")
-  const [LocationCode, setLocationCode] = useState("")
-  const [Barangay, setBarangay] = useState("")
-  const [Municipality, setMunicipality] = useState("")
-  const [Province, setProvince] = useState("")
-  const [Remarks, setRemarks] = useState("")
-  const [NationWideID, setNationWideID] = useState("")
+  const [inputSiteType , setInputSiteType] = useState("")
+  const [inputLocationName , setInputLocationName] = useState("")
+  const [inputFundSource , setInputFundSource] = useState("")
+  const [inputProjectName , setInputProjectName] = useState("")
+  const [inputContact , setInputContact] = useState("")
+  const [inputLinkType , setInputLinkType] = useState("")
+  const [inputApCount , setInputApCount] = useState("")
+  const [inputCoordinates , setInputCoordinates] = useState("")
+  const [coordinates, setCoordinates] = useState([])
+  const [inputLocationCode , setInputLocationCode] = useState("")
+  const [inputBarangay , setInputBarangay] = useState("")
+  const [inputMunicipality , setInputMunicipality] = useState("")
+  const [inputProvince , setInputProvince] = useState("")
+  const [inputRemarks , setInputRemarks] = useState("")
+  const [inputNationWideID , setInputNationWideID] = useState("")
 
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
@@ -425,7 +487,7 @@ const handleChange = (e) => {
         <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6'>
           <div>
             <h1 className='tracking-wide font-semibold text-2xl text-slate-100'>
-              ALBAY - PNPKI
+              ALBAY - WIFI
             </h1>
             <p className='text-xs text-slate-400 mt-1'>Region V - Bicol Region</p>
           </div>
@@ -433,7 +495,7 @@ const handleChange = (e) => {
             onClick={handleOpenAddModal}
             className="md:self-end px-4 py-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-sm font-medium rounded-lg transition-colors shadow-sm"
           >
-            + Add New PNPKI
+            + Add New WIFI
           </button>
         </div>
 
@@ -445,7 +507,7 @@ const handleChange = (e) => {
             <div>
               <div className='flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6'>
                 <h2 className='text-lg font-medium text-slate-200'>
-                  {searchQuery ? `Search Results (${filteredWIFI.length})` : `Current PNPKI (${liveWIFI.length})`}
+                  {searchQuery ? `Search Results (${filteredWIFI.length})` : `Current WIFI (${liveWIFI.length})`}
                 </h2>
                 
                 {/* Search & Export Controls Row */}
@@ -514,7 +576,7 @@ const handleChange = (e) => {
                       </tr>
                     </thead>
                     <tbody className='divide-y divide-[#1E293B]/50 text-sm'>
-                      {paginatedPNPKI.map((wifi) => (
+                      {paginatedWIFI.map((wifi) => (
                         <tr key={wifi.id} className={`hover:bg-[#111A3E]/50 transition-colors group ${formData.id === wifi.id && isModalOpen ? 'bg-[#111A3E]/30' : ''}`}>
                           
                           <td className='py-3.5 text-slate-300 font-mono text-xs'>{wifi.SiteType}</td>
@@ -531,9 +593,9 @@ const handleChange = (e) => {
                           <td className='py-3.5 text-slate-300 font-mono text-xs'>{wifi.Province}</td>
                           <td className='py-3.5 text-slate-300 font-mono text-xs'>{wifi.Remarks}</td>
                           <td className='py-3.5 text-slate-300 font-mono text-xs'>{wifi.NationWideID}</td>
-                          {/* <td className='py-3.5 text-slate-300 font-mono text-xs'>{Array.isArray(pnpki.Coordinates)
-                            ? pnpki.Coordinates.join(', ')
-                            : pnpki.Coordinates}
+                          {/* <td className='py-3.5 text-slate-300 font-mono text-xs'>{Array.isArray(wifi.Coordinates)
+                            ? wifi.Coordinates.join(', ')
+                            : wifi.Coordinates}
                           </td> */}
                           <td className='py-3.5 text-right'>
                             <div className='flex items-center justify-end gap-2'>
@@ -546,15 +608,15 @@ const handleChange = (e) => {
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
                                 </svg>
                               </button>
-                              <button 
+                              {/* <button 
                                 onClick={() => handleDeleteUser(wifi.id)}
-                                title="Deactive eLGU"
+                                title="Archive WIFI"
                                 className='p-1.5 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded transition-colors'
                               >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                                 </svg>
-                              </button>
+                              </button> */}
                             </div>
                           </td>
                         </tr>
@@ -566,7 +628,7 @@ const handleChange = (e) => {
                     <svg className="mx-auto h-8 w-8 text-slate-600 mb-3" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                     </svg>
-                    <p className='text-sm text-slate-400 font-medium'>No WIFI DATA found matching "{searchQuery}"</p>
+                    <p className='text-sm text-slate-400 font-medium'>No PROVINCE WIFI DATA found matching "{searchQuery}"</p>
                   </div>
                 )}
               </div>
@@ -618,7 +680,7 @@ const handleChange = (e) => {
               <div className='p-6 border-b border-[#1E293B] flex justify-between items-center bg-gradient-to-r from-[#0B112C] to-[#161233] rounded-t-xl'>
                 <div>
                   <h2 className='text-lg font-bold text-white tracking-wide'>
-                    {modalMode === 'edit' ? 'Edit PNPKI' : 'Add New PNPKI'}
+                    {modalMode === 'edit' ? 'Edit WIFI' : 'Add New WIFI'}
                   </h2>
                 </div>
                 
@@ -652,197 +714,184 @@ const handleChange = (e) => {
               <div className='p-6 space-y-4 max-h-[calc(100vh-280px)] overflow-y-auto custom-scrollbar'>
                 {/* SiteType */}
                 <div>
-                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>PROVINCE</label>
+                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>Site type</label>
                   <input
                       type="text"
-                      value={inputprovince}
+                      value={inputSiteType}
                       onChange={(e) => {
-                          setInputprovince(e.target.value);
+                          setInputSiteType(e.target.value);
                           setShowDropdown(true);
                       }}
-                      placeholder="Search pnpki..."
+                      placeholder="Search wifi..."
                       className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
-                {/* DATE */}
+                {/* locational name */}
                 <div>
-                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>DATE</label>
+                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>locational name</label>
                   <input
                       type="text"
-                      value={inputdate}
+                      value={inputLocationName}
                       onChange={(e) => {
-                          setInputdate(e.target.value);
-                          setShowDropdown(true);
+                          setInputLocationName(e.target.value);
                       }}
-                      placeholder="Search pnpki..."
+                      placeholder="Search wifi..."
                       className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
-                {/* RAA */}
+                {/* fund source */}
                 <div>
-                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>RAA</label>
+                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>fund source</label>
                   <input
                       type="text"
-                      value={inputraa}
+                      value={inputFundSource}
                       onChange={(e) => {
-                          setInputraa(e.target.value);
-                          setShowDropdown(true);
+                          setInputFundSource(e.target.value);
                       }}
-                      placeholder="Search pnpki..."
+                      placeholder="Search wifi..."
                       className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
-                {/* REGION */}
+                {/* project name */}
                 <div>
-                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>REGION</label>
+                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>project name</label>
                   <input
                       type="text"
-                      value={inputregion}
+                      value={inputProjectName}
                       onChange={(e) => {
-                          setInputregion(e.target.value);
-                          setShowDropdown(true);
+                          setInputProjectName(e.target.value);
                       }}
-                      placeholder="Search pnpki..."
+                      placeholder="project name wifi..."
                       className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
-                {/* LastName_firstName_Sign */}
+                {/* contact */}
                 <div>
-                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>LastName_firstName_Sign</label>
+                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>contact</label>
                   <input
                       type="text"
-                      value={inputLastName_firstName_Sign}
+                      value={inputContact}
                       onChange={(e) => {
-                          setInputLastName_firstName_Sign(e.target.value);
-                          setShowDropdown(true);
+                          setInputContact(e.target.value);
                       }}
-                      placeholder="Search pnpki..."
+                      placeholder="contact wifi..."
                       className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
-                {/* fullName */}
+                {/* link type */}
                 <div>
-                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>fullName</label>
+                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>link type</label>
                   <input
                       type="text"
-                      value={inputfullName}
+                      value={inputLinkType}
                       onChange={(e) => {
-                          setInputfullName(e.target.value);
-                          setShowDropdown(true);
+                          setInputLinkType(e.target.value);
                       }}
-                      placeholder="Search pnpki..."
+                      placeholder="link type wifi..."
                       className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
-                {/* EmailAddress */}
+                {/* ap account */}
                 <div>
-                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>EmailAddress</label>
+                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>ap account</label>
                   <input
                       type="text"
-                      value={inputEmailAddress}
+                      value={inputApCount}
                       onChange={(e) => {
-                          setInputEmailAddress(e.target.value);
-                          setShowDropdown(true);
+                          setInputApCount(e.target.value);
                       }}
-                      placeholder="Search pnpki..."
+                      placeholder="ap account wifi..."
                       className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
-                {/* ContactNumber */}
+                {/* coordinates */}
                 <div>
-                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>ContactNumber</label>
+                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>coordinates</label>
                   <input
                       type="text"
-                      value={inputContactNumber}
+                      value={inputCoordinates}
                       onChange={(e) => {
-                          setInputContactNumber(e.target.value);
-                          setShowDropdown(true);
+                          setInputCoordinates(e.target.value);
                       }}
-                      placeholder="Search pnpki..."
+                      placeholder="sample: 120.9842, 14.5995"
                       className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
-                {/* MUNICIPALITIES */}
+                {/* location code */}
                 <div>
-                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>MUNICIPALITIES</label>
+                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>location code</label>
+                  <input
+                      type="text"
+                      value={inputLocationCode}
+                      onChange={(e) => {
+                          setInputLocationCode(e.target.value);
+                      }}
+                      placeholder="location code wifi..."
+                      className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+                {/* barangay */}
+                <div>
+                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>barangay</label>
+                  <input
+                      type="text"
+                      value={inputBarangay}
+                      onChange={(e) => {
+                          setInputBarangay(e.target.value);
+                      }}
+                      placeholder="barangay wifi..."
+                      className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+                {/* municipality */}
+                <div>
+                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>municipality</label>
                   <input
                       type="text"
                       value={inputMunicipality}
                       onChange={(e) => {
                           setInputMunicipality(e.target.value);
-                          setShowDropdown(true);
                       }}
-                      placeholder="Search pnpki..."
+                      placeholder="municipality ..."
+                      className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
+                  />
+                </div> 
+                {/* Province */}
+                <div>
+                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>Province</label>
+                  <input
+                      type="text"
+                      value={inputProvince}
+                      onChange={(e) => {
+                          setInputProvince(e.target.value);
+                      }}
+                      placeholder="Province wifi..."
                       className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
-                {/* CongressionalDistrict */}
+                {/* Remarks */}
                 <div>
-                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>CongressionalDistrict</label>
+                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>Remarks</label>
                   <input
                       type="text"
-                      value={inputCongressionalDistrict}
+                      value={inputRemarks}
                       onChange={(e) => {
-                          setInputCongressionalDistrict(e.target.value);
-                          setShowDropdown(true);
+                          setInputRemarks(e.target.value);
                       }}
-                      placeholder="Search pnpki..."
+                      placeholder="Remarks wifi..."
                       className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
-                {/* AgencyName */}
+                {/* national wideID */}
                 <div>
-                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>AgencyName</label>
+                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>national wideID</label>
                   <input
                       type="text"
-                      value={inputAgencyName}
+                      value={inputNationWideID}
                       onChange={(e) => {
-                          setInputAgencyName(e.target.value);
-                          setShowDropdown(true);
+                          setInputNationWideID(e.target.value);
                       }}
-                      placeholder="Search pnpki..."
-                      className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
-                  />
-                </div>
-                {/* followS_NConvention */}
-                <div>
-                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>followS_NConvention</label>
-                  <input
-                      type="text"
-                      value={inputfollowS_NConvention}
-                      onChange={(e) => {
-                          setInputfollowS_NConvention(e.target.value);
-                          setShowDropdown(true);
-                      }}
-                      placeholder="Search pnpki..."
-                      className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
-                  />
-                </div>
-                {/* Tax */}
-                <div>
-                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>Tax</label>
-                  <input
-                      type="text"
-                      value={inputtax}
-                      onChange={(e) => {
-                          setInputtax(e.target.value);
-                          setShowDropdown(true);
-                      }}
-                      placeholder="Search pnpki..."
-                      className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
-                  />
-                </div>
-                {/* Status */}
-                <div>
-                  <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>Status</label>
-                  <input
-                      type="text"
-                      value={inputstatus}
-                      onChange={(e) => {
-                          setInputstatus(e.target.value);
-                          setShowDropdown(true);
-                      }}
-                      placeholder="Search pnpki..."
+                      placeholder="national wideID wifi..."
                       className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
@@ -854,7 +903,7 @@ const handleChange = (e) => {
                 <button onClick={() => setIsModalOpen(false)} className='px-4 py-2 border border-[#1E293B] text-slate-300 hover:text-white rounded-lg text-sm font-medium transition-colors hover:bg-slate-800'>
                   Discard
                 </button>
-                <button onClick={updatePNPKI} className='px-5 py-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-lg text-sm font-medium transition-colors'>
+                <button onClick={modalMode === 'edit' ? updateWIFI : createWIFI} className='px-5 py-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-lg text-sm font-medium transition-colors'>
                   {modalMode === 'edit' ? 'Save Changes' : 'Create '}
                 </button>
               </div>

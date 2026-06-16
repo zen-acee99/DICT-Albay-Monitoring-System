@@ -22,8 +22,8 @@ If you are developing a production application, we recommend using TypeScript wi
 # npm install html-to-image
 # npm install react-toastify
 # npm install xlsx <-for excel import data
-#
-#
+# npm install lucide-react papaparse
+# npm install firebase 
 #
 #
 #

@@ -53,7 +53,6 @@ const SettingsPNPKI = () => {
     setInputstatus('');
     setValue(''); 
     setError('');   
-
     setIsModalOpen(true);
   };
 
@@ -143,6 +142,49 @@ const SettingsPNPKI = () => {
   //     )
   //   )
   // }
+
+//#region CREATE
+
+const createPNPKI = async () => {
+  try {
+    // 1. Build your payload using your input states
+    const payload = {
+      Province: inputprovince,
+      Date: inputdate,
+      Raa: inputraa,
+      Region: inputregion,
+      LastName_firstName_Sign: inputLastName_firstName_Sign,
+      fullName: inputfullName,
+      EmailAddress: inputEmailAddress,
+      ContactNumber: inputContactNumber,
+      Municipality: inputMunicipality,
+      CongressionalDistrict: inputCongressionalDistrict,
+      AgencyName: inputAgencyName,
+      followS_NConvention: inputfollowS_NConvention,
+      Tax: inputtax,
+      Status: inputstatus
+    };
+
+    // 2. Send an HTTP POST request to your base endpoint
+    await axios.post(
+      `${VITE_API_URL}/pnpki`,
+      payload
+    );
+
+    // 3. Refresh list and close modal on success
+    await fetchPNPKI();
+    setIsModalOpen(false);
+
+  } catch (err) {
+    console.error("ERROR CREATING PNPKI:", err);
+
+    if (err.response) {
+      console.error("STATUS:", err.response.status);
+      console.error("DATA:", err.response.data);
+    }
+  }
+};
+
 
 //#region UPDATE
   const VITE_API_URL = import.meta.env.VITE_API_URL
@@ -538,22 +580,22 @@ const handleChange = (e) => {
                             <div className='flex items-center justify-end gap-2'>
                               <button 
                                 onClick={() => handleOpenEditModal(pnpki)}
-                                title="Edit eLGU"
+                                title="Edit WIFI"
                                 className='p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition-colors'
                               >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
                                 </svg>
                               </button>
-                              <button 
+                              {/* <button 
                                 onClick={() => handleDeleteUser(pnpki.id)}
-                                title="Deactive eLGU"
+                                title="Delete WIFI"
                                 className='p-1.5 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded transition-colors'
                               >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                                 </svg>
-                              </button>
+                              </button> */}
                             </div>
                           </td>
                         </tr>
@@ -853,7 +895,7 @@ const handleChange = (e) => {
                 <button onClick={() => setIsModalOpen(false)} className='px-4 py-2 border border-[#1E293B] text-slate-300 hover:text-white rounded-lg text-sm font-medium transition-colors hover:bg-slate-800'>
                   Discard
                 </button>
-                <button onClick={updatePNPKI} className='px-5 py-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-lg text-sm font-medium transition-colors'>
+                <button onClick={modalMode === 'edit' ? updatePNPKI : createPNPKI} className='px-5 py-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-lg text-sm font-medium transition-colors'>
                   {modalMode === 'edit' ? 'Save Changes' : 'Create '}
                 </button>
               </div>

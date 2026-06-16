@@ -24,6 +24,8 @@ const EgovProRoutes = require('./routes/egovproRoutes')
 const additionalInfoRoutes = require('./routes/additionalInfoRoutes')
 const wifiRoutes = require('./routes/wifiRoutes')
 const pnpkiRoutes = require('./routes/pnpkiRoutes')
+const ilcdbRoutes = require('./routes/ilcdbRoutes')
+const egovRoutes = require('./routes/egovRoutes')
 
 app.use('/egovph', egovphRoutes);
 app.use('/operational', operationalRoutes);
@@ -34,6 +36,8 @@ app.use('/egovpro', EgovProRoutes)
 app.use('/additionaldescription', additionalInfoRoutes)
 app.use('/wifiData', wifiRoutes)
 app.use('/pnpki', pnpkiRoutes)
+app.use('/ilcdb', ilcdbRoutes)
+app.use('/egov', egovRoutes)
 
 
 app.get('/', (req, res) => {
