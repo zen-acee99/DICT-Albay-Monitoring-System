@@ -24,12 +24,17 @@ If you are developing a production application, we recommend using TypeScript wi
 # npm install xlsx <-for excel import data
 # npm install lucide-react papaparse
 # npm install firebase 
+# npm install docx file-saver
+# npm install --save-dev @types/file-saver
+# npm install jspdf jspdf-autotable
+# npm install exceljs 
+# npm install pdf-lib file-saver
 #
 #
 #
 # for backend
-# npm install @supabase/supabase-js express cors dotenv nodemon pg
-# npm i express mongoose cors dotenv nodemon
+# npm install @supabase/supabase-js express cors dotenv nodemon pg csv-parser
+# npm i express mongoose cors dotenv nodemon axios
 # 
 #
 #

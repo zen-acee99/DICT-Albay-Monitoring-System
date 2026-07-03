@@ -336,7 +336,11 @@ const handleChange = (e) => {
   const [ShowDropdown, setShowDropdown] = useState(true)
   const [ShowTitle, setShowTitle] = useState(true)
   const [ShowTargetSectors, setShowTargetSectors] = useState(true)
-
+  const [inputData, setInputData] = useState("")
+  const targetSectors = ["LGUs", "Other", "All Sectors", "NGAs", "Student", "SUCS", "MSMEs", "Senior Citizens", "Teachers", "Out of School Youth", "HEIs", "School", "Parents"]
+  const filtered = targetSectors.filter(item =>
+    item.toLowerCase().includes(inputData.toLowerCase())
+  )
   return (
     <div id="dashboard-export" className='flex min-h-screen overflow-x-hidden bg-[#050816] text-white font-sans'>
       {/* Sidebar Container */}
@@ -579,27 +583,9 @@ const handleChange = (e) => {
                             setInputTitle(e.target.value);
                             setShowDropdown(true);
                         }}
-                        placeholder="Search ilcdb..."
+                        placeholder="ILCDB Title"
                         className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
                     />
-                    {ShowDropdown && inputTitle && filtered.length > 0 && (
-                        <div className="absolute z-50 w-80 mt-1 bg-[#0B112C] border border-[#1E293B] rounded-lg shadow-lg max-h-60 overflow-y-auto">
-
-                            {filtered.map((item, index) => (
-                              <div
-                                key={`${item}-${index}`}
-                                onMouseDown={() => {
-                                  setInputTitle(item);
-                                  setShowDropdown(false);
-                                }}
-                                className="px-3 py-2 hover:bg-[#111A3E] cursor-pointer text-slate-200"
-                              >
-                                {item}
-                              </div>
-                            ))}
-
-                        </div>
-                    )}
                   </div>
                   <div>
                     <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>location</label>
@@ -611,36 +597,17 @@ const handleChange = (e) => {
                         }}
                       className='w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8B5CF6] text-slate-200' 
                     />
-                    {
-                        ShowTitle && inputLocation && filteredStatus.length > 0 && (
-                          <div className="absolute z-50 w-36 mt-1 bg-[#0B112C] border border-[#1E293B] rounded-lg shadow-lg max-h-60 overflow-y-auto">
-
-                            {filteredStatus.map((item) => (
-                                <div
-                                    key={item}
-                                    onMouseDown={() => {
-                                    setInputLocation(item);
-                                    setShowTitle(false);
-                                    }}
-                                    className="px-3 py-2 hover:bg-[#111A3E] cursor-pointer text-slate-200"
-                                >
-                                    {item}
-                                </div>
-                            ))}
-
-                        </div>
-                        )
-                    }
                   </div>
                 </div>
 
                 <div className='grid grid-cols-2 gap-4'>
                   <div>
-                      <label className='block text-xs font-semibold text-slate-300 mb-1.5 tracking-wider'>mode</label>
+                      <label className='block text-xs font-semibold text-slate-300 mb-1.5 tracking-wider'>Coordinates</label>
                       <input 
                         type="text"
                         value={value}
                         onChange={handleChange}
+                        readonly={true}
                         className='w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8B5CF6] text-slate-200' 
                       />
                       {error && <p className="text-red-400 text-xs mt-1">{error}</p>}
@@ -648,33 +615,31 @@ const handleChange = (e) => {
                     <div>
                       <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>targetSectors</label>
                       <input 
-                        value={inputCoordinates}
+                        value={inputData}
                         onChange={(e) => {
-                          setInputCoordinates(e.target.value)
+                          setInputData(e.target.value)
                           setShowTargetSectors(true)
                         }}
                         className='w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8B5CF6] text-slate-200' 
                       />
-                      {
-                        ShowTargetSectors && inputCoordinates && filteredVersion.length > 0 && (
-                          <div className="absolute z-50 w-36 mt-1 bg-[#0B112C] border border-[#1E293B] rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                      {ShowDropdown && inputData && filtered.length > 0 && (
+                        <div className="absolute z-50 w-80 mt-1 bg-[#0B112C] border border-[#1E293B] rounded-lg shadow-lg max-h-60 overflow-y-auto">
 
-                            {filteredVersion.map((item) => (
-                                <div
-                                    key={item}
-                                    onMouseDown={() => {
-                                    setInputCoordinates(item);
-                                    setShowTargetSectors(false);
-                                    }}
-                                    className="px-3 py-2 hover:bg-[#111A3E] cursor-pointer text-slate-200"
-                                >
-                                    {item}
-                                </div>
+                            {filtered.map((item, index) => (
+                              <div
+                                key={`${item}-${index}`}
+                                onMouseDown={() => {
+                                  setInputData(item);
+                                  setShowDropdown(false);
+                                }}
+                                className="px-3 py-2 hover:bg-[#111A3E] cursor-pointer text-slate-200"
+                              >
+                                {item}
+                              </div>
                             ))}
 
                         </div>
-                        )
-                      }
+                    )}
                     </div>
                   </div>
                 

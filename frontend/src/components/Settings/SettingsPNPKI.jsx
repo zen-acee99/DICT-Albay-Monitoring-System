@@ -534,7 +534,7 @@ const handleChange = (e) => {
                   <table className='w-full text-left border-collapse'>
                     <thead>
                       <tr className='text-xs font-semibold text-slate-400 border-b border-[#1E293B] pb-3'>
-                        <th className='pb-3 text-wrap'>ID</th>
+                        {/* <th className='pb-3 text-wrap'>ID</th> */}
                         <th className='pb-3 text-wrap'>Province</th>
                         <th className='pb-3 text-wrap'>Date</th>
                         <th className='pb-3 text-wrap'>Raa</th>
@@ -557,7 +557,7 @@ const handleChange = (e) => {
                       {paginatedPNPKI.map((pnpki) => (
                         <tr key={pnpki.id} className={`hover:bg-[#111A3E]/50 transition-colors group ${formData.id === pnpki.id && isModalOpen ? 'bg-[#111A3E]/30' : ''}`}>
                           
-                          <td className='py-3.5 text-slate-300 font-mono text-xs'>{pnpki.id}</td>
+                          {/* <td className='py-3.5 text-slate-300 font-mono text-xs'>{pnpki.id}</td> */}
                           <td className='py-3.5 text-slate-300 font-mono text-xs'>{pnpki.Province}</td>
                           <td className='py-3.5 text-slate-300 font-mono text-xs'>{pnpki.Date}</td>
                           <td className='py-3.5 text-slate-300 font-mono text-xs'>{pnpki.Raa}</td>

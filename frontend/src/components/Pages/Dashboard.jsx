@@ -53,11 +53,12 @@ const Dashboard = () => {
 
   const [stats, setStats] = useState({
     live: 0,
-    uat: 0,
-    training: 0,
-    inactive: 0,
-    thirdParty: 0,
-    total: 0
+    dataBuildUp: 0, // Admin TRAINING
+    uat: 0, // UAT
+    ownsystem: 0, // 3RD PARTY
+    technical: 0, // TECHNICAL
+    instanceInactive: 0, // INACTIVE
+    nosys: 0,
   });
 
   useEffect(() => {
@@ -102,45 +103,38 @@ const Dashboard = () => {
           item => item.status?.trim().toUpperCase() === 'LIVE'
         ).length;
 
-        const DATA = uniqueData.filter(
-          item => item.status?.trim().toUpperCase() === 'BUILDUP - GLP'
+        const dataBuildUp = uniqueData.filter(
+          item => item.status?.trim().toUpperCase() === 'BUILDUPGLP'
         ).length;
-        // const DATA2 = uniqueData.filter(
-        //   item => item.status?.trim().toUpperCase() === 'DATA BUILDUP - GLP'
-        // ).length;
 
-        // console.log("data",DATA)
-        // console.log("data2",DATA2)
-        // console.log(TotalData)
         const uat = uniqueData.filter(
           item => item.status?.trim().toUpperCase() === 'UAT'
         ).length;
 
-        const training = uniqueData.filter(
-          item => item.status?.trim().toUpperCase() === 'Training'
+        const ownsystem = uniqueData.filter(
+          item => item.status?.trim().toUpperCase() === 'OWN SYSTEM' // 3RD PARTY APP
         ).length;
 
-        const nosystem = uniqueData.filter(
+        // new status
+
+        const instanceInactive = uniqueData.filter(
+          item => item.status?.trim().toUpperCase() === 'INACTIVE'
+        ).length;
+        const nosys = uniqueData.filter(
           item => item.status?.trim().toUpperCase() === 'NO SYSTEM'
         ).length;
-
-        const thirdParty = uniqueData.filter(
-          item => item.status?.trim().toUpperCase() === 'OWN SYSTEM'
-        ).length;
-
-
-        const inactive = uniqueData.filter(
-          item => item.status?.trim().toUpperCase() === 'INACTIVE'
+        const technical = uniqueData.filter(
+          item => item.status?.trim().toUpperCase() === 'TECHNICAL'
         ).length;
 
         setStats({
           live,
-          DATA,
-          uat,
-          training,
-          inactive,
-          nosystem,
-          thirdParty,
+          dataBuildUp, // Admin TRAINING
+          uat, // UAT
+          ownsystem, // 3RD PARTY
+          technical, // TECHNICAL
+          instanceInactive, // INACTIVE
+          nosys, // NO SYSTEM
           total: uniqueData.length
         });
 
@@ -169,13 +163,16 @@ const Dashboard = () => {
   const getColor = (status) => {
     switch (status) {
       case 'LIVE':
-        return '#22c55e';
+        return '#22C55E';
 
-      case 'TotalData':
-        return '#9ACD32';
+      case 'dataBuildUp':
+        return '#3B82F6';
 
       case 'UAT':
-        return '#eab308';
+        return '#F59E0B';
+
+      case 'OWN SYSTEM':
+        return '#8B5CF6'; // 3RD PARTY
 
       case 'TRAINING':
         return '#f97316';
@@ -183,8 +180,6 @@ const Dashboard = () => {
       case 'NO SYSTEM':
         return '#ef4444';
 
-      case 'OWN SYSTEM':
-        return '#3b82f6';
 
       default:
         return '#6b7280';
@@ -247,10 +242,12 @@ console.log(response.data);
 
   const statusConfig = {
     live: { title: "LIVE eLGUs", color: "text-green-400", status: "LIVE" },
+    dataBuildUp: { title: "Admin Training", color: "text-orange-400", status: "BUILDUPGLP" }, // FIX: "TRAINING"
     uat: { title: "UAT eLGUs", color: "text-yellow-400", status: "UAT" },
-    training: { title: "Admin Training", color: "text-orange-400", status: "TRAINING" }, // FIX: "TRAINING"
-    inactive: { title: "Inactive / No eLGU", color: "text-red-400", status: "NO SYSTEM" },
-    thirdParty: { title: "OWN / 3rd Party", color: "text-blue-400", status: "OWN SYSTEM" },
+    ownsystem: { title: "Inactive / No eLGU", color: "text-red-400", status: "OWN SYSTEM" },
+    instanceInactive: { title: "Inactive Instance", color: "text-red-400", status: "INACTIVE" },
+    nosys: { title: "NO System", color: "text-blue-400", status: "NO SYSTEM" },
+    technical: { title: "Techincal Activities", color: "text-blue-400", status: "Training" },
   };
 
   const current = statusConfig[statShow];
@@ -399,16 +396,16 @@ console.log(response.data);
         </div>
 
         {/* CARDS */}
-        <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6 gap-4 py-6'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-7 gap-4 py-6'>
 
           {/* LIVE */}
           <button 
             onClick={() => setStatShow("live")}
-            className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl border border-green-500/30 bg-gradient-to-br from-[#071b12] to-[#041018] p-5 shadow-[0_0_25px_rgba(0,255,128,0.08)]'>
+            className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl bg-gradient-to-br from-[#006b3b] to-[#041018] p-2 shadow-[0_0_25px_rgba(0,255,128,0.08)]'>
 
             <div className='relative z-10 flex items-start gap-4'>
 
-              <div className='w-16 h-16 rounded-2xl bg-green-500/10 flex items-center justify-center'>
+              <div className='w-10 h-10 flex items-center justify-center'>
                 <TbRadar2 className='text-4xl text-green-400' />
               </div>
 
@@ -432,25 +429,25 @@ console.log(response.data);
 
           </button>
 
-          {/* Date Buildup */}
+          {/* dataBuildUp */}
           <button 
-            onClick={() => setStatShow("uat")}
-            className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl border border-yellow-500/30 bg-gradient-to-br from-[#1a1405] to-[#100b03] p-5'>
+            onClick={() => setStatShow("dataBuildUp")}
+            className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl bg-gradient-to-br from-[#005266] to-[#100b03] p-5'>
 
             <div className='relative z-10 flex items-start gap-4'>
 
-              <div className='w-16 h-16 rounded-2xl bg-yellow-500/10 flex items-center justify-center'>
-                <HiOutlineDocumentSearch className='text-4xl text-yellow-400' />
+              <div className='w-10 h-10 rounded-2xl flex items-center justify-center'>
+                <HiOutlineDocumentSearch className='text-4xl text-[#06B6D4]' />
               </div>
 
               <div>
 
-                <h1 className='text-yellow-300 text-xs'>
+                <h1 className='text-[#06B6D4] text-[10px]'>
                   Data Buildup /Go Live Up
                 </h1>
 
-                <h2 className='text-5xl font-bold text-yellow-400 leading-none mt-1'>
-                  {stats.DATA}
+                <h2 className='text-5xl font-bold text-[#06B6D4] leading-none mt-1'>
+                  {stats.dataBuildUp}
                 </h2>
 
               </div>
@@ -462,21 +459,21 @@ console.log(response.data);
           {/* UAT */}
           <button 
             onClick={() => setStatShow("uat")}
-            className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl border border-yellow-500/30 bg-gradient-to-br from-[#1a1405] to-[#100b03] p-5'>
+            className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl bg-gradient-to-br from-[#896300] to-[#100b03] p-5'>
 
             <div className='relative z-10 flex items-start gap-4'>
 
-              <div className='w-16 h-16 rounded-2xl bg-yellow-500/10 flex items-center justify-center'>
-                <HiOutlineDocumentSearch className='text-4xl text-yellow-400' />
+              <div className='w-10 h-10 flex items-center justify-center'>
+                <HiOutlineDocumentSearch className='text-4xl text-[#F59E0B]' />
               </div>
 
               <div>
 
-                <h1 className='text-yellow-300 text-xs'>
-                  UAT
+                <h1 className='text-[#F59E0B] text-xs'>
+                  UAT 
                 </h1>
 
-                <h2 className='text-5xl font-bold text-yellow-400 leading-none mt-1'>
+                <h2 className='text-5xl font-bold text-[#F59E0B] leading-none mt-1'>
                   {stats.uat}
                 </h2>
 
@@ -488,23 +485,23 @@ console.log(response.data);
 
           {/* THIRD PARTY */}
           <button 
-            onClick={() => setStatShow("thirdParty")}
-            className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl border border-blue-500/30 bg-gradient-to-br from-[#07101f] to-[#040916] p-5'>
+            onClick={() => setStatShow("ownsystem")}
+            className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl bg-gradient-to-br from-[#2e009b] to-[#040916] p-5'>
 
             <div className='relative z-10 flex items-start gap-4'>
 
-              <div className='w-16 h-16 rounded-2xl bg-blue-500/10 flex items-center justify-center'>
-                <FaCogs className='text-4xl text-blue-400' />
+              <div className='w-10 h-10 flex items-center justify-center'>
+                <FaCogs className='text-4xl text-[#8B5CF6]' />
               </div>
 
               <div>
 
-                <h1 className='text-blue-300 text-sm font-medium'>
+                <h1 className='text-[#8B5CF6] text-sm font-medium'>
                   OWN / 3rd Party
                 </h1>
 
-                <h2 className='text-5xl font-bold text-blue-400 leading-none mt-1'>
-                  {stats.thirdParty}
+                <h2 className='text-5xl font-bold text-[#8B5CF6] leading-none mt-1'>
+                  {stats.ownsystem}
                 </h2>
 
               </div>
@@ -515,23 +512,23 @@ console.log(response.data);
 
           {/* instance but inactive */}
           <button 
-            onClick={() => setStatShow("training")}
-            className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl border border-orange-500/30 bg-gradient-to-br from-[#1b1007] to-[#120803] p-5'>
+            onClick={() => setStatShow("instanceInactive")}
+            className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl bg-gradient-to-br from-[#8d0000] to-[#120803] p-5'>
 
             <div className='relative z-10 flex items-start gap-4'>
 
-              <div className='w-16 h-16 rounded-2xl bg-orange-500/10 flex items-center justify-center'>
-                <FaChalkboardTeacher className='text-4xl text-orange-400' />
+              <div className='w-10 h-10 flex items-center justify-center'>
+                <FaChalkboardTeacher className='text-4xl text-red-500' />
               </div>
 
               <div>
 
-                <h1 className='text-orange-300 text-sm font-medium'>
+                <h1 className='text-red-500 text-sm font-medium'>
                   Instance Inactive
                 </h1>
 
-                <h2 className='text-5xl font-bold text-orange-400 leading-none mt-1'>
-                  {stats.inactive}
+                <h2 className='text-5xl font-bold text-red-500 leading-none mt-1'>
+                  {stats.instanceInactive}
                 </h2>
 
               </div>
@@ -542,23 +539,50 @@ console.log(response.data);
 
           {/* INACTIVE */}
           <button 
-            onClick={() => setStatShow("inactive")}
-            className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl border border-red-500/30 bg-gradient-to-br from-[#1a0707] to-[#100303] p-5'>
+            onClick={() => setStatShow("nosys")}
+            className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl bg-gradient-to-br from-[#454a53] to-[#100303] p-5'>
 
             <div className='relative z-10 flex items-start gap-4'>
 
-              <div className='w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center'>
-                <FaBan className='text-4xl text-red-400' />
+              <div className='w-10 h-10 flex items-center justify-center'>
+                <FaBan className='text-4xl text-[#6B7280]' />
               </div>
 
               <div>
 
-                <h1 className='text-red-300 text-sm font-medium'>
+                <h1 className='text-[#6B7280] text-sm font-medium'>
                   Inactive / No eLGU
                 </h1>
 
-                <h2 className='text-5xl font-bold text-red-400 leading-none mt-1'>
-                  {stats.nosystem}
+                <h2 className='text-5xl font-bold text-[#6B7280] leading-none mt-1'>
+                  {stats.nosys}
+                </h2>
+
+              </div>
+
+            </div>
+
+          </button>
+
+          {/*TECHINCAL Total number of technical activities status */}
+          <button 
+            onClick={() => setStatShow("technical")}
+            className='relative hover:scale-105 transition-all duration-300 overflow-hidden rounded-2xl bg-gradient-to-br from-[#454a53] to-[#100303] p-5'>
+
+            <div className='relative z-10 flex items-start gap-4'>
+
+              {/* <div className='w-10 h-10 flex items-center justify-center'>
+                <FaBan className='text-4xl text-[#6B7280]' />
+              </div> */}
+
+              <div>
+
+                <h1 className='text-violet-500 text-[10px] font-medium'>
+                  technical Activities Status
+                </h1>
+
+                <h2 className='text-5xl font-bold text-violet-500 leading-none mt-1'>
+                  {stats.technical}
                 </h2>
 
               </div>
@@ -694,10 +718,10 @@ console.log(response.data);
         {/* modal for stat end */}
 
         {/* DASHBOARD GRID */}
-        <div className='grid grid-cols-1 xl:grid-cols-4 gap-5'>
+        <div className='grid grid-cols-1 xl:grid-cols-6 gap-5'>
 
           {/* MAP */}
-          <div className='border border-[#1d2942] bg-[#091121] min-h-[400px] xl:col-span-2 p-5 rounded-2xl overflow-hidden'>
+          <div className='border border-[#1d2942] bg-[#091121] min-h-[200px] xl:col-span-2 p-5 rounded-2xl overflow-hidden'>
 
             <div className='flex items-center justify-between mb-5'>
 
@@ -707,11 +731,11 @@ console.log(response.data);
 
             </div>
 
-            <div className="w-full h-[700px] rounded-xl overflow-hidden border border-[#1d2942]">
+            <div className="w-full h-[250px] rounded-xl outline-none overflow-hidden border border-[#1d2942]">
 
               <MapContainer
                 center={[13.3, 123.5]}
-                zoom={9}
+                zoom={5.5}
                 scrollWheelZoom={true}
                 style={{ height: "100%", width: "100%" }}
               >
@@ -764,15 +788,15 @@ console.log(response.data);
           {/* CARDS */}
           <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-5'>
 
-            <DashboardCard />
+            {/* <DashboardCard /> */}
 
-            <EgovPromotional />
+            {/* <EgovPromotional /> */}
 
           </div>
 
           <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-5'>
 
-            <EGovPH />
+            {/* <EGovPH /> */}
 
           </div>
 

@@ -80,6 +80,9 @@ const Navbar = () => {
                 <Link to="/calendar" className='hover:text-white transition cursor-pointer'>
                   Calendar
                 </Link>
+                <Link to="/DailyTimeRecord" className='hover:text-white transition cursor-pointer'>
+                  Daily Time Record
+                </Link>
                 <Link to="/" className='hover:text-white transition cursor-pointer'>
                   Region
                 </Link>
@@ -155,9 +158,9 @@ const Navbar = () => {
 
             {openSettings && (
               <ul className='flex flex-col pl-6 pt-3 space-y-3 text-gray-300'>
-                <Link to="/settings/user" className='hover:text-white transition cursor-pointer'>
+                {/* <Link to="/settings/user" className='hover:text-white transition cursor-pointer'>
                   USERS
-                </Link>
+                </Link> */}
                 <Link to="/settings/elgu" className='hover:text-white transition cursor-pointer'>
                   eLGU
                 </Link>
@@ -176,11 +179,11 @@ const Navbar = () => {
                 <Link to="/settings/egov" className='hover:text-white transition cursor-pointer'>
                   eGOVPH
                 </Link>
+                <Link onClick={handleLogout} className='hover:text-white transition cursor-pointer'>
+                  Log out
+                </Link>
               </ul>
             )}
-          <Link onClick={handleLogout} className='hover:text-white transition cursor-pointer'>
-            Log out
-          </Link>
         </ul>
       </div>
 
