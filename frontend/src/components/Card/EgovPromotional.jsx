@@ -45,7 +45,7 @@ const OperationalActivities = () => {
   }, []);
 
   return (
-    <div className="w-72 p-5 rounded-2xl bg-[#0f1024]/80 backdrop-blur-md shadow-xl border border-white/10 text-white">
+    <div className="w-80 p-5 rounded-2xl bg-[#0f1024]/80 backdrop-blur-md shadow-xl border border-white/10 text-white">
       <h2 className="text-lg font-semibold text-purple-300 mb-4">
         Operational Activities
       </h2>

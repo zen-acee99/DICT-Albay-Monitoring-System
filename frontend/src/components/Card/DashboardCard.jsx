@@ -123,7 +123,7 @@ const DownloadsCard = () => {
         </div>
 
         {/* PROVINCE BREAKDOWN */}
-        <div className="mt-3 space-y-1">
+        {/* <div className="mt-3 space-y-1">
 
           {chartData.length === 0 ? (
             <p className="text-xs text-gray-400">Loading data...</p>
@@ -142,7 +142,7 @@ const DownloadsCard = () => {
             ))
           )}
 
-        </div>
+        </div> */}
 
       </div>
     </div>

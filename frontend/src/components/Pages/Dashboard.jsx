@@ -37,6 +37,8 @@ import {
 import DashboardCard from '../Card/DashboardCard';
 import EGovPH from '../Card/EGovPH';
 import EgovPromotional from '../Card/EgovPromotional';
+import RadarChart from '../Chart/RadarChart';
+import StackedChart from '../Chart/StackChart';
 
 const Dashboard = () => {
 
@@ -70,6 +72,7 @@ const Dashboard = () => {
         const response = await axios.get(`${VITE_API_URL}/operational`);
 
         const data = response.data;
+        console.log(data)
 
         const normalized = data.map(item => ({
           ...item,
@@ -718,10 +721,10 @@ console.log(response.data);
         {/* modal for stat end */}
 
         {/* DASHBOARD GRID */}
-        <div className='grid grid-cols-1 xl:grid-cols-6 gap-5'>
+        <div className='grid grid-cols-1 xl:grid-cols-3 gap-5'>
 
           {/* MAP */}
-          <div className='border border-[#1d2942] bg-[#091121] min-h-[200px] xl:col-span-2 p-5 rounded-2xl overflow-hidden'>
+          <div className='border border-[#1d2942] bg-[#091121] w-[400px]  min-h-[200px] p-5 rounded-2xl overflow-hidden'>
 
             <div className='flex items-center justify-between mb-5'>
 
@@ -785,12 +788,21 @@ console.log(response.data);
 
           </div>
 
+          <RadarChart/>
+
+          <StackedChart/>
+
+          <DashboardCard />
+
+          <EgovPromotional />
+
           {/* CARDS */}
           <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-5'>
 
             {/* <DashboardCard /> */}
-
-            {/* <EgovPromotional /> */}
+            
+            
+            
 
           </div>
 
