@@ -24,15 +24,13 @@ const SettingsILCDB = () => {
       title: '',
       location: '',
       Coordinates: '',
-      targetSectors: '',
-      mode: ''
+      TargetSectors: ''
     });
 
     setInputTitle('');
     setInputLocation('');
     setInputCoordinates('');
     setInputTargetSectors('');
-    setInputMode('');
     setValue('');
     setError('');
 
@@ -49,24 +47,16 @@ const SettingsILCDB = () => {
 
     setFormData({
       id: ilcdb.id || null,
-      title: ilcdb.title || '',
-      location: ilcdb.location || '',
-      Coordinates: ilcdb.coordinates || '',
-      targetSectors: ilcdb.targetSectors || '',
-      mode: ilcdb.mode || ''
+      title: ilcdb.Title || '',
+      location: ilcdb.Location || '',
+      Coordinates: ilcdb.Coordinates || '',
+      TargetSectors: ilcdb.TargetSectors || ''
     });
 
-    setInputTitle(ilcdb.title || '');
-    setInputLocation(ilcdb.location || '');
-    setInputCoordinates(ilcdb.coordinates || '');
-    setInputTargetSectors(ilcdb.targetsetInputTargetSectors || '');
-    setInputMode(ilcdb.Mode || '');
-
-    if (Array.isArray(ilcdb.mode)) {
-      setValue(ilcdb.mode.join(', '));
-    } else {
-      setValue(ilcdb.mode || '');
-    }
+    setInputTitle(ilcdb.Title || '');
+    setInputLocation(ilcdb.Location || '');
+    setInputCoordinates(ilcdb.Coordinates || '');
+    setInputTargetSectors(ilcdb.TargetSectors || '');
 
     setIsModalOpen(true);
   };
@@ -117,8 +107,7 @@ const SettingsILCDB = () => {
       title: inputTitle,
       location: inputLocation,
       Coordinates: inputCoordinates,
-      targetSectors: inputTargetSectors,
-      mode: coordinatesArray
+      TargetSectors: inputTargetSectors
     };
 
     await axios.patch(
@@ -140,41 +129,79 @@ const SettingsILCDB = () => {
 };
 
 
+const createILCDB = async () => {
+    try {
+      // 1. Convert the coordinates string into an array of numbers
+      const coordinatesArray = value
+        .split(",")
+        .map(coord => Number(coord.trim()));
+
+      // 2. Build your payload
+      const payload = {
+        Title: inputTitle,
+        Location: inputLocation,
+        Coordinates: inputCoordinates,
+        TargetSectors: inputTargetSectors
+      };
+
+      // 3. Send a POST request to create the new entry
+      await axios.post(
+        `${VITE_API_URL}/ilcdb`,
+        payload
+      );
+
+      // 4. Refresh the list and close the modal
+      await fetchILCDB();
+      setIsModalOpen(false);
+
+    } catch (err) {
+      console.error("ERROR CREATING ILCDB:", err);
+
+      if (err.response) {
+        console.error("STATUS:", err.response.status);
+        console.error("DATA:", err.response.data);
+      }
+    }
+  };
+
+
 //#region FETCH ILCDB
   const [selectedRegion, setSelectedRegion] = useState("ALL")
   const fetchILCDB = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get(`${VITE_API_URL}/ilcdb`);
-      const data = response.data;
+  try {
+    setLoading(true);
+    const response = await axios.get(`${VITE_API_URL}/ilcdb`);
+    const data = response.data;
+    console.log(response.data);
 
-      const normalized = data
-        .filter(item => {
-          if (selectedRegion === "ALL") return true;
+    const normalized = data
+      .filter(item => {
+        if (selectedRegion === "ALL") return true;
+        const parts = item.title?.split(",").map(s => s.trim().toLowerCase());
+        return parts?.[1] === selectedRegion.toLowerCase();
+      })
+      .map(item => ({
+        id: item._id,
+        Title: item.Title || item.Title,
+        Location: item.Location || item.Location,
+        Coordinates: item.Coordinates || item.Coordinates, // Added this!
+        TargetSectors: item.TargetSectors || item.TargetSectors
+      }));
 
-          const parts = item.title?.split(",").map(s => s.trim().toLowerCase());
-          return parts?.[1] === selectedRegion.toLowerCase();
-        })
-        .map(item => ({
-          id: item._id,
-          title: item.title,
-          location: item.location?.trim(),
-          targetSectors: item.targetSectors,
-          mode: item.mode,
-        }));
+    console.log("Filtered Data:", normalized);
+    setLiveILCDB(normalized);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
+};
 
-      console.log("Filtered Data:", normalized);
-      setLiveILCDB(normalized);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
     useEffect(() => {
       fetchILCDB()
     }, [selectedRegion])
+
 
   // Handle Excel File Import/Parsing
   const handleExcelImport = (e) => {
@@ -199,9 +226,8 @@ const SettingsILCDB = () => {
           setInputTitle(row.title || '');
           setInputLocation(row.location || '');
           setInputCoordinates(row.Coordinates || '');
-          setInputTargetSectors(row.targetSectors || '');
+          setInputTargetSectors(row.TargetSectors || '');
           setInputMode(row.Mode || '');
-          setValue(row.mode || '');
         }
 
       } catch (error) {
@@ -222,11 +248,8 @@ const SettingsILCDB = () => {
 
     const exportData = liveILCDB.map(ilcdb => ({
       "ilcdb title": ilcdb.title || "",
-      targetSectors: ilcdb.targetSectors || "",
-      location: ilcdb.location || "",
-      mode: Array.isArray(ilcdb.mode)
-        ? ilcdb.mode.join(", ")
-        : (ilcdb.mode || "")
+      TargetSectors: ilcdb.TargetSectors || "",
+      location: ilcdb.location || ""
     }))
 
     const worksheet = XLSX.utils.json_to_sheet(exportData)
@@ -244,11 +267,10 @@ const SettingsILCDB = () => {
   // Form States
     const [formData, setFormData] = useState({
       id: null,
-      title: '',
-      location: '',
+      Title: '',
+      Location: '',
       Coordinates: '',
-      targetSectors: '',
-      mode: ''
+      TargetSectors: ''
     })
   // Search logic
   
@@ -258,27 +280,22 @@ const SettingsILCDB = () => {
     const query = searchQuery.toLowerCase();
 
     return (
-      item.title?.toLowerCase().includes(query) ||
-      item.location?.toLowerCase().includes(query) ||
+      item.Title?.toLowerCase().includes(query) ||
+      item.Location?.toLowerCase().includes(query) ||
       item.Coordinates?.join(", ").toLowerCase().includes(query) ||
-      item.targetSectors?.toLowerCase().includes(query) ||
-      item.mode?.toLowerCase().includes(query)
+      item.TargetSectors?.toLowerCase().includes(query) 
     );
   });
-
-console.log("SEARCH QUERY:", searchQuery)
-console.log("LIVE LGUS:", liveILCDB)
-console.log("FILTERED:", filteredILCDB)
 
   // Pagination Calculation Core Logic
   const totalPages = Math.ceil(filteredILCDB.length / ITEMS_PER_PAGE)
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
   const endIndex = startIndex + ITEMS_PER_PAGE
-  const paginatedLgus = filteredILCDB.slice(startIndex, endIndex)
+  const paginatedILCDB = filteredILCDB.slice(startIndex, endIndex)
 
   console.log("liveILCDB:", liveILCDB)
   console.log("filteredILCDB:", filteredILCDB)
-  console.log("Paginated:", paginatedLgus)
+  console.log("Paginated:", paginatedILCDB)
 
   
   const handlePageChange = (pageNumber) => {
@@ -323,22 +340,12 @@ const handleChange = (e) => {
   console.log(regex.test(input));
   };
 
-  // const filteredStatus = location.filter(item =>(
-  //   item.toLowerCase().includes(inputLocation.toLowerCase())
-  // ))
-  // const filteredVersion = targetSectors.filter(item =>(
-  //   item.toLowerCase().includes(inputCoordinates.toLowerCase())
-  // ))
-  // const filtered = municipalities.filter(item =>
-  //   item.toLowerCase().includes(inputTitle.toLowerCase())
-  // )
-
   const [ShowDropdown, setShowDropdown] = useState(true)
   const [ShowTitle, setShowTitle] = useState(true)
   const [ShowTargetSectors, setShowTargetSectors] = useState(true)
   const [inputData, setInputData] = useState("")
-  const targetSectors = ["LGUs", "Other", "All Sectors", "NGAs", "Student", "SUCS", "MSMEs", "Senior Citizens", "Teachers", "Out of School Youth", "HEIs", "School", "Parents"]
-  const filtered = targetSectors.filter(item =>
+  const TargetSectors = ["LGUs", "Other", "All Sectors", "NGAs", "Student", "SUCS", "MSMEs", "Senior Citizens", "Teachers", "Out of School Youth", "HEIs", "School", "Parents"]
+  const filtered = TargetSectors.filter(item =>
     item.toLowerCase().includes(inputData.toLowerCase())
   )
   return (
@@ -440,24 +447,20 @@ const handleChange = (e) => {
                     <thead>
                       <tr className='text-xs font-semibold text-slate-400 border-b border-[#1E293B] pb-3'>
                         <th className='pb-3'>title</th>
-                        <th className='pb-3'>targetSectors</th>
+                        <th className='pb-3'>TargetSectors</th>
                         <th className='pb-3'>location</th>
                         <th className='pb-3'>mode</th>
                         <th className='pb-3 w-24 text-right'>Actions</th>
                       </tr>
                     </thead>
                     <tbody className='divide-y divide-[#1E293B]/50 text-sm'>
-                      {paginatedLgus.map((ilcdb) => (
+                      {paginatedILCDB.map((ilcdb) => (
                         <tr key={ilcdb.id} className={`hover:bg-[#111A3E]/50 transition-colors group ${formData.id === ilcdb.id && isModalOpen ? 'bg-[#111A3E]/30' : ''}`}>
                           <td className='py-3.5 font-medium text-[#60A5FA] group-hover:text-blue-400'>
-                            {ilcdb.title} {ilcdb.role === 'Admin' && <span className='text-xs ml-1'>👑</span>}
+                            {ilcdb.Title}
                           </td>
-                          <td className='py-3.5 text-slate-300 font-mono text-xs'>{ilcdb.targetSectors}</td>
-                          <td className='py-3.5 text-slate-300 font-mono text-xs' style={{ color: getColor(ilcdb.location) }}>{ilcdb.location}</td>
-                          <td className='py-3.5 text-slate-300 font-mono text-xs'>{Array.isArray(ilcdb.mode)
-                            ? ilcdb.mode.join(', ')
-                            : ilcdb.mode}
-                          </td>
+                          <td className='py-3.5 text-slate-300 font-mono text-xs'>{ilcdb.TargetSectors}</td>
+                          <td className='py-3.5 text-slate-300 font-mono text-xs'>{ilcdb.Location}</td>
                           <td className='py-3.5 text-right'>
                             <div className='flex items-center justify-end gap-2'>
                               <button 
@@ -613,16 +616,16 @@ const handleChange = (e) => {
                       {error && <p className="text-red-400 text-xs mt-1">{error}</p>}
                     </div>
                     <div>
-                      <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>targetSectors</label>
+                      <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>TargetSectors</label>
                       <input 
-                        value={inputData}
+                        value={inputTargetSectors}
                         onChange={(e) => {
-                          setInputData(e.target.value)
+                          setInputTargetSectors(e.target.value)
                           setShowTargetSectors(true)
                         }}
                         className='w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8B5CF6] text-slate-200' 
                       />
-                      {ShowDropdown && inputData && filtered.length > 0 && (
+                      {ShowDropdown && inputTargetSectors && filtered.length > 0 && (
                         <div className="absolute z-50 w-80 mt-1 bg-[#0B112C] border border-[#1E293B] rounded-lg shadow-lg max-h-60 overflow-y-auto">
 
                             {filtered.map((item, index) => (
@@ -704,8 +707,8 @@ const handleChange = (e) => {
                 <button onClick={() => setIsModalOpen(false)} className='px-4 py-2 border border-[#1E293B] text-slate-300 hover:text-white rounded-lg text-sm font-medium transition-colors hover:bg-slate-800'>
                   Discard
                 </button>
-                <button onClick={updateILCDB} className='px-5 py-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-lg text-sm font-medium transition-colors'>
-                  {modalMode === 'edit' ? 'Save Changes' : 'Create ILCDB'}
+                <button onClick={modalMode === 'edit' ? updateILCDB : createILCDB} className='px-5 py-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-lg text-sm font-medium transition-colors'>
+                  {modalMode === 'edit' ? 'Save Changes' : 'Create '}
                 </button>
               </div>
             </div>

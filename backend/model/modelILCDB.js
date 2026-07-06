@@ -6,8 +6,7 @@ const IlcdbSchema = new mongoose.Schema({
     Coordinates: {
         type: [Number]
     },
-    TargetSectors: { type: String },
-    Mode: { type: String }
+    TargetSectors: { type: String }
 })
 
 const IlcdbModel = mongoose.model('ilcdb', IlcdbSchema)

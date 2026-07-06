@@ -173,9 +173,9 @@ const Navbar = () => {
                 <Link to="/settings/ilcdb" className='hover:text-white transition cursor-pointer'>
                   ILCDB
                 </Link>
-                <Link to="/settings/cybersecurity" className='hover:text-white transition cursor-pointer'>
+                {/* <Link to="/settings/cybersecurity" className='hover:text-white transition cursor-pointer'>
                   CYBERSECURITY
-                </Link>
+                </Link> */}
                 <Link to="/settings/egov" className='hover:text-white transition cursor-pointer'>
                   eGOVPH
                 </Link>

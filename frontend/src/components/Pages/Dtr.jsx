@@ -14,6 +14,9 @@ import Navbar from '../Layout/Navbar';
 import { PDFDocument, StandardFonts } from 'pdf-lib';
 import { saveAs } from 'file-saver';
 
+// import dtr_file from '../../assets/dtr_template.pdf';
+import { dtrTemplateBase64 } from '../../assets/dtrBase64.js';
+
 export default function Dtr() {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [rawData, setRawData] = useState('');
@@ -99,70 +102,161 @@ export default function Dtr() {
   };
 
   const handlePrint = async () => {
-    setIsGeneratingPDF(true);
+  setIsGeneratingPDF(true);
 
-    try {
-      // 1. Fetch the PDF directly from the public folder
-      const templateRes = await fetch('/dtr_template.pdf');
-      
-      if (!templateRes.ok) {
-        throw new Error(`Could not load template (Status: ${templateRes.status}). Please ensure dtr_template.pdf is placed inside the public/ folder.`);
-      }
-      
-      const bytes = await templateRes.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(bytes);
-      
-      const pages = pdfDoc.getPages();
-      if (!pages.length) {
-        throw new Error("The PDF document has no pages.");
-      }
+  try {
+    const pdfDoc = await PDFDocument.load(dtrTemplateBase64);
 
-      const page = pages[0];
-      const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const page = pdfDoc.getPages()[0];
 
-      // 2. Layout Configuration 
-      const table = {
-        firstRowY: 575,
-        rowHeight: 15,
-        amArrival: 78,
-        amDeparture: 104,
-        pmArrival: 132,
-        pmDeparture: 158,
-        underHours: 186,
-        underMins: 200,
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const bold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+    // ---------- TABLE CALIBRATION ----------
+    const table = {
+      // Row 1 starts here
+      firstRowY: 780,
+
+      // Distance between row centers
+      rowHeight: 11.56,
+
+      // Left copy
+      left: {
+        amArrival: 39,
+        amDeparture: 82,
+        pmArrival: 125,
+        pmDeparture: 165,
+        underHours: 165,
+        underMins: 0,
+      },
+
+      // Width of every column
+      colWidth: 26,
+
+      // Distance to the right copy
+      rightOffset: 312,
+    };
+
+    const FONT_SIZE = 6.5;
+
+    const drawCentered = (
+        text,
+        x,
+        y,
+        offsetX = 0,
+        width = table.colWidth,
+        size = 6.2
+      ) => {
+        if (!text) return;
+
+        text = String(text);
+
+        const tw = font.widthOfTextAtSize(text, size);
+
+        page.drawText(text, {
+          x: offsetX + x + (width - tw) / 2,
+          y,
+          size,
+          font,
+        });
       };
 
-      // 3. Write Data into PDF
-      records.forEach((row, index) => {
-        const y = table.firstRowY - index * table.rowHeight;
-
-        const amArrival = String(row.amArrival || "");
-        const amDeparture = String(row.amDeparture || "");
-        const pmArrival = String(row.pmArrival || "");
-        const pmDeparture = String(row.pmDeparture || "");
-        const underHours = String(row.underHours || "");
-        const underMins = String(row.underMins || "");
-
-        if (amArrival) page.drawText(amArrival, { x: table.amArrival, y, size: 8, font });
-        if (amDeparture) page.drawText(amDeparture, { x: table.amDeparture, y, size: 8, font });
-        if (pmArrival) page.drawText(pmArrival, { x: table.pmArrival, y, size: 8, font });
-        if (pmDeparture) page.drawText(pmDeparture, { x: table.pmDeparture, y, size: 8, font });
-        if (underHours) page.drawText(underHours, { x: table.underHours, y, size: 8, font });
-        if (underMins) page.drawText(underMins, { x: table.underMins, y, size: 8, font });
+    const drawHeaders = (offset) => {
+      // Top employee name
+      page.drawText(employeeName.toUpperCase(), {
+        x: 74 + offset,
+        y: 912,
+        size: 8.5,
+        font: bold,
       });
 
-      // 4. Save and Export
-      const pdfBytes = await pdfDoc.save();
-      const blob = new Blob([pdfBytes], { type: "application/pdf" });
-      saveAs(blob, `DTR_${employeeName}.pdf`);
-      
-    } catch (err) {
-      console.error("FULL ERROR:", err);
-      alert(err?.message || "Unknown error occurred while generating PDF");
-    } finally {
-      setIsGeneratingPDF(false);
-    }
-  };
+      // Month
+      page.drawText(monthYear.toUpperCase(), {
+        x: 96 + offset,
+        y: 875,
+        size: 7,
+        font: bold,
+      });
+
+      // Employee name at bottom
+      page.drawText(employeeName.toUpperCase(), {
+        x: 80 + offset,
+        y: 340,
+        size: 7.5,
+        font: bold,
+      });
+
+      // Supervisor
+      page.drawText(supervisorName.toUpperCase(), {
+        x: 80 + offset,
+        y: 270,
+        size: 8,
+        font: bold,
+      });
+
+      // Title
+      page.drawText(supervisorTitle, {
+        x: 48 + offset,
+        y: 263,
+        size: 8.5,
+        font,
+      });
+    };
+
+    drawHeaders(0);
+    drawHeaders(table.rightOffset);
+
+    records.forEach((row, index) => {
+      const y = table.firstRowY - index * table.rowHeight + 1;
+
+      const printSide = (offset) => {
+        if (row.isMerged) {
+          const start = table.left.amArrival;
+          const width = 104;
+
+          const tw = bold.widthOfTextAtSize(row.note, 6.5);
+
+          page.drawText(row.note, {
+            x: offset + start + (width - tw) / 2,
+            y,
+            size: 6.5,
+            font: bold,
+          });
+
+          return;
+        }
+
+        drawCentered(row.amArrival, table.left.amArrival, y, offset);
+
+        drawCentered(row.amDeparture, table.left.amDeparture, y, offset);
+
+        drawCentered(row.pmArrival, table.left.pmArrival, y, offset);
+
+        drawCentered(row.pmDeparture, table.left.pmDeparture, y, offset);
+
+        drawCentered(row.underHours, table.left.underHours, y, offset);
+
+        drawCentered(row.underMins, table.left.underMins, y, offset);
+      };
+
+      printSide(0);
+      printSide(table.rightOffset);
+    });
+
+    const bytes = await pdfDoc.save();
+
+    const blob = new Blob([bytes], {
+      type: "application/pdf",
+    });
+
+    saveAs(blob, `DTR_${employeeName}.pdf`);
+  } catch (err) {
+    console.error(err);
+    alert(err.message);
+  } finally {
+    setIsGeneratingPDF(false);
+  }
+};
 
   const autofillWeekends = () => {
     try {
