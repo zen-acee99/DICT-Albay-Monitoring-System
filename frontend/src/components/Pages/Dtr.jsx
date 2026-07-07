@@ -15,7 +15,7 @@ import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 
 // This must now be the base64 string of your .xlsx template
-import dtrTemplateBase64  from '../../assets/dtrBase64.txt';
+// import excelDTR  from '../../assets/dtr_template.xlsx';
 
 export default function Dtr() {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -101,100 +101,160 @@ export default function Dtr() {
     }
   };
 
-  // Helper utility to turn base64 string into an ArrayBuffer for exceljs
-  const base64ToArrayBuffer = (base64) => {
-    const binaryString = window.atob(base64);
-    const len = binaryString.length;
-    const bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
-    }
-    return bytes.buffer;
-  };
+  // // Helper utility to turn base64 string into an ArrayBuffer for exceljs
+  // const base64ToArrayBuffer = (base64) => {
+  //   const binaryString = window.atob(base64);
+  //   const len = binaryString.length;
+  //   const bytes = new Uint8Array(len);
+  //   for (let i = 0; i < len; i++) {
+  //     bytes[i] = binaryString.charCodeAt(i);
+  //   }
+  //   return bytes.buffer;
+  // };
 
   const handleExportExcel = async () => {
     setIsGeneratingExcel(true);
 
     try {
-      const workbook = new ExcelJS.Workbook();
-      const buffer = base64ToArrayBuffer(dtrTemplateBase64);
-      await workbook.xlsx.load(buffer);
+        const workbook = new ExcelJS.Workbook();
 
-      // Grab the first worksheet from your template
-      const worksheet = workbook.worksheets[0];
+        // Load Excel template
+        const response = await fetch("/dtr_template.xlsx");
+        const buffer = await response.arrayBuffer();
 
-      // ---------- EXCEL CELL CONFIGURATION ----------
-      // Since your original PDF printed side-by-side duplicate copies, 
-      // these mappings target columns for the left and right sides.
-      // CHANGE THESE CELL STRINGS TO MATCH YOUR EXCEL DESIGN.
-      const CELL_MAPPING = {
-        left: {
-          employeeTop: 'B2',
-          monthYear: 'B4',
-          employeeBottom: 'B40',
-          supervisorName: 'B45',
-          supervisorTitle: 'B46',
-          startRow: 8, // Row index where Day 1 row begins
-          cols: { amArrival: 'B', amDeparture: 'C', pmArrival: 'D', pmDeparture: 'E', underHours: 'F', underMins: 'G', note: 'B' }
-        },
-        right: {
-          employeeTop: 'I2',
-          monthYear: 'I4',
-          employeeBottom: 'I40',
-          supervisorName: 'I45',
-          supervisorTitle: 'I46',
-          startRow: 8, // Row index where Day 1 row begins
-          cols: { amArrival: 'I', amDeparture: 'J', pmArrival: 'K', pmDeparture: 'L', underHours: 'M', underMins: 'N', note: 'I' }
-        }
-      };
+        await workbook.xlsx.load(buffer);
 
-      const populateSide = (config) => {
-        // Headers
-        worksheet.getCell(config.employeeTop).value = employeeName.toUpperCase();
-        worksheet.getCell(config.monthYear).value = monthYear.toUpperCase();
-        worksheet.getCell(config.employeeBottom).value = employeeName.toUpperCase();
-        worksheet.getCell(config.supervisorName).value = supervisorName.toUpperCase();
-        worksheet.getCell(config.supervisorTitle).value = supervisorTitle;
+        // Check worksheet
+        console.log("Sheets:", workbook.worksheets.map(ws => ws.name));
 
-        // Dynamic Records Rows
-        records.forEach((row, index) => {
-          const currentRowNum = config.startRow + index;
+        const worksheet = workbook.worksheets[0];
 
-          if (row.isMerged) {
-            const noteCell = worksheet.getCell(`${config.cols.note}${currentRowNum}`);
-            noteCell.value = row.note;
-            // Optional styling for weekend rows via ExcelJS if required:
-            noteCell.font = { bold: true, size: 9 };
-          } else {
-            worksheet.getCell(`${config.cols.amArrival}${currentRowNum}`).value = row.amArrival || '';
-            worksheet.getCell(`${config.cols.amDeparture}${currentRowNum}`).value = row.amDeparture || '';
-            worksheet.getCell(`${config.cols.pmArrival}${currentRowNum}`).value = row.pmArrival || '';
-            worksheet.getCell(`${config.cols.pmDeparture}${currentRowNum}`).value = row.pmDeparture || '';
-            worksheet.getCell(`${config.cols.underHours}${currentRowNum}`).value = row.underHours || '';
-            worksheet.getCell(`${config.cols.underMins}${currentRowNum}`).value = row.underMins || '';
-          }
-        });
-      };
+        const CELL_MAPPING = {
+            left: {
+                employeeTop: 'B6',
+                monthYear: 'B9',
+                employeeBottom: 'B53',      
+                supervisorName: 'B59',      
+                supervisorTitle: 'B60',
+                startRow: 16,
 
-      // Fill Left and Right blocks
-      populateSide(CELL_MAPPING.left);
-      populateSide(CELL_MAPPING.right);
+                cols: {
+                    // Shifted right to match the template columns perfectly
+                    amArrival: 'B',      // Was C
+                    amDeparture: 'C',    // Was D
+                    pmArrival: 'D',      // Was E
+                    pmDeparture: 'E',    // Was F
+                    underHours: 'F',     // Was G
+                    underMins: 'G',      // Was H
+                    note: 'C'            // Changed from B to C so it aligns inside the table grid
+                }
+            },
 
-      // Write Workbook to a buffer stream
-      const outputBuffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([outputBuffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
+            right: {
+                employeeTop: 'I6',
+                monthYear: 'I9',
+                employeeBottom: 'I53',      
+                supervisorName: 'I59',      
+                supervisorTitle: 'I60',
+                startRow: 16,
 
-      // Saving as .xlsx with your existing naming scheme
-      saveAs(blob, `DTR_${employeeName}.xlsx`);
-    } catch (err) {
-      console.error(err);
-      alert(err.message);
+                cols: {
+                    amArrival: 'J',
+                    amDeparture: 'K',
+                    pmArrival: 'L',
+                    pmDeparture: 'M',
+                    underHours: 'N',
+                    underMins: 'O',
+                    note: 'J'            // Changed from I to J so it doesn't overwrite the Day numbers!
+                }
+            }
+        };
+
+
+        const populateSide = (config) => {
+            // Header data
+            worksheet.getCell(config.employeeTop).value =
+                employeeName?.toUpperCase() || "";
+
+            worksheet.getCell(config.monthYear).value =
+                monthYear?.toUpperCase() || "";
+
+            worksheet.getCell(config.employeeBottom).value =
+                employeeName?.toUpperCase() || "";
+
+            worksheet.getCell(config.supervisorName).value =
+                supervisorName?.toUpperCase() || "";
+
+            worksheet.getCell(config.supervisorTitle).value =
+                supervisorTitle || "";
+
+            console.log("Records:", records);
+
+            // Table rows
+            records.forEach((row, index) => {
+                const currentRow = config.startRow + index;
+
+                if (row.isMerged) {
+                    const noteCell = worksheet.getCell(`${config.cols.note}${currentRow}`);
+                    noteCell.value = row.note || "";
+                    
+                    // FIX: Centers "Saturday/Sunday" so it doesn't spill out of the column borders
+                    noteCell.alignment = { horizontal: 'center', vertical: 'middle' };
+                } else {
+                    worksheet.getCell(
+                        `${config.cols.amArrival}${currentRow}`
+                    ).value = row.amArrival ?? "";
+
+                    worksheet.getCell(
+                        `${config.cols.amDeparture}${currentRow}`
+                    ).value = row.amDeparture ?? "";
+
+                    worksheet.getCell(
+                        `${config.cols.pmArrival}${currentRow}`
+                    ).value = row.pmArrival ?? "";
+
+                    worksheet.getCell(
+                        `${config.cols.pmDeparture}${currentRow}`
+                    ).value = row.pmDeparture ?? "";
+
+                    worksheet.getCell(
+                        `${config.cols.underHours}${currentRow}`
+                    ).value = row.underHours ?? "";
+
+                    worksheet.getCell(
+                        `${config.cols.underMins}${currentRow}`
+                    ).value = row.underMins ?? "";
+                }
+            });
+        };
+
+        // Fill both sides
+        populateSide(CELL_MAPPING.left);
+        populateSide(CELL_MAPPING.right);
+
+        // Generate Excel
+        const outputBuffer = await workbook.xlsx.writeBuffer();
+
+        const blob = new Blob(
+            [outputBuffer],
+            {
+                type:
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            }
+        );
+
+        saveAs(
+            blob,
+            `DTR_${employeeName}_${targetMonth}.xlsx`
+        );
+
+    } catch (error) {
+        console.error("Excel export error:", error);
+        alert(error.message);
     } finally {
-      setIsGeneratingExcel(false);
+        setIsGeneratingExcel(false);
     }
-  };
+};
 
   const autofillWeekends = () => {
     try {
