@@ -90,7 +90,7 @@ const SettingsEGOV = () => {
         }
       );
 
-      await fetchWIFI();
+      await fetchEGOV();
 
       if (formData.id === userId) {
         setIsModalOpen(false);
@@ -99,19 +99,6 @@ const SettingsEGOV = () => {
       console.error(err);
     }
   };
-
-  // const handleInputChange = (e) => {
-  //   const { name, value } = e.target
-  //   setFormData(prev => ({ ...prev, [name]: value }))
-  // }
-
-  // const handleToggle = (sectionId, field) => {
-  //   setPermissions(prev =>
-  //     prev.map(sec =>
-  //       sec.id === sectionId ? { ...sec, [field]: !sec[field] } : sec
-  //     )
-  //   )
-  // }
 
 //#region UPDATE
   const VITE_API_URL = import.meta.env.VITE_API_URL
@@ -138,7 +125,7 @@ const SettingsEGOV = () => {
       payload
     );
 
-    await fetchWIFI();
+    await fetchEGOV();
     setIsModalOpen(false);
 
   } catch (err) {
@@ -152,7 +139,7 @@ const SettingsEGOV = () => {
 };
 
   useEffect(() => {
-    fetchWIFI()
+    fetchEGOV()
   }, [])
 
 //#endregion
@@ -160,7 +147,7 @@ const SettingsEGOV = () => {
 
 
 //#region CREATE
-const createWIFI = async () => {
+const createEGOV = async () => {
   try {
     // 1. Prepare your payload exactly like updateWIFI
     const payload = {
@@ -179,7 +166,7 @@ const createWIFI = async () => {
     );
 
     // 3. Refresh data and close modal
-    await fetchWIFI();
+    await fetchEGOV();
     setIsModalOpen(false);
 
   } catch (err) {
@@ -195,7 +182,7 @@ const createWIFI = async () => {
 
 //#region FETCH DATA
   
-  const fetchWIFI = async () => {
+  const fetchEGOV = async () => {
     try{
       const response = await axios.get(`${VITE_API_URL}/egov`)
       const data = response.data
@@ -225,38 +212,39 @@ const createWIFI = async () => {
 
 //#region FILE IMPORT
   // Handle Excel File Import/Parsing
-  const handleExcelImport = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-
-    reader.onload = (evt) => {
-      try {
-        const bstr = evt.target.result;
-        const wb = XLSX.read(bstr, { type: 'binary' });
-        const wsname = wb.SheetNames[0];
-        const ws = wb.Sheets[wsname];
-        const data = XLSX.utils.sheet_to_json(ws);
-
-        console.log("Imported Excel Data Rows:", data);
-
-        if (data.length > 0) {
-          const row = data[0];
-
-          setInputData(row.name || '');
-          setInputStatus(row.status || '');
-          setInputVersion(row.version || '');
-          setValue(row.coordinates || '');
-        }
-
-      } catch (error) {
-        console.error("Error reading excel file:", error);
-      }
-    };
-
-    reader.readAsBinaryString(file);
-    e.target.value = '';
+  const handleExcelImport = async (e) => {
+      const file = e.target.files[0];
+  
+      if (!file) return;
+  
+      const reader = new FileReader();
+  
+      reader.onload = async (event) => {
+          const data = new Uint8Array(event.target.result);
+  
+          const workbook = XLSX.read(data, {
+              type: "array",
+          });
+  
+          const sheetName = workbook.SheetNames[0];
+  
+          const worksheet = workbook.Sheets[sheetName];
+  
+          // First row = header
+          const jsonData = XLSX.utils.sheet_to_json(worksheet);
+  
+          console.log(jsonData);
+  
+          try {
+              await axios.post(`${VITE_API_URL}/pnpki/import`, jsonData);
+              
+              await fetchEGOV();
+          } catch (err) {
+              console.error(err);
+          }
+      };
+  
+      reader.readAsArrayBuffer(file);
   };
 
   // // Handle Excel Export Functionality
@@ -691,7 +679,7 @@ const handleChange = (e) => {
                 <button onClick={() => setIsModalOpen(false)} className='px-4 py-2 border border-[#1E293B] text-slate-300 hover:text-white rounded-lg text-sm font-medium transition-colors hover:bg-slate-800'>
                   Discard
                 </button>
-                <button onClick={modalMode === 'edit' ? updateWIFI : createWIFI} className='px-5 py-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-lg text-sm font-medium transition-colors'>
+                <button onClick={modalMode === 'edit' ? updateWIFI : createEGOV} className='px-5 py-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-lg text-sm font-medium transition-colors'>
                   {modalMode === 'edit' ? 'Save Changes' : 'Create '}
                 </button>
               </div>

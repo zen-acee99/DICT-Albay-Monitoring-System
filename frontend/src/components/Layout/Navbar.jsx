@@ -176,9 +176,9 @@ const Navbar = () => {
                 {/* <Link to="/settings/cybersecurity" className='hover:text-white transition cursor-pointer'>
                   CYBERSECURITY
                 </Link> */}
-                <Link to="/settings/egov" className='hover:text-white transition cursor-pointer'>
+                {/* <Link to="/settings/egov" className='hover:text-white transition cursor-pointer'>
                   eGOVPH
-                </Link>
+                </Link> */}
                 <Link onClick={handleLogout} className='hover:text-white transition cursor-pointer'>
                   Log out
                 </Link>

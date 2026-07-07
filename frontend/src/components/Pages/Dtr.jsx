@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Printer, 
+  FileSpreadsheet, 
   Calendar, 
   Loader2, 
   Sparkles, 
@@ -11,17 +11,17 @@ import { DtrForm } from './DtrForm';
 import parseData from '../lib/parseDatas';
 import Navbar from '../Layout/Navbar';
 
-import { PDFDocument, StandardFonts } from 'pdf-lib';
+import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 
-// import dtr_file from '../../assets/dtr_template.pdf';
-import { dtrTemplateBase64 } from '../../assets/dtrBase64.js';
+// This must now be the base64 string of your .xlsx template
+import dtrTemplateBase64  from '../../assets/dtrBase64.txt';
 
 export default function Dtr() {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [rawData, setRawData] = useState('');
   const [isParsing, setIsParsing] = useState(false);
-  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [isGeneratingExcel, setIsGeneratingExcel] = useState(false);
   
   const [targetMonth, setTargetMonth] = useState(new Date().getMonth());
   const [targetYear, setTargetYear] = useState(new Date().getFullYear());
@@ -101,162 +101,100 @@ export default function Dtr() {
     }
   };
 
-  const handlePrint = async () => {
-  setIsGeneratingPDF(true);
+  // Helper utility to turn base64 string into an ArrayBuffer for exceljs
+  const base64ToArrayBuffer = (base64) => {
+    const binaryString = window.atob(base64);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes.buffer;
+  };
 
-  try {
-    const pdfDoc = await PDFDocument.load(dtrTemplateBase64);
+  const handleExportExcel = async () => {
+    setIsGeneratingExcel(true);
 
-    const page = pdfDoc.getPages()[0];
+    try {
+      const workbook = new ExcelJS.Workbook();
+      const buffer = base64ToArrayBuffer(dtrTemplateBase64);
+      await workbook.xlsx.load(buffer);
 
-    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-    const bold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+      // Grab the first worksheet from your template
+      const worksheet = workbook.worksheets[0];
 
-    // ---------- TABLE CALIBRATION ----------
-    const table = {
-      // Row 1 starts here
-      firstRowY: 780,
+      // ---------- EXCEL CELL CONFIGURATION ----------
+      // Since your original PDF printed side-by-side duplicate copies, 
+      // these mappings target columns for the left and right sides.
+      // CHANGE THESE CELL STRINGS TO MATCH YOUR EXCEL DESIGN.
+      const CELL_MAPPING = {
+        left: {
+          employeeTop: 'B2',
+          monthYear: 'B4',
+          employeeBottom: 'B40',
+          supervisorName: 'B45',
+          supervisorTitle: 'B46',
+          startRow: 8, // Row index where Day 1 row begins
+          cols: { amArrival: 'B', amDeparture: 'C', pmArrival: 'D', pmDeparture: 'E', underHours: 'F', underMins: 'G', note: 'B' }
+        },
+        right: {
+          employeeTop: 'I2',
+          monthYear: 'I4',
+          employeeBottom: 'I40',
+          supervisorName: 'I45',
+          supervisorTitle: 'I46',
+          startRow: 8, // Row index where Day 1 row begins
+          cols: { amArrival: 'I', amDeparture: 'J', pmArrival: 'K', pmDeparture: 'L', underHours: 'M', underMins: 'N', note: 'I' }
+        }
+      };
 
-      // Distance between row centers
-      rowHeight: 11.56,
+      const populateSide = (config) => {
+        // Headers
+        worksheet.getCell(config.employeeTop).value = employeeName.toUpperCase();
+        worksheet.getCell(config.monthYear).value = monthYear.toUpperCase();
+        worksheet.getCell(config.employeeBottom).value = employeeName.toUpperCase();
+        worksheet.getCell(config.supervisorName).value = supervisorName.toUpperCase();
+        worksheet.getCell(config.supervisorTitle).value = supervisorTitle;
 
-      // Left copy
-      left: {
-        amArrival: 39,
-        amDeparture: 82,
-        pmArrival: 125,
-        pmDeparture: 165,
-        underHours: 165,
-        underMins: 0,
-      },
+        // Dynamic Records Rows
+        records.forEach((row, index) => {
+          const currentRowNum = config.startRow + index;
 
-      // Width of every column
-      colWidth: 26,
-
-      // Distance to the right copy
-      rightOffset: 312,
-    };
-
-    const FONT_SIZE = 6.5;
-
-    const drawCentered = (
-        text,
-        x,
-        y,
-        offsetX = 0,
-        width = table.colWidth,
-        size = 6.2
-      ) => {
-        if (!text) return;
-
-        text = String(text);
-
-        const tw = font.widthOfTextAtSize(text, size);
-
-        page.drawText(text, {
-          x: offsetX + x + (width - tw) / 2,
-          y,
-          size,
-          font,
+          if (row.isMerged) {
+            const noteCell = worksheet.getCell(`${config.cols.note}${currentRowNum}`);
+            noteCell.value = row.note;
+            // Optional styling for weekend rows via ExcelJS if required:
+            noteCell.font = { bold: true, size: 9 };
+          } else {
+            worksheet.getCell(`${config.cols.amArrival}${currentRowNum}`).value = row.amArrival || '';
+            worksheet.getCell(`${config.cols.amDeparture}${currentRowNum}`).value = row.amDeparture || '';
+            worksheet.getCell(`${config.cols.pmArrival}${currentRowNum}`).value = row.pmArrival || '';
+            worksheet.getCell(`${config.cols.pmDeparture}${currentRowNum}`).value = row.pmDeparture || '';
+            worksheet.getCell(`${config.cols.underHours}${currentRowNum}`).value = row.underHours || '';
+            worksheet.getCell(`${config.cols.underMins}${currentRowNum}`).value = row.underMins || '';
+          }
         });
       };
 
-    const drawHeaders = (offset) => {
-      // Top employee name
-      page.drawText(employeeName.toUpperCase(), {
-        x: 74 + offset,
-        y: 912,
-        size: 8.5,
-        font: bold,
+      // Fill Left and Right blocks
+      populateSide(CELL_MAPPING.left);
+      populateSide(CELL_MAPPING.right);
+
+      // Write Workbook to a buffer stream
+      const outputBuffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([outputBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
 
-      // Month
-      page.drawText(monthYear.toUpperCase(), {
-        x: 96 + offset,
-        y: 875,
-        size: 7,
-        font: bold,
-      });
-
-      // Employee name at bottom
-      page.drawText(employeeName.toUpperCase(), {
-        x: 80 + offset,
-        y: 340,
-        size: 7.5,
-        font: bold,
-      });
-
-      // Supervisor
-      page.drawText(supervisorName.toUpperCase(), {
-        x: 80 + offset,
-        y: 270,
-        size: 8,
-        font: bold,
-      });
-
-      // Title
-      page.drawText(supervisorTitle, {
-        x: 48 + offset,
-        y: 263,
-        size: 8.5,
-        font,
-      });
-    };
-
-    drawHeaders(0);
-    drawHeaders(table.rightOffset);
-
-    records.forEach((row, index) => {
-      const y = table.firstRowY - index * table.rowHeight + 1;
-
-      const printSide = (offset) => {
-        if (row.isMerged) {
-          const start = table.left.amArrival;
-          const width = 104;
-
-          const tw = bold.widthOfTextAtSize(row.note, 6.5);
-
-          page.drawText(row.note, {
-            x: offset + start + (width - tw) / 2,
-            y,
-            size: 6.5,
-            font: bold,
-          });
-
-          return;
-        }
-
-        drawCentered(row.amArrival, table.left.amArrival, y, offset);
-
-        drawCentered(row.amDeparture, table.left.amDeparture, y, offset);
-
-        drawCentered(row.pmArrival, table.left.pmArrival, y, offset);
-
-        drawCentered(row.pmDeparture, table.left.pmDeparture, y, offset);
-
-        drawCentered(row.underHours, table.left.underHours, y, offset);
-
-        drawCentered(row.underMins, table.left.underMins, y, offset);
-      };
-
-      printSide(0);
-      printSide(table.rightOffset);
-    });
-
-    const bytes = await pdfDoc.save();
-
-    const blob = new Blob([bytes], {
-      type: "application/pdf",
-    });
-
-    saveAs(blob, `DTR_${employeeName}.pdf`);
-  } catch (err) {
-    console.error(err);
-    alert(err.message);
-  } finally {
-    setIsGeneratingPDF(false);
-  }
-};
+      // Saving as .xlsx with your existing naming scheme
+      saveAs(blob, `DTR_${employeeName}.xlsx`);
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+    } finally {
+      setIsGeneratingExcel(false);
+    }
+  };
 
   const autofillWeekends = () => {
     try {
@@ -467,18 +405,18 @@ export default function Dtr() {
               
               <div className="pt-2 border-t border-zinc-800">
                 <button 
-                  onClick={handlePrint}
-                  disabled={isGeneratingPDF}
+                  onClick={handleExportExcel}
+                  disabled={isGeneratingExcel}
                   className="w-full flex items-center justify-center space-x-2 bg-emerald-600 hover:bg-emerald-500 text-zinc-950 font-semibold px-4 py-2.5 rounded-lg text-xs shadow-md transition-all disabled:opacity-50"
                 >
-                  {isGeneratingPDF ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Printer className="w-3.5 h-3.5" />}
-                  <span>{isGeneratingPDF ? 'Compiling File Layers...' : 'Export Document ( PDF )'}</span>
+                  {isGeneratingExcel ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileSpreadsheet className="w-3.5 h-3.5" />}
+                  <span>{isGeneratingExcel ? 'Compiling Excel Sheets...' : 'Export Document ( XLSX )'}</span>
                 </button>
               </div>
 
             </div>
 
-            {/* DTR Print View */}
+            {/* DTR Web Preview */}
             <div className="flex-1 w-full flex justify-center xl:justify-start">
               <div 
                 id="print-area" 

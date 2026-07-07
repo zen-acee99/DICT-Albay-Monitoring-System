@@ -4,6 +4,19 @@ const router = express.Router()
 const IlcdbModel = require('../model/modelILCDB')
 
 
+router.post("/import", async (req, res) => {
+    try {
+        const result = await IlcdbModel.insertMany(req.body);
+
+        res.json({
+            success: true,
+            inserted: result.length
+        });
+    } catch (err) {
+        res.status(500).json(err);
+    }
+});
+
 // GET all users
 router.get('/', (req, res) => {
     const filter = {}

@@ -281,38 +281,39 @@ const createWIFI = async () => {
 
 //#region FILE IMPORT
   // Handle Excel File Import/Parsing
-  const handleExcelImport = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-
-    reader.onload = (evt) => {
-      try {
-        const bstr = evt.target.result;
-        const wb = XLSX.read(bstr, { type: 'binary' });
-        const wsname = wb.SheetNames[0];
-        const ws = wb.Sheets[wsname];
-        const data = XLSX.utils.sheet_to_json(ws);
-
-        console.log("Imported Excel Data Rows:", data);
-
-        if (data.length > 0) {
-          const row = data[0];
-
-          setInputData(row.name || '');
-          setInputStatus(row.status || '');
-          setInputVersion(row.version || '');
-          setValue(row.coordinates || '');
-        }
-
-      } catch (error) {
-        console.error("Error reading excel file:", error);
-      }
-    };
-
-    reader.readAsBinaryString(file);
-    e.target.value = '';
+  const handleExcelImport = async (e) => {
+      const file = e.target.files[0];
+  
+      if (!file) return;
+  
+      const reader = new FileReader();
+  
+      reader.onload = async (event) => {
+          const data = new Uint8Array(event.target.result);
+  
+          const workbook = XLSX.read(data, {
+              type: "array",
+          });
+  
+          const sheetName = workbook.SheetNames[0];
+  
+          const worksheet = workbook.Sheets[sheetName];
+  
+          // First row = header
+          const jsonData = XLSX.utils.sheet_to_json(worksheet);
+  
+          console.log(jsonData);
+  
+          try {
+              await axios.post(`${VITE_API_URL}/wifiData/import`, jsonData);
+              
+              await fetchWIFI();
+          } catch (err) {
+              console.error(err);
+          }
+      };
+  
+      reader.readAsArrayBuffer(file);
   };
 
   // // Handle Excel Export Functionality
