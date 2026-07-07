@@ -27,7 +27,7 @@ const pnpkiRoutes = require('./routes/pnpkiRoutes')
 const ilcdbRoutes = require('./routes/ilcdbRoutes')
 const egovRoutes = require('./routes/egovRoutes')
 const scheduleCalendar = require('./routes/schedules')
-app.use('/egovph', egovphRoutes);
+app.use('/albayCalendar', scheduleCalendar)
 app.use('/operational', operationalRoutes);
 app.use('/auditTrail', auditTrailRoutes);
 app.use('/users', userRoutes);
@@ -36,9 +36,9 @@ app.use('/egovpro', EgovProRoutes)
 app.use('/additionaldescription', additionalInfoRoutes)
 app.use('/wifiData', wifiRoutes)
 app.use('/pnpki', pnpkiRoutes)
+app.use('/egovph', egovphRoutes);
 app.use('/ilcdb', ilcdbRoutes)
 app.use('/egov', egovRoutes)
-app.use('/albayCalendar', scheduleCalendar)
 
 
 app.get('/', (req, res) => {
