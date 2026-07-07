@@ -89,7 +89,7 @@ const Navbar = () => {
                 <Link to="/albay" className='hover:text-white transition cursor-pointer'>
                   Albay
                 </Link>
-                <Link to="/sorsogon" className='hover:text-white transition cursor-pointer'>
+                {/* <Link to="/sorsogon" className='hover:text-white transition cursor-pointer'>
                   Sorsogon
                 </Link>
                 <Link to="/camnorte" className='hover:text-white transition cursor-pointer'>
@@ -103,7 +103,7 @@ const Navbar = () => {
                 </Link>
                 <Link to="/catanduanes" className='hover:text-white transition cursor-pointer'>
                   Catanduanes
-                </Link>
+                </Link> */}
               </ul>
             )}
           </li>
