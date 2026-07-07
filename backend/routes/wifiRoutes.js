@@ -4,6 +4,19 @@ const router = express.Router()
 const WifiModel = require('../model/wifi')
 
 
+router.post("/import", async (req, res) => {
+    try {
+        const result = await WifiModel.insertMany(req.body);
+
+        res.json({
+            success: true,
+            inserted: result.length
+        });
+    } catch (err) {
+        res.status(500).json(err);
+    }
+});
+
 // GET all wifis
 router.get('/', (req, res) => {
     WifiModel.find({})

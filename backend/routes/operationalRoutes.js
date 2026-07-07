@@ -4,6 +4,19 @@ const router = express.Router()
 const OperationalModel = require('../model/operational')
 
 
+router.post("/import", async (req, res) => {
+    try {
+        const result = await OperationalModel.insertMany(req.body);
+
+        res.json({
+            success: true,
+            inserted: result.length
+        });
+    } catch (err) {
+        res.status(500).json(err);
+    }
+});
+
 // GET all users
 router.get('/', (req, res) => {
     const filter = {}

@@ -3,6 +3,18 @@ const router = express.Router()
 
 const PnpkiModel = require('../model/modalPNPKI')
 
+router.post("/import", async (req, res) => {
+    try {
+        const result = await PnpkiModel.insertMany(req.body);
+
+        res.json({
+            success: true,
+            inserted: result.length
+        });
+    } catch (err) {
+        res.status(500).json(err);
+    }
+});
 
 // GET all pnpki
 router.get('/', (req, res) => {
