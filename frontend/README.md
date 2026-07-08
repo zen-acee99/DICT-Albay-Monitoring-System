@@ -35,7 +35,7 @@ If you are developing a production application, we recommend using TypeScript wi
 # for backend
 # npm install @supabase/supabase-js express cors dotenv nodemon pg csv-parser
 # npm i express mongoose cors dotenv nodemon axios
-# 
+# npm install nanoid
 #
 #
 # Maps

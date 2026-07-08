@@ -152,9 +152,12 @@ const pnpkiRoutes = require('./routes/pnpkiRoutes');
 const ilcdbRoutes = require('./routes/ilcdbRoutes');
 const egovRoutes = require('./routes/egovRoutes');
 const scheduleCalendar = require('./routes/schedules');
+const urlshort = require('./routes/urlRoutes');
+
 
 
 app.use('/albayCalendar', scheduleCalendar);
+app.use('/albay-urlShortener', urlshort);
 app.use('/operational', operationalRoutes);
 app.use('/auditTrail', auditTrailRoutes);
 app.use('/users', userRoutes);

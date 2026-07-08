@@ -277,6 +277,8 @@ import SettingsCybersecurity from "./components/Settings/SettingsCybersecurity"
 import Calendar from "./components/Pages/albayCalendar"
 import Login from "./components/Pages/Login"
 import Dtr from "./components/Pages/Dtr"
+import UrlShortener from "./components/Settings/SettingsURL"
+import UrlRedirectHandler from "./components/Settings/UrlRedirectHandler"
 
 function App() {
   return (
@@ -287,7 +289,7 @@ function App() {
 
           {/* <Route path="/administrator" element={<AdministratorModule />} /> */}
           {/* <Route path="/settings" element={<Settings />} /> */}
-
+          <Route path="/:code" element={<UrlRedirectHandler />} />
           <Route path="/albay" element={<Albay />} />
           <Route path="/DailyTimeRecord" element={<Dtr />} />
           <Route path="/catanduanes" element={<Catanduanes />} />
@@ -302,6 +304,7 @@ function App() {
           <Route path="/login" element={<Login />} />
 
           {/* settings */}
+          <Route path="/albay-urlShortener" element={<UrlShortener />} />
           <Route path="/settings/egov" element={<SettingsEGOV />} />
           <Route path="/settings/user" element={<SettingsUser />} />
           <Route path="/settings/elgu" element={<SettingseLGU />} />

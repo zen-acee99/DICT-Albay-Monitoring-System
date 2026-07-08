@@ -12,6 +12,20 @@ import {
 import { LuSettings } from "react-icons/lu"
 import { TbBuildingCommunity } from "react-icons/tb"
 import { Link } from 'react-router-dom'
+import {
+  FaGlobeAsia,
+  FaMapMarkedAlt,
+  FaCalendarAlt,
+  FaClock,
+  FaCog,
+  FaBuilding,
+  FaWifi,
+  FaUsers,
+  FaDatabase,
+  FaCloud,
+  FaKey,
+  FaQrcode
+} from "react-icons/fa";
 
 import { signOut } from "firebase/auth";
 import { auth } from "../Pages/firebase"; // adjust path if needed
@@ -34,7 +48,7 @@ const Navbar = () => {
 
   return (
     <div className="w-full h-screen bg-[#050816] text-white px-4 py-5 border-r border-[#1b2440] flex flex-col">
-
+      
       {/* Logo */}
       <div className='flex items-center gap-3 mb-8'>
         <div className='w-10 h-10 rounded-full flex items-center justify-center shadow-lg shadow-cyan-500/20'>
@@ -51,17 +65,20 @@ const Navbar = () => {
       <div className='flex-1 overflow-y-auto'>
 
         <ul className='flex flex-col pl-6 pt-3 space-y-3 text-gray-300'>
-          <Link to="/" className='hover:text-white transition cursor-pointer'>
-            Region
+          <Link to="/" className='flex items-center gap-3 hover:text-white transition cursor-pointer'>
+            <FaGlobeAsia/>Region
           </Link>
-          <Link to="/albay" className='hover:text-white transition cursor-pointer'>
-            Albay
+          <Link to="/albay" className='flex items-center gap-3 hover:text-white transition cursor-pointer'>
+            <FaMapMarkedAlt/>Albay
           </Link>
-          <Link to="/calendar" className='hover:text-white transition cursor-pointer'>
-            Calendar
+          <Link to="/calendar" className='flex items-center gap-3 hover:text-white transition cursor-pointer'>
+            <FaCalendarAlt/>Calendar
           </Link>
-          <Link to="/DailyTimeRecord" className='hover:text-white transition cursor-pointer'>
-            Daily Time Record
+          <Link to="/DailyTimeRecord" className='flex items-center gap-3 hover:text-white transition cursor-pointer'>
+            <FaClock/>Daily Time Record
+          </Link>
+          <Link to="/albay-urlShortener" className='flex items-center gap-3 hover:text-white transition cursor-pointer'>
+            <FaQrcode/>URL Shortener
           </Link>
           <br/>
           <br/>
@@ -69,17 +86,17 @@ const Navbar = () => {
           <div className='flex flex-1'>
             <hr className="h-[0.5px] bg-gray-300 border-0" /><span className='text-gray-400 text-sm'>SETTINGS</span><hr className="h-px bg-gray-300 border-0" />
           </div>
-          <Link to="/settings/elgu" className='hover:text-white transition cursor-pointer'>
-            eLGU
+          <Link to="/settings/elgu" className='flex items-center gap-3 hover:text-white transition cursor-pointer'>
+            <FaCog/>eLGU
           </Link>
-          <Link to="/settings/wifi" className='hover:text-white transition cursor-pointer'>
-            WIFI
+          <Link to="/settings/wifi" className='flex items-center gap-3 hover:text-white transition cursor-pointer'>
+            <FaWifi/>WIFI
           </Link>
-          <Link to="/settings/pnpki" className='hover:text-white transition cursor-pointer'>
-            PNPKI
+          <Link to="/settings/pnpki" className='flex items-center gap-3 hover:text-white transition cursor-pointer'>
+            <FaKey/>PNPKI
           </Link>
-          <Link to="/settings/ilcdb" className='hover:text-white transition cursor-pointer'>
-            ILCDB
+          <Link to="/settings/ilcdb" className='flex items-center gap-3 hover:text-white transition cursor-pointer'>
+            <FaDatabase/>ILCDB
           </Link>
           {/* <Link to="/settings/cybersecurity" className='hover:text-white transition cursor-pointer'>
             CYBERSECURITY
