@@ -330,16 +330,43 @@ const handleChange = (e) => {
     return  
   }
 
-  const regex = /^\d+,\d+,\s?\d+,\d+$/;
+  const regex = /^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$/;
 
   if (!regex.test(input)) {
-      setError("Invalid format. Use: 123,12345, 12,1234");
+      setError("Invalid format. Use: 123.456, 123.456");
+      // i put id='SubmitButton' i want to disable the button if the error is not empty
+      const submitButton = document.getElementById('SubmitButton');
+      if (submitButton) {
+        submitButton.disabled = true;
+      }
     } else {
       setError("");
+      // Enable the button if there's no error
+      const submitButton = document.getElementById('SubmitButton');
+      if (submitButton) {
+        submitButton.disabled = false;
       }
-      console.log(input);
-  console.log(regex.test(input));
+    }
+    console.log(input);
+    console.log(regex.test(input));
   };
+
+  const [err, setErr] = useState("");
+  
+    const handleProvince = (e) => {
+      const input = e.target.value;
+      setInputLocation(input);
+  
+      if (!input.trim().toLowerCase().includes("albay")) {
+        setErr("Province must be Albay");
+        const submitButton = document.getElementById('SubmitButton');
+        if (submitButton) {
+          submitButton.disabled = true;
+        }
+      } else {
+        setErr("");
+      }
+    }
 
   const [ShowDropdown, setShowDropdown] = useState(true)
   const [ShowTitle, setShowTitle] = useState(true)
@@ -632,11 +659,12 @@ const handleChange = (e) => {
                     <input 
                         value={inputLocation}
                         onChange={(e) => {
-                            setInputLocation(e.target.value);
+                            handleProvince(e);
                             setShowTitle(true);
                         }}
                       className='w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8B5CF6] text-slate-200' 
                     />
+                    {err && <p className="text-red-400 text-xs mt-1">{err}</p>}
                   </div>
                 </div>
 
@@ -743,7 +771,7 @@ const handleChange = (e) => {
                 <button onClick={() => setIsModalOpen(false)} className='px-4 py-2 border border-[#1E293B] text-slate-300 hover:text-white rounded-lg text-sm font-medium transition-colors hover:bg-slate-800'>
                   Discard
                 </button>
-                <button onClick={modalMode === 'edit' ? updateILCDB : createILCDB} className='px-5 py-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-lg text-sm font-medium transition-colors'>
+                <button id='SubmitButton' onClick={modalMode === 'edit' ? updateILCDB : createILCDB} className='px-5 py-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-lg text-sm font-medium transition-colors'>
                   {modalMode === 'edit' ? 'Save Changes' : 'Create '}
                 </button>
               </div>

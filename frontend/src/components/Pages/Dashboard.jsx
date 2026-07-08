@@ -72,7 +72,14 @@ const Dashboard = () => {
         const response = await axios.get(`${VITE_API_URL}/operational`);
 
         const data = response.data;
-        console.log(data)
+        // console.log(data)
+        console.log("CONSOLE DATA LON LAT:",
+          data.filter(
+            item =>
+              item.lat == null ||
+              item.lng == null
+          )
+        );
 
         const normalized = data.map(item => ({
           ...item,

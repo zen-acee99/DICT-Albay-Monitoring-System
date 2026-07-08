@@ -437,6 +437,22 @@ console.log("FILTERED:", filteredWIFI)
 
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
+  const [err, setErr] = useState("");
+
+  const handleProvince = (e) => {
+    const input = e.target.value;
+    setInputProvince(input);
+
+    if (!input.trim().toLowerCase().includes("Albay")) {
+      setErr("Province must be Albay");
+      const submitButton = document.getElementById('SubmitButton');
+      if (submitButton) {
+        submitButton.disabled = true;
+      }
+    } else {
+      setErr("");
+    }
+  }
 
 const handleChange = (e) => {
   const input = e.target.value;
@@ -447,15 +463,24 @@ const handleChange = (e) => {
     return  
   }
 
-  const regex = /^\d+,\d+,\s?\d+,\d+$/;
+  const regex = /^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$/;
 
-  if (!regex.test(input)) {
-      setError("Invalid format. Use: 123,12345, 12,1234");
-    } else {
-      setError("");
+    if (!regex.test(input)) {
+      setError("Invalid format. Use: 123.456, 123.456");
+      // i put id='SubmitButton' i want to disable the button if the error is not empty
+      const submitButton = document.getElementById('SubmitButton');
+      if (submitButton) {
+        submitButton.disabled = true;
       }
-      console.log(input);
-  console.log(regex.test(input));
+    }
+    else {
+      setError("");
+      // Enable the button if there's no error
+      const submitButton = document.getElementById('SubmitButton');
+      if (submitButton) {
+        submitButton.disabled = false;
+      }
+    }
   };
 
 
@@ -810,13 +835,12 @@ const handleChange = (e) => {
                   <label className='block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider'>coordinates</label>
                   <input
                       type="text"
-                      value={inputCoordinates}
-                      onChange={(e) => {
-                          setInputCoordinates(e.target.value);
-                      }}
+                        value={value}
+                      onChange={handleChange}
                       placeholder="sample: 120.9842, 14.5995"
                       className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
                   />
+                  {error && <p className="text-red-400 text-xs mt-1">{error}</p>}
                 </div>
                 {/* location code */}
                 <div>
@@ -863,12 +887,11 @@ const handleChange = (e) => {
                   <input
                       type="text"
                       value={inputProvince}
-                      onChange={(e) => {
-                          setInputProvince(e.target.value);
-                      }}
+                      onChange={handleProvince}
                       placeholder="Province wifi..."
                       className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
                   />
+                  {err && <p className="text-red-400 text-xs mt-1">{err}</p>}
                 </div>
                 {/* Remarks */}
                 <div>
@@ -904,7 +927,7 @@ const handleChange = (e) => {
                 <button onClick={() => setIsModalOpen(false)} className='px-4 py-2 border border-[#1E293B] text-slate-300 hover:text-white rounded-lg text-sm font-medium transition-colors hover:bg-slate-800'>
                   Discard
                 </button>
-                <button onClick={modalMode === 'edit' ? updateWIFI : createWIFI} className='px-5 py-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-lg text-sm font-medium transition-colors'>
+                <button id='SubmitButton' onClick={modalMode === 'edit' ? updateWIFI : createWIFI} className='px-5 py-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-lg text-sm font-medium transition-colors'>
                   {modalMode === 'edit' ? 'Save Changes' : 'Create '}
                 </button>
               </div>

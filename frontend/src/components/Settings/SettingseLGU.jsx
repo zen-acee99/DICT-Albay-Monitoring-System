@@ -297,26 +297,6 @@ console.log("FILTERED:", filteredLgus)
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
 
-const handleChange = (e) => {
-  const input = e.target.value;
-  setValue(input);
-
-  if(input.trim() == ""){
-    setError("")
-    return  
-  }
-
-  // const regex = /^\d+,\d+,\s?\d+,\d+$/;
-
-  // if (!regex.test(input)) {
-  //     setError("Invalid format. Use: 123,12345, 12,1234");
-  //   } else {
-  //     setError("");
-  //     }
-  //     console.log(input);
-  // console.log(regex.test(input));
-  };
-
   const municipalities = [
     "Albay Bacacay",
     "Albay Camalig",
@@ -504,6 +484,36 @@ const handleChange = (e) => {
       };
   
       reader.readAsArrayBuffer(file);
+  };
+
+  const handleChange = (e) => {
+  const input = e.target.value;
+  setValue(input);
+
+  if(input.trim() == ""){
+    setError("")
+    return  
+  }
+
+  const regex = /^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$/;
+
+  if (!regex.test(input)) {
+      setError("Invalid format. Use: 123.456, 123.456");
+      // i put id='SubmitButton' i want to disable the button if the error is not empty
+      const submitButton = document.getElementById('SubmitButton');
+      if (submitButton) {
+        submitButton.disabled = true;
+      }
+    } else {
+      setError("");
+      // Enable the button if there's no error
+      const submitButton = document.getElementById('SubmitButton');
+      if (submitButton) {
+        submitButton.disabled = false;
+      }
+    }
+    console.log(input);
+    console.log(regex.test(input));
   };
 
   return (
@@ -908,7 +918,7 @@ const handleChange = (e) => {
                 <button onClick={() => setIsModalOpen(false)} className='px-4 py-2 border border-[#1E293B] text-slate-300 hover:text-white rounded-lg text-sm font-medium transition-colors hover:bg-slate-800'>
                   Discard
                 </button>
-                <button onClick={modalMode === 'edit' ? updateLGUs : createLGU} className='px-5 py-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-lg text-sm font-medium transition-colors'>
+                <button id='SubmitButton' onClick={modalMode === 'edit' ? updateLGUs : createLGU} className='px-5 py-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-lg text-sm font-medium transition-colors'>
                   {modalMode === 'edit' ? 'Save Changes' : 'Create '}
                 </button>
               </div>

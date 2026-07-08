@@ -50,9 +50,49 @@ const Navbar = () => {
       {/* Navigation */}
       <div className='flex-1 overflow-y-auto'>
 
-        <ul className='space-y-2'>
+        <ul className='flex flex-col pl-6 pt-3 space-y-3 text-gray-300'>
+          <Link to="/" className='hover:text-white transition cursor-pointer'>
+            Region
+          </Link>
+          <Link to="/albay" className='hover:text-white transition cursor-pointer'>
+            Albay
+          </Link>
+          <Link to="/calendar" className='hover:text-white transition cursor-pointer'>
+            Calendar
+          </Link>
+          <Link to="/DailyTimeRecord" className='hover:text-white transition cursor-pointer'>
+            Daily Time Record
+          </Link>
+          <br/>
+          <br/>
+          <br/>
+          <div className='flex flex-1'>
+            <hr className="h-[0.5px] bg-gray-300 border-0" /><span className='text-gray-400 text-sm'>SETTINGS</span><hr className="h-px bg-gray-300 border-0" />
+          </div>
+          <Link to="/settings/elgu" className='hover:text-white transition cursor-pointer'>
+            eLGU
+          </Link>
+          <Link to="/settings/wifi" className='hover:text-white transition cursor-pointer'>
+            WIFI
+          </Link>
+          <Link to="/settings/pnpki" className='hover:text-white transition cursor-pointer'>
+            PNPKI
+          </Link>
+          <Link to="/settings/ilcdb" className='hover:text-white transition cursor-pointer'>
+            ILCDB
+          </Link>
+          {/* <Link to="/settings/cybersecurity" className='hover:text-white transition cursor-pointer'>
+            CYBERSECURITY
+          </Link> */}
+          <Link to="/settings/egov" className='hover:text-white transition cursor-pointer'>
+            eGOVPH
+          </Link>
+          {/* <Link onClick={handleLogout} className='hover:text-white transition cursor-pointer'>
+            Log out
+          </Link> */}
 
-          {/* Overview */}
+
+{/* 
           <li>
             <button
               onClick={() => setOpen(!open)}
@@ -73,7 +113,7 @@ const Navbar = () => {
               />
             </button>
 
-            {/* Dropdown */}
+
             {open && (
               <ul className='flex flex-col pl-6 pt-3 space-y-3 text-gray-300'>
 
@@ -89,7 +129,7 @@ const Navbar = () => {
                 <Link to="/albay" className='hover:text-white transition cursor-pointer'>
                   Albay
                 </Link>
-                {/* <Link to="/sorsogon" className='hover:text-white transition cursor-pointer'>
+                <Link to="/sorsogon" className='hover:text-white transition cursor-pointer'>
                   Sorsogon
                 </Link>
                 <Link to="/camnorte" className='hover:text-white transition cursor-pointer'>
@@ -103,12 +143,11 @@ const Navbar = () => {
                 </Link>
                 <Link to="/catanduanes" className='hover:text-white transition cursor-pointer'>
                   Catanduanes
-                </Link> */}
+                </Link>
               </ul>
             )}
           </li>
 
-{/* 
           <li className='flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-[#0d1325] transition cursor-pointer text-gray-300 hover:text-white'>
             <BiUser className='text-2xl' />
             <span className='text-lg'>Users</span>
@@ -132,9 +171,8 @@ const Navbar = () => {
           <li className='flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-[#0d1325] transition cursor-pointer text-gray-300 hover:text-white'>
             <BiCreditCard className='text-2xl' />
             <span className='text-lg'>Payments</span>
-          </li> */}
+          </li> 
 
-          {/* Administration */}
             <button
               onClick={() => setOpenSettings(!openSettings)}
               className='w-full flex items-center justify-between px-1 py-2 rounded-2xl bg-gradient-to-r '
@@ -158,9 +196,9 @@ const Navbar = () => {
 
             {openSettings && (
               <ul className='flex flex-col pl-6 pt-3 space-y-3 text-gray-300'>
-                {/* <Link to="/settings/user" className='hover:text-white transition cursor-pointer'>
+                <Link to="/settings/user" className='hover:text-white transition cursor-pointer'>
                   USERS
-                </Link> */}
+                </Link>
                 <Link to="/settings/elgu" className='hover:text-white transition cursor-pointer'>
                   eLGU
                 </Link>
@@ -173,9 +211,9 @@ const Navbar = () => {
                 <Link to="/settings/ilcdb" className='hover:text-white transition cursor-pointer'>
                   ILCDB
                 </Link>
-                {/* <Link to="/settings/cybersecurity" className='hover:text-white transition cursor-pointer'>
+                <Link to="/settings/cybersecurity" className='hover:text-white transition cursor-pointer'>
                   CYBERSECURITY
-                </Link> */}
+                </Link>
                 <Link to="/settings/egov" className='hover:text-white transition cursor-pointer'>
                   eGOVPH
                 </Link>
@@ -183,12 +221,12 @@ const Navbar = () => {
                   Log out
                 </Link>
               </ul>
-            )}
+            )} */}
         </ul>
       </div>
 
       {/* Bottom Card */}
-      <div className='relative mt-6 rounded-[30px] overflow-hidden border border-[#1a3d80] bg-gradient-to-b from-[#07152d] to-[#020817] p-6 min-h-[240px] flex flex-col justify-end'>
+      <div className='relative mt-6 rounded-[30px] h-56 overflow-hidden border border-[#1a3d80] bg-gradient-to-b from-[#07152d] to-[#020817] p-6 min-h-[240px] flex flex-col justify-end'>
 
         {/* Glow */}
         <div className='absolute w-[300px] h-[300px] bg-blue-700/30 rounded-full blur-3xl -bottom-28 left-1/2 -translate-x-1/2'></div>
