@@ -300,7 +300,7 @@ function App() {
 
           <Route path="/calendar" element={<Calendar />} />
 
-          {/* firebase auth LOGIN */}
+          {/* firebase auth LOGIN  get config*/}
           <Route path="/login" element={<Login />} />
 
           {/* settings */}
