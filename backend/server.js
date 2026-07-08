@@ -137,8 +137,6 @@ app.use(cors({
 
 
 app.use(express.json());
-const mongoSanitize = require('express-mongo-sanitize');
-app.use(mongoSanitize());
 
 
 // Routes
