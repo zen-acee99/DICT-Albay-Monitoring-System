@@ -28,7 +28,7 @@ router.post("/", async (req, res) => {
 
     // ⭐ CALCULATE EXPIRATION TIME HERE:
     // Let's set it to 5 hours from right now
-    const hoursToLive = 5; 
+    const hoursToLive = 168; // 168 hours = 7 days 
     const expirationDate = new Date();
     expirationDate.setHours(expirationDate.getHours() + hoursToLive); 
     

@@ -72,6 +72,7 @@ const Albay = () => {
     live: 0,
     uat: 0,
     training: 0,
+    BUILDUPGLP: 0,
     inactive: 0,
     thirdParty: 0,
     total: 0
@@ -116,8 +117,8 @@ const Albay = () => {
           item => item.status?.trim().toUpperCase() === 'LIVE'
         ).length;
 
-        const DATA = uniqueData.filter(
-          item => item.status?.trim().toUpperCase() === 'BUILDUP - GLP'
+        const BUILDUPGLP = uniqueData.filter(
+          item => item.status?.trim().toUpperCase() === 'BUILDUPGLP'
         ).length;
 
         const uat = uniqueData.filter(
@@ -141,7 +142,7 @@ const Albay = () => {
 
         setStats({
           live,
-          DATA,
+          BUILDUPGLP,
           uat,
           training,
           inactive,
@@ -183,6 +184,9 @@ const Albay = () => {
       case 'TRAINING':
         return '#f97316';
 
+      case 'BUILDUPGLP':
+        return '#f97316';
+
       case 'NO SYSTEM':
         return '#ef4444';
 
@@ -218,12 +222,29 @@ console.log(response.data);
 
   const columnHelper = createColumnHelper();
   const columns = [
-    columnHelper.accessor("name", {
-      header: "LGU Name",
-      cell: (info) => (
-        <span className="text-white">{info.getValue()}</span>
-      ),
-    }),
+      columnHelper.accessor("name", {
+        header: "LGU Name",
+        cell: (info) => {
+          const name = info.getValue();
+
+          const slug = name
+            ?.split(",")[0]      // remove ", Albay" if it exists
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, "-"); // "Legazpi City" -> "legazpi-city"
+
+          return (
+            <a
+              href={`https://elgu-${slug}-albay.e.gov.ph/`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 hover:underline"
+            >
+              {name}
+            </a>
+          );
+        },
+      }),
 
     columnHelper.accessor("status", {
       header: "Status",
@@ -249,13 +270,13 @@ console.log(response.data);
   const statusConfig = {
     live: { title: "LIVE eLGUs", color: "text-green-400", status: "LIVE" },
     uat: { title: "UAT eLGUs", color: "text-yellow-400", status: "UAT" },
-    training: { title: "Admin Training", color: "text-orange-400", status: "TRAINING" }, // FIX: "TRAINING"
-    inactive: { title: "Inactive / No eLGU", color: "text-red-400", status: "NO SYSTEM" },
-    thirdParty: { title: "OWN / 3rd Party", color: "text-blue-400", status: "OWN SYSTEM" },
-    DATA: {
+    BUILDUPGLP: { title: "Admin Training", color: "text-orange-400", status: "BUILDUPGLP" }, // FIX: "TRAINING"
+    inactive: { title: "Inactive system", color: "text-red-400", status: "NO SYSTEM" },
+    thirdParty: { title: "OWN / 3rd Party Sys", color: "text-blue-400", status: "OWN SYSTEM" },
+    BUILDUPGLP: {
     title: "BUILDUP - GLP",
     color: "text-cyan-400",
-    status: "BUILDUP - GLP",
+    status: "BUILDUPGLP",
   },
   nosystem: {
     title: "No System",
@@ -1232,8 +1253,12 @@ useEffect(() => {
 
   const fetchEgovData = async () => {
     try {
-      const response = await axios.get(`${VITE_API_URL}/wifiData`);
+      const response = await axios.get(`${VITE_API_URL}/egovph`);
       const dataEgov = response.data;
+
+      console.log("Fetched Egov Data:", dataEgov);
+      console.log("TEST 1  ",response.data);
+      console.log("TEST 2  ",Array.isArray(response.data));
 
       const normalizedEgov = dataEgov
         .filter(item => item.Province?.trim().toLowerCase() === "albay")
@@ -1246,6 +1271,7 @@ useEffect(() => {
 
       normalizedEgov.forEach(item => {
         uniqueMapEgov.set(item._id, item);
+        console.log("province EGOV PH:", item.Province);
       });
 
       setLiveEgov(normalizedEgov);
@@ -1282,7 +1308,7 @@ useEffect(() => {
 }, []);
 
 const getColorEgov = (Province) => {
-  switch (Province) {
+  switch (Province?.toUpperCase()) {
     case 'Province':
       return '#22c55e';
     default:
@@ -1290,84 +1316,61 @@ const getColorEgov = (Province) => {
   }
 };
 
-const columnHelperEgov = createColumnHelper();
-
-const columnsEgov = [
-  columnHelperEgov.accessor("SiteType", {
-    header: "Site Type",
-    cell: info => <span className="text-white">{info.getValue()}</span>,
-  }),
-  columnHelperEgov.accessor("LocationName", {
-    header: "Location",
-    cell: info => <span className="text-white">{info.getValue()}</span>,
-  }),
-  columnHelperEgov.accessor("fundSource", {
-    header: "fund Source",
-    cell: info => <span className="text-white">{info.getValue()}</span>,
-  }),
-  columnHelperEgov.accessor("ProjectName", {
-    header: "Project Name",
-    cell: info => <span className="text-white">{info.getValue()}</span>,
-  }),
-  columnHelperEgov.accessor("Contact", {
-    header: "Contact",
-    cell: info => <span className="text-white">{info.getValue()}</span>,
-  }),
-  columnHelperEgov.accessor("LinkType", {
-    header: "Link Type",
-    cell: info => <span className="text-white">{info.getValue()}</span>,
-  }),
-  columnHelperEgov.accessor("ApCount", {
-    header: "Ap Count",
-    cell: info => <span className="text-white">{info.getValue()}</span>,
-  }),
-  columnHelperEgov.accessor("Coordinates", {
-    header: "Coordinates",
-    cell: (info) => {
-      const coords = info.getValue();
-      if (!coords || coords.length < 2) return <span>-</span>;
-      return (
-        <span className="text-white">
-          {coords[1]}, {coords[0]}
-        </span>
-      );
-    },
-  }),
-  columnHelperEgov.accessor("LocationCode", {
-    header: "Location Code",
-    cell: info => <span className="text-white">{info.getValue()}</span>,
-  }),
-  columnHelperEgov.accessor("Barangay", {
-    header: "Barangay",
-    cell: info => <span className="text-white">{info.getValue()}</span>,
-  }),
-  columnHelperEgov.accessor("Municipality", {
-    header: "Municipality",
-    cell: info => <span className="text-white">{info.getValue()}</span>,
-  }),
-  columnHelperEgov.accessor("Province", {
-    header: "Province",
-    cell: info => <span className="text-white">{info.getValue()}</span>,
-  }),
-  columnHelperEgov.accessor("Remarks", {
-    header: "Remarks",
-    cell: info => <span className="text-white">{info.getValue()}</span>,
-  }),
-  columnHelperEgov.accessor("NationWideID", {
-    header: "NationWide ID",
-    cell: info => <span className="text-white">{info.getValue()}</span>,
-  }),
-];
-
 const statusConfigEgov = {
-  Province: {
-    title: "LIVE EGOV ALBAY",
-    colorEgov: "text-blue-400",
-    Province: "ALBAY"
-  },
+  Province: { title: "LIVE EGOV ALBAY", colorEGOV: "text-blue-400", Province: "ALBAY" }
 };
 
 const currentEgov = statusConfigEgov[statShowEgov];
+
+const columnHelperEgov = createColumnHelper();
+
+const columnsEgov = [
+  columnHelperEgov.accessor("municipalities", {
+    header: "municipalities",
+    cell: info => <span className="text-white">{info.getValue()}</span>,
+  }),
+  // columnHelperEgov.accessor("municipalities", {
+  //   header: "Municipalities",
+  //   cell: (info) => {
+  //     const municipality = info.getValue();
+
+  //     const slug = municipality
+  //       ?.split(",")[0]      // remove ", Albay" if it exists
+  //       .trim()
+  //       .toLowerCase()
+  //       .replace(/\s+/g, "-"); // "Legazpi City" -> "legazpi-city"
+
+  //     return (
+  //       <a
+  //         href={`https://elgu-${slug}-albay.e.gov.ph/`}
+  //         target="_blank"
+  //         rel="noopener noreferrer"
+  //         className="text-blue-400 hover:underline"
+  //       >
+  //         {municipality}
+  //       </a>
+  //     );
+  //   },
+  // }),
+  columnHelperEgov.accessor("registeredUsers", {
+    header: "Registered Users",
+    cell: info => <span className="text-white">{info.getValue()}</span>,
+  }),
+  columnHelperEgov.accessor("Province", {
+        header: "Province",
+        cell: (info) => {
+          const val = info.getValue();
+    
+          const colorEgov =
+            val === "ALBAY"
+              ? "text-green-400": ""
+    
+          return <span className={colorEgov}>{val}</span>;
+        },
+      })
+];
+
+
 
 const filteredDataEgov = useMemo(() => {
   if (!statShowEgov) return liveEgov;
@@ -1397,7 +1400,7 @@ const egovNearSelectedLGU = useMemo(() => {
   );
 
   return liveEgov.filter((egov) => {
-    const egovMunicipality = normalizeMunicipality(egov.Municipality);
+    const egovMunicipality = normalizeMunicipality(egov.municipalities);
     return egovMunicipality === lguMunicipality;
   });
 
@@ -1636,7 +1639,7 @@ console.log("Additional Info: ",pnpkiNearSelectedLGU)
 
           {/* BUILDUP */}
           <button 
-            onClick={() => setStatShow("uat")}
+            onClick={() => setStatShow("BUILDUPGLP")}
             className='relative hover:scale-105 transition-all h-20 duration-300 overflow-hidden rounded-2xl border border-yellow-500/30 bg-gradient-to-br from-[#1a1405] to-[#100b03] p-5'>
 
             <div className='relative z-10 flex items-start gap-4'>
@@ -1652,7 +1655,7 @@ console.log("Additional Info: ",pnpkiNearSelectedLGU)
                 </h1>
 
                 <h2 className='text-2xl font-bold text-yellow-400 leading-none mt-1'>
-                  {stats.DATA}
+                  {stats.BUILDUPGLP}
                 </h2>
 
               </div>
@@ -1841,7 +1844,7 @@ console.log("Additional Info: ",pnpkiNearSelectedLGU)
 
           {/* ILCDB */}
           <button 
-            onClick={() => setStatShow("ilcdb")}
+            // onClick={() => setStatShow("ilcdb")}
             className='relative hover:scale-105 transition-all h-20 duration-300 overflow-hidden rounded-2xl border border-violet-400/30 bg-gradient-to-br from-violet-900/30 to-slate-950 p-5'>
 
             <div className='relative z-10 flex items-start gap-4'>
@@ -1862,7 +1865,7 @@ console.log("Additional Info: ",pnpkiNearSelectedLGU)
 
           {/* CYBERSECURITY */}
           <button 
-            onClick={() => setStatShow("cybersecurity")}
+            // onClick={() => setStatShow("cybersecurity")}
             className='relative hover:scale-105 transition-all h-20 duration-300 overflow-hidden rounded-2xl border border-red-400/30 bg-gradient-to-br from-red-900/30 to-slate-950 p-5'>
 
             <div className='relative z-10 flex items-start gap-4'>
@@ -1884,7 +1887,7 @@ console.log("Additional Info: ",pnpkiNearSelectedLGU)
 
           {/* EGOV PH */}
           <button 
-            onClick={() => setStatShow("egov")}
+            onClick={() => setStatShowEgov("Province")}
             className='relative hover:scale-105 transition-all h-20 duration-300 overflow-hidden rounded-2xl border border-fuchsia-400/30 bg-gradient-to-br from-fuchsia-900/30 to-slate-950 p-5'>
 
             <div className='relative z-10 flex items-start gap-4'>
@@ -1896,7 +1899,7 @@ console.log("Additional Info: ",pnpkiNearSelectedLGU)
               <div>
                 <h1 className='text-fuchsia-300 text-xs font-medium'>eGOV PH</h1>
                 <h2 className='text-2xl font-bold text-fuchsia-300 leading-none mt-1'>
-                  {stats.egov}
+                  {statsEgov.liveEgov}
                 </h2>
               </div>
 
@@ -1907,6 +1910,70 @@ console.log("Additional Info: ",pnpkiNearSelectedLGU)
         </div>
 
         {/* modal for stat start */}
+
+        {statShowEgov && (
+          <div
+            className="fixed inset-0 p-4 bg-black/10 flex items-center justify-center z-[9999]"
+            onClick={() => setStatShowEgov(false)}
+          >
+            <div
+              className="bg-gray-900 p-6 rounded-xl w-[1500px] max-h-[100vh]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setStatShowEgov(false)}
+                className="float-right text-white"
+              >
+                ✕
+              </button>
+
+              <h2 className={`${currentEgov.colorEgov} text-xl font-bold`}>
+                {currentEgov.title}
+              </h2>
+                {/* 
+              <p className="text-white">
+                Rows: {filteredData.length}
+              </p> */}
+
+              <div className="max-h-[400px] overflow-y-auto rounded-lg">
+                <table className="w-full text-sm">
+                  <thead className="sticky top-0 bg-gray-900 z-10">
+                    {tableEgov.getHeaderGroups().map((headerGroup) => (
+                      <tr key={headerGroup.id}>
+                        {headerGroup.headers.map((header) => (
+                          <th
+                            key={header.id}
+                            className="text-xs text-left py-3 px-4 text-slate-400 border-b border-white/10"
+                          >
+                            {flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                          </th>
+                        ))}
+                      </tr>
+                    ))}
+                  </thead>
+
+                  <tbody>
+                    {tableEgov.getRowModel().rows.map((row) => (
+                      <tr key={row.id} className="border-b border-white/10">
+                        {row.getVisibleCells().map((cell) => (
+                          <td key={cell.id} className="py-3 px-4">
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
 
         {statShowPNPKI && (
           <div

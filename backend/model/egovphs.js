@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 
 const EgovphSchema = new mongoose.Schema({
-    provinceName: {type: String},
+    Province: {type: String},
     municipalities: {type: String},
     registeredUsers: {type: Number},
 })

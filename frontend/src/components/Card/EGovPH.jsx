@@ -26,20 +26,20 @@ const UsersCard = () => {
         // Get municipality data
         const chartRes = await fetch(`${VITE_API_URL}/egovph/user-per-municipality`);
         const chartData = await chartRes.json();
-
+        console.log("EGOVPH chart" ,chartData)
         if (Array.isArray(chartData)) {
           // Group by province and sum users
           const groupedData = chartData.reduce((acc, item) => {
-            const { provinceName, registeredUsers } = item;
+            const { Province, registeredUsers } = item;
             
-            if (!acc[provinceName]) {
-              acc[provinceName] = {
-                name: provinceName,
+            if (!acc[Province]) {
+              acc[Province] = {
+                name: Province,
                 users: 0,
               };
             }
             
-            acc[provinceName].users += registeredUsers;
+            acc[Province].users += registeredUsers;
             return acc;
           }, {});
 
@@ -135,14 +135,14 @@ const UsersCard = () => {
               barCategoryGap={5}
             >
 
-              {/* GRID */}
+      
               <CartesianGrid
                 vertical={false}
                 stroke="#1E293B"
                 strokeDasharray="0"
               />
 
-              {/* X AXIS */}
+
                 <XAxis
                     dataKey="name"
                     tick={{
@@ -157,7 +157,7 @@ const UsersCard = () => {
                     tickLine={false}
                 />
 
-              {/* Y AXIS */}
+  
               <YAxis
                 tick={{
                   fill: "#64748B",
@@ -168,7 +168,7 @@ const UsersCard = () => {
                 tickFormatter={(value) => `${value / 1000}K`}
               />
 
-              {/* TOOLTIP */}
+    
               <Tooltip
                 cursor={{
                   fill: "rgba(59,130,246,0.08)",
@@ -181,14 +181,14 @@ const UsersCard = () => {
                 }}
               />
 
-              {/* BAR */}
+
               <Bar
                 dataKey="users"
                 radius={[8, 8, 0, 0]}
                 fill="url(#barGradient)"
               />
 
-              {/* BAR GRADIENT */}
+      
               <defs>
 
                 <linearGradient

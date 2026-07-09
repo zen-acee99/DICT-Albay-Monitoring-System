@@ -837,6 +837,7 @@ const handleChange = (e) => {
                       type="text"
                         value={value}
                       onChange={handleChange}
+                      readOnly={modalMode === "edit" && value !== ""} // added for validation to prevent editing coordinates in edit mode
                       placeholder="sample: 120.9842, 14.5995"
                       className="w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm"
                   />

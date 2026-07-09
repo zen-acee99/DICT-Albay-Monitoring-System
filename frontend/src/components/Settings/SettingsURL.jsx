@@ -12,38 +12,44 @@ import axios from "axios";
 import { QRCodeSVG } from "qrcode.react";
 
 
+// Define your office logos here (using public URLs or base64 paths)
+const BRAND_LOGOS = [
+  { id: "none", name: "No Logo", url: null },
+  { id: "dict", name: "DICT Logo", url: "/DictLOGO.png" }, // Replace with your actual paths
+  { id: "pnpki", name: "pnpki Logo", url: "/logopnpki.png" },  // Replace with your actual paths
+  { id: "wifi", name: "wifi Logo", url: "/wifiLogo.png" }  // Replace with your actual paths
+  // { id: "pnpki", name: "eGov Logo", url: "/logopnpki.png" }  // Replace with your actual paths
+  // { id: "pnpki", name: "eGov Logo", url: "/logopnpki.png" }  // Replace with your actual paths
+];
+
 export default function UrlShortener() {
-    
-    const [originalUrl, setOriginalUrl] = useState("");
-    const [customAlias, setCustomAlias] = useState("");
-    const [shortUrl, setShortUrl] = useState("");
-    
-    // ⭐ Fix: Create an array state to safely hold historical items 
-    const [urlList, setUrlList] = useState([]);
-    
-    const qrRef = useRef(null);
-    const VITE_API_URL = import.meta.env.VITE_API_URL;
+  const [originalUrl, setOriginalUrl] = useState("");
+  const [customAlias, setCustomAlias] = useState("");
+  const [shortUrl, setShortUrl] = useState("");
+  const [urlList, setUrlList] = useState([]);
+  
+  // ⭐ New State: Holds the currently selected logo configuration
+  const [selectedLogo, setSelectedLogo] = useState(BRAND_LOGOS[0]);
+  
+  const qrRef = useRef(null);
+  const VITE_API_URL = import.meta.env.VITE_API_URL;
 
-    // ⭐ Fix: Fetch function to pull data down from the database
-    const fetchUrls = async () => {
-      try {
-        const response = await axios.get(`${VITE_API_URL}/albay-urlShortener/all`);
-        setUrlList(response.data);
-      } catch (error) {
-        console.error("Error fetching URLs:", error);
-      }
-    };
+  const fetchUrls = async () => {
+    try {
+      const response = await axios.get(`${VITE_API_URL}/albay-urlShortener/all`);
+      setUrlList(response.data);
+    } catch (error) {
+      console.error("Error fetching URLs:", error);
+    }
+  };
 
-    // ⭐ Fix: Automatically fetch records on page refresh/mount
-    useEffect(() => {
-      fetchUrls();
-      
-      // Keep click statistics synchronized by running an automatic background pull every 4 seconds
-      const timer = setInterval(fetchUrls, 4000);
-      return () => clearInterval(timer);
-    }, []);
-    
-    const createShortUrl = async () => {
+  useEffect(() => {
+    fetchUrls();
+    const timer = setInterval(fetchUrls, 4000);
+    return () => clearInterval(timer);
+  }, []);
+  
+  const createShortUrl = async () => {
     try {
       const payload = {
         originalUrl: originalUrl,
@@ -51,34 +57,26 @@ export default function UrlShortener() {
       };
 
       const response = await axios.post(
-            `${VITE_API_URL}/albay-urlShortener`,
-            payload
-          );
+        `${VITE_API_URL}/albay-urlShortener`,
+        payload
+      );
 
       console.log("CREATED:", response.data);
       
-      let incomingUrl = response.data.shortUrl;
-      
-      if (incomingUrl && incomingUrl.includes("undefined")) {
-        const shortCode = incomingUrl.split("undefined/")[1];
-        incomingUrl = `${window.location.origin}/${shortCode}`;
-      }
+      const shortCode = response.data.data?.shortCode || response.data.shortUrl.split("/").pop();
+      const absoluteLiveUrl = `${window.location.origin}/${shortCode}`;
 
-      setShortUrl(incomingUrl);
-      
-      // Clear input fields and refresh the database list view instantly
+      setShortUrl(absoluteLiveUrl);
       setOriginalUrl("");
       setCustomAlias("");
       fetchUrls();
 
     } catch(error){
       console.error("CREATE URL ERROR:", error);
-      if(error.response){
-        console.log(error.response.data);
-      }
     }
   };
 
+  // ⭐ Updated: Embeds selected center-image logo onto download canvas cleanly
   const downloadQRCode = () => {
     const svgElement = qrRef.current.querySelector("svg");
     if (!svgElement) return;
@@ -88,25 +86,49 @@ export default function UrlShortener() {
     const URL = window.URL || window.webkitURL || window;
     const blobURL = URL.createObjectURL(svgBlob);
     
-    const image = new Image();
-    image.onload = () => {
+    const qrImage = new Image();
+    qrImage.onload = () => {
       const canvas = document.createElement("canvas");
-      canvas.width = 300;
-      canvas.height = 300;
+      canvas.width = 500; // Increased size resolution for cleaner asset look
+      canvas.height = 500;
       const context = canvas.getContext("2d");
-      context.drawImage(image, 0, 0, 300, 300);
       
-      const png = canvas.toDataURL("image/png");
-      const downloadLink = document.createElement("a");
-      downloadLink.href = png;
-      downloadLink.download = `${customAlias || "short-url"}-qr.png`;
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-      document.body.removeChild(downloadLink);
+      // Draw standard background matrix 
+      context.drawImage(qrImage, 0, 0, 500, 500);
+      
+      // If a custom logo badge layout is toggled, paint it cleanly over center space
+      if (selectedLogo.url) {
+        const logoImage = new Image();
+        logoImage.crossOrigin = "anonymous"; // Prevents CORS security trace canvas locks
+        logoImage.onload = () => {
+          const logoSize = 120; 
+          const xPos = (500 - logoSize) / 2;
+          const yPos = (500 - logoSize) / 2;
+          
+          // Draw white background backing square behind logo for visual separation
+          context.fillStyle = "#ffffff";
+          context.fillRect(xPos - 6, yPos - 6, logoSize + 12, logoSize + 12);
+          
+          context.drawImage(logoImage, xPos, yPos, logoSize, logoSize);
+          triggerDownload(canvas);
+        };
+        logoImage.src = selectedLogo.url;
+      } else {
+        triggerDownload(canvas);
+      }
     };
-    image.src = blobURL;
+    qrImage.src = blobURL;
   };
 
+  const triggerDownload = (canvas) => {
+    const png = canvas.toDataURL("image/png");
+    const downloadLink = document.createElement("a");
+    downloadLink.href = png;
+    downloadLink.download = `${customAlias || "short-url"}-qr.png`;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+  };
 
   return (
     <div className="min-h-screen bg-[#050816] text-slate-200 lg:ml-[250px] p-6">
@@ -119,7 +141,7 @@ export default function UrlShortener() {
 
       {/* HEADER */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">URL Shortener</h1>
+        <h1 className="text-2xl font-bold">DICT - ALBAY URL Shortener</h1>
         <p className="text-sm text-slate-400">Generate short links and QR codes</p>
       </div>
 
@@ -149,6 +171,26 @@ export default function UrlShortener() {
             placeholder="my-link"
           />
 
+          {/* ⭐ New Option Module: Radio Custom Branding Selection */}
+          <div className="mt-5">
+            <label className="text-sm block mb-3 font-medium text-slate-300">Select Project Badge</label>
+            <div className="flex gap-4 ">
+              {BRAND_LOGOS.map((logo) => (
+                <label key={logo.id} className="flex items-center gap-2 cursor-pointer text-sm hover:text-white transition-colors">
+                  <input
+                    type="radio"
+                    name="qrLogo"
+                    value={logo.id}
+                    checked={selectedLogo.id === logo.id}
+                    onChange={() => setSelectedLogo(logo)}
+                    className="accent-purple-500 h-4 w-4"
+                  />
+                  {logo.name}
+                </label>
+              ))}
+            </div>
+          </div>
+
           <button
             onClick={createShortUrl}
             className="mt-6 bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg font-medium"
@@ -177,7 +219,15 @@ export default function UrlShortener() {
               <QRCodeSVG 
                 value={shortUrl} 
                 size={160}
-                level={"H"}
+                level={"H"} // Fixed high-error correction allows center logo readability
+                imageSettings={selectedLogo.url ? {
+                  src: selectedLogo.url,
+                  x: undefined,
+                  y: undefined,
+                  height: 38,
+                  width: 38,
+                  excavate: true, // Cuts out the QR modules cleanly under the logo background space
+                } : undefined}
               />
             ) : (
               <QrCode size={120} className="text-slate-300" />
@@ -214,7 +264,6 @@ export default function UrlShortener() {
           </thead>
           <tbody>
             {urlList.length > 0 ? (
-              // ⭐ Fix: Map rows dynamically using database documents!
               urlList.map((urlItem) => {
                 const absoluteLink = `${window.location.origin}/${urlItem.shortCode}`;
                 return (

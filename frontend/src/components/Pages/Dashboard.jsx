@@ -175,7 +175,7 @@ const Dashboard = () => {
       case 'LIVE':
         return '#22C55E';
 
-      case 'dataBuildUp':
+      case 'BUILDUPGLP':
         return '#3B82F6';
 
       case 'UAT':
@@ -221,11 +221,65 @@ console.log(response.data);
   const columnHelper = createColumnHelper();
   const columns = [
     columnHelper.accessor("name", {
-      header: "LGU Name",
-      cell: (info) => (
-        <span className="text-white">{info.getValue()}</span>
-      ),
+      header: "name",
+      cell: (info) => {
+        const name = info.getValue();
+
+        const cleanName = name
+          ?.split(",")[0]
+          .trim()
+          .toLowerCase()
+          .replace(/\s+/g, "-");
+
+        const v1List = [
+          "malilipot",
+          "libon",
+          "bacacay",
+          "camalig",
+          "camaligan",
+          "bula",
+          "ragay",
+          "minalabac",
+          "sagñay",
+          "delgallego",
+          "canaman",
+          "sanfernando",
+          "capalonga",
+          "basud",
+          "josepanganiban",
+          "labo",
+          "mercedes",
+          "vinzons",
+          "sanelena",
+          "paracale",
+          "sanvicente",
+          "talisay",
+          "mandaon"
+        ];
+
+        const url = v1List.includes(cleanName)
+          ? `https://bpbc.ibpls.com/${cleanName}albay/`
+          : `https://elgu-${cleanName}-albay.e.gov.ph/`;
+
+        return (
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-400 hover:underline"
+          >
+            {name}
+          </a>
+        );
+      },
     }),
+
+    columnHelper.accessor("version", {
+        header: "Version",
+        cell: info => (
+          <span className="text-blue-500">{info.getValue()}</span>
+        ),
+      }),
 
     columnHelper.accessor("status", {
       header: "Status",
@@ -251,10 +305,10 @@ console.log(response.data);
   ];
 
   const statusConfig = {
-    live: { title: "LIVE eLGUs", color: "text-green-400", status: "LIVE" },
+    live: { title: "LIVE eLGUs", color: "text-green-400", version: "V1 BPBC", status: "LIVE" },
     dataBuildUp: { title: "Admin Training", color: "text-orange-400", status: "BUILDUPGLP" }, // FIX: "TRAINING"
     uat: { title: "UAT eLGUs", color: "text-yellow-400", status: "UAT" },
-    ownsystem: { title: "Inactive / No eLGU", color: "text-red-400", status: "OWN SYSTEM" },
+    ownsystem: { title: "3rd Party Systems", color: "text-red-400", status: "OWN SYSTEM" },
     instanceInactive: { title: "Inactive Instance", color: "text-red-400", status: "INACTIVE" },
     nosys: { title: "NO System", color: "text-blue-400", status: "NO SYSTEM" },
     technical: { title: "Techincal Activities", color: "text-blue-400", status: "Training" },

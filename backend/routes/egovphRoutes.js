@@ -32,7 +32,7 @@ router.get("/chart/by-province", async (req, res) => {
     const result = await EgovphModel.aggregate([
       {
         $group: {
-          _id: "$provinceName",
+          _id: "$Province",
           value: { $sum: "$registeredUsers" }
         }
       },
@@ -49,7 +49,7 @@ router.get("/chart/by-province", async (req, res) => {
 router.get('/user-per-municipality', async (req, res) => {
   try {
     const result = await EgovphModel.find({}, {
-      provinceName: 1,
+      Province: 1,
       registeredUsers: 1,
       _id: 0
     });
@@ -70,8 +70,8 @@ router.get('/', (req, res) => {
     if(req.query.municipalities){
         filter.municipalities = req.query.municipalities        
     }
-    if(req.query.provinceName) {
-        filter.provinceName = req.query.provinceName
+    if(req.query.Province) {
+        filter.Province = req.query.Province
     }
 
     EgovphModel.find(filter)

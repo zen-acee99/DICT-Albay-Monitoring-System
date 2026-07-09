@@ -448,8 +448,8 @@ console.log("FILTERED:", filteredLgus)
   )
 
   const [ShowDropdown, setShowDropdown] = useState(true)
-  const [ShowStatus, setShowStatus] = useState(true)
-  const [ShowVersion, setShowVersion] = useState(true)
+  const [ShowStatus, setShowStatus] = useState(false)
+  const [ShowVersion, setShowVersion] = useState(false)
 
   const handleExcelImport = async (e) => {
       const file = e.target.files[0];
@@ -820,6 +820,7 @@ console.log("FILTERED:", filteredLgus)
                         type="text"
                         value={value}
                         onChange={handleChange}
+                        readOnly={modalMode === "edit"} // added for validation to prevent editing coordinates in edit mode
                         className='w-full bg-[#050816] border border-[#1E293B] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8B5CF6] text-slate-200' 
                       />
                       {error && <p className="text-red-400 text-xs mt-1">{error}</p>}
