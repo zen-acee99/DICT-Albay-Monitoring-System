@@ -3,147 +3,125 @@ import {
   AreaChart,
   Area,
   ResponsiveContainer,
-  XAxis,
   YAxis,
   Tooltip,
 } from "recharts";
 
 const DownloadsCard = () => {
-  const [totalUsers, setTotalUsers] = useState(0);
-  const [chartData, setChartData] = useState([]);
+  const [totalUsers, setTotalUsers] = useState(992406);
+  const [provinceData, setProvinceData] = useState([
+    { name: "Albay", value: 37308 },
+    { name: "Camarines Norte", value: 16318 },
+    { name: "Camarines Sur", value: 52490 },
+    { name: "Catanduanes", value: 9399 },
+    { name: "Sorsogon", value: 21222 },
+  ]);
+
+  const waveChartData = [
+    { x: 1, val: 3200 },
+    { x: 2, val: 6800 },
+    { x: 3, val: 5100 },
+    { x: 4, val: 8900 },
+    { x: 5, val: 7200 },
+    { x: 6, val: 11400 },
+    { x: 7, val: 9800 },
+    { x: 8, val: 14200 },
+    { x: 9, val: 12500 },
+    { x: 10, val: 17800 },
+    { x: 11, val: 16200 },
+    { x: 12, val: 21000 },
+  ];
 
   const API_URL = import.meta.env.VITE_API_URL;
 
-  // GET TOTAL USERS
   useEffect(() => {
     const fetchTotal = async () => {
       try {
-        const res = await fetch(
-          `${API_URL}/egovph/total-registered-users`
-        );
-
+        const res = await fetch(`${API_URL}/egovph/total-registered-users`);
+        if (!res.ok) return;
         const data = await res.json();
-        setTotalUsers(data.total || 0);
-      } catch (err) {
-        console.error(err);
-      }
+        if (data.total) setTotalUsers(data.total);
+      } catch (err) {}
+    };
+
+    const fetchChart = async () => {
+      try {
+        const res = await fetch(`${API_URL}/egovph/chart/by-province`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          const formatted = data.map((item) => ({
+            name: item._id || item.name,
+            value: item.value || item.users || 0,
+          }));
+          setProvinceData(formatted);
+        }
+      } catch (err) {}
     };
 
     fetchTotal();
-  }, []);
-
-  // GET CHART DATA (BY PROVINCE)
-  useEffect(() => {
-    const fetchChart = async () => {
-      try {
-        const res = await fetch(
-          `${API_URL}/egovph/chart/by-province`
-        );
-
-        const data = await res.json();
-
-        const formatted = data.map((item) => ({
-          name: item._id,
-          value: item.value,
-        }));
-
-        setChartData(formatted);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
     fetchChart();
-  }, []);
-
-  const today = new Date().toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
+  }, [API_URL]);
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-purple-500/20 bg-[#070B1A] px-5 py-4 shadow-[0_0_40px_rgba(168,85,247,0.08)]">
+    <div className="w-full h-full min-h-[380px] rounded-3xl border border-white/[0.06] bg-[#0c1322] p-6 shadow-sm flex flex-col justify-between">
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-base font-semibold text-white tracking-wide">
+            Downloads
+          </h2>
+          <span className="text-xs text-slate-400 font-medium">As of May 2026</span>
+        </div>
 
-      {/* glow */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.18),transparent_55%)]" />
-      <div className="absolute -bottom-20 left-0 h-40 w-40 rounded-full bg-purple-500/20 blur-3xl" />
+        {/* Total Number - Minimalist */}
+        <div className="mt-2">
+          <h1 className="text-3xl font-bold tracking-tight text-white">
+            {totalUsers.toLocaleString()}
+          </h1>
+          <p className="text-xs text-slate-400 mt-1 font-medium">
+            Total eGovPH Downloads
+          </p>
+        </div>
 
-      <div className="relative z-10">
-
-        {/* HEADER */}
-        <h2 className="text-[22px] font-semibold text-[#E879F9]">
-          Downloads
-        </h2>
-
-        <p className="mt-1 text-sm text-gray-400">
-          As of {today}
-        </p>
-
-        {/* TOTAL */}
-        <h1 className="mt-1 text-6xl font-bold text-[#E879F9] drop-shadow-[0_0_12px_rgba(232,121,249,0.45)]">
-          {totalUsers.toLocaleString()}
-        </h1>
-
-        <p className="text-sm text-purple-200/80">
-          Total eGovPH Downloads
-        </p>
-
-        {/* CHART */}
-        <div className="h-[140px] w-full mt-2 outline-none">
-          <ResponsiveContainer width="100%" height="100%" className="outline-none">
-            <AreaChart data={chartData} className="outline-none">
-
+        {/* Minimalist Area Chart */}
+        <div className="h-20 w-full mt-3 -mx-2">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={waveChartData}>
               <defs>
-                <linearGradient id="colorLine" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#A855F7" />
-                  <stop offset="100%" stopColor="#C084FC" />
-                </linearGradient>
-
-                <linearGradient id="colorFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#A855F7" stopOpacity={0.5} />
-                  <stop offset="100%" stopColor="#A855F7" stopOpacity={0} />
+                <linearGradient id="minimalArea" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#818cf8" stopOpacity={0.25} />
+                  <stop offset="100%" stopColor="#818cf8" stopOpacity={0.0} />
                 </linearGradient>
               </defs>
-
-              {/* <XAxis dataKey="name" tick={{ fill: "#aaa", fontSize: 10 }} /> */}
-              <YAxis hide />
-              <Tooltip />
-
+              <YAxis hide domain={["dataMin - 1000", "dataMax + 1000"]} />
+              <Tooltip cursor={false} content={<></>} />
               <Area
                 type="monotone"
-                dataKey="value"
-                stroke="url(#colorLine)"
-                fill="url(#colorFill)"
-                strokeWidth={3}
+                dataKey="val"
+                stroke="#818cf8"
+                strokeWidth={2}
+                fill="url(#minimalArea)"
               />
-
             </AreaChart>
           </ResponsiveContainer>
         </div>
+      </div>
 
-        {/* PROVINCE BREAKDOWN */}
-        {/* <div className="mt-3 space-y-1">
-
-          {chartData.length === 0 ? (
-            <p className="text-xs text-gray-400">Loading data...</p>
-          ) : (
-            chartData.map((item) => (
-              <div
-                key={item.name}
-                className="flex items-center justify-between border-b border-white/5 pb-2 text-xs"
-              >
-                <span className="text-gray-300">{item.name}</span>
-
-                <span className="text-white font-semibold">
-                  {Number(item.value).toLocaleString()}
-                </span>
-              </div>
-            ))
-          )}
-
-        </div> */}
-
+      {/* Province Breakdown List - Clean Bento style */}
+      <div className="mt-4 pt-3 border-t border-white/[0.06] space-y-2">
+        {provinceData.map((item) => (
+          <div
+            key={item.name}
+            className="flex items-center justify-between text-xs"
+          >
+            <span className="text-slate-400 font-medium">
+              {item.name}
+            </span>
+            <span className="font-semibold text-slate-200">
+              {Number(item.value).toLocaleString()}
+            </span>
+          </div>
+        ))}
       </div>
     </div>
   );

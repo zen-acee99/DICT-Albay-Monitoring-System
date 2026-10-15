@@ -2195,10 +2195,15 @@ console.log("Additional Info: ",pnpkiNearSelectedLGU)
               >
 
                 <TileLayer
-                  url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                  url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+                  maxZoom={16}
+                />
+                <TileLayer
+                  url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}"
+                  maxZoom={16}
                 />
 
-                {liveLgus.map((lgu, i) => (
+                {liveLgus.filter(lgu => lgu && lgu.coordinates && lgu.coordinates.length >= 2).map((lgu, i) => (
 
                   <CircleMarker
                     key={i}
@@ -2286,10 +2291,15 @@ console.log("Additional Info: ",pnpkiNearSelectedLGU)
             >
 
               <TileLayer
-                url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+                maxZoom={16}
+              />
+              <TileLayer
+                url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}"
+                maxZoom={16}
               />
 
-              {liveLgus.map((lgu, i) => (
+              {liveLgus.filter(lgu => lgu && lgu.coordinates && lgu.coordinates.length >= 2).map((lgu, i) => (
 
                 <CircleMarker
                   className='animate-pulse'

@@ -185,18 +185,73 @@ app.use((req, res) => {
 });
 
 
+// Global Express error handler
+app.use((err, req, res, next) => {
+    console.error('Express Server Error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+});
+
+const fs = require('fs');
+const path = require('path');
+const logFile = path.join(__dirname, 'server_activity.log');
+function syncLog(msg) {
+    try {
+        fs.appendFileSync(logFile, `[${new Date().toISOString()}] ${msg}\n`);
+    } catch (_) {}
+}
+
 // Start server
 const PORT = process.env.PORT || 3002;
 
-mongoose.connect(process.env.MONGO_URI)
+// Prevent EventEmitter crashes when mongoose connection emits errors or disconnects
+mongoose.connection.on('error', (err) => {
+    syncLog(`Mongoose connection error: ${err.message || err}`);
+    console.error('Mongoose connection error:', err);
+});
+
+mongoose.connection.on('disconnected', () => {
+    syncLog('Mongoose disconnected from MongoDB. Reconnecting will occur automatically.');
+    console.warn('Mongoose disconnected from MongoDB. Reconnecting will occur automatically.');
+});
+
+// Guard against unhandled promise rejections or uncaught exceptions crashing the process
+process.on('unhandledRejection', (reason, promise) => {
+    syncLog(`Unhandled Rejection: ${reason?.stack || reason}`);
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+    syncLog(`Uncaught Exception: ${err.stack || err}`);
+    console.error('Uncaught Exception thrown:', err);
+});
+
+process.on('exit', (code) => {
+    syncLog(`Process exit event received with code: ${code}`);
+});
+
+process.on('SIGINT', () => {
+    syncLog('Process received SIGINT');
+    process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+    syncLog('Process received SIGTERM');
+    process.exit(0);
+});
+
+mongoose.connect(process.env.MONGO_URI, {
+    serverSelectionTimeoutMS: 10000,
+})
 .then(() => {
+    syncLog('MongoDB Connected successfully');
     console.log("MongoDB Connected");
 
     app.listen(PORT, () => {
+        syncLog(`Server is running on port ${PORT}`);
         console.log(`Server is running on port ${PORT}`);
     });
-
 })
 .catch((err) => {
+    syncLog(`MongoDB initial connect error: ${err.message || err}`);
     console.log("MongoDB Error:", err);
 });

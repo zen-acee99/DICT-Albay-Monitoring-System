@@ -1,270 +1,204 @@
 import React, { useState } from 'react'
-import {
-  BiHomeAlt2,
-  BiChevronDown,
-  BiMap,
-  BiUser,
-  BiDownload,
-  BiCalendar,
-  BiCreditCard,
-} from 'react-icons/bi'
-
-import { LuSettings } from "react-icons/lu"
-import { TbBuildingCommunity } from "react-icons/tb"
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import {
   FaGlobeAsia,
   FaMapMarkedAlt,
   FaCalendarAlt,
   FaClock,
   FaCog,
-  FaBuilding,
   FaWifi,
-  FaUsers,
-  FaDatabase,
-  FaCloud,
   FaKey,
+  FaDatabase,
   FaQrcode
 } from "react-icons/fa";
-
+import { BiLogOut } from "react-icons/bi";
 import { signOut } from "firebase/auth";
-import { auth } from "../Pages/firebase"; // adjust path if needed
+import { auth } from "../Pages/firebase";
 import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
-  const [open, setOpen] = useState(false)
-  const [openSettings, setOpenSettings] = useState(false)
-
+  const location = useLocation();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
-      navigate("/login"); // redirect after logout
+      if (auth) await signOut(auth);
+      navigate("/login");
     } catch (error) {
       console.error("Logout error:", error);
     }
   };
 
+  const isActive = (path) => location.pathname === path;
+
   return (
-    <div className="w-full h-screen bg-[#050816] text-white px-4 py-5 border-r border-[#1b2440] flex flex-col">
-      
-      {/* Logo */}
-      <div className='flex items-center gap-3 mb-8'>
-        <div className='w-10 h-10 rounded-full flex items-center justify-center shadow-lg shadow-cyan-500/20'>
-          <img src="/DictLOGO.png" alt="" />
-        </div>
-
-        <h1 className='text-2xl font-semibold tracking-wide'>
-          DigiGOV
-        </h1>
-      </div>
-
-
-      {/* Navigation */}
-      <div className='flex-1 overflow-y-auto'>
-
-        <ul className='flex flex-col pl-6 pt-3 space-y-3 text-gray-300'>
-          <Link to="/" className='flex items-center gap-3 hover:text-white transition cursor-pointer'>
-            <FaGlobeAsia/>Region
-          </Link>
-          <Link to="/albay" className='flex items-center gap-3 hover:text-white transition cursor-pointer'>
-            <FaMapMarkedAlt/>Albay
-          </Link>
-          <Link to="/calendar" className='flex items-center gap-3 hover:text-white transition cursor-pointer'>
-            <FaCalendarAlt/>Calendar
-          </Link>
-          <Link to="/DailyTimeRecord" className='flex items-center gap-3 hover:text-white transition cursor-pointer'>
-            <FaClock/>Daily Time Record
-          </Link>
-          <Link to="/albay-urlShortener" className='flex items-center gap-3 hover:text-white transition cursor-pointer'>
-            <FaQrcode/>URL Shortener
-          </Link>
-          <br/>
-          <br/>
-          <br/>
-          <div className='flex flex-1'>
-            <hr className="h-[0.5px] bg-gray-300 border-0" /><span className='text-gray-400 text-sm'>SETTINGS</span><hr className="h-px bg-gray-300 border-0" />
+    <aside className="w-[260px] h-screen bg-[#090d18] text-white px-4 py-5 border-r border-white/[0.06] flex flex-col justify-between select-none overflow-y-auto custom-scrollbar">
+      <div>
+        {/* Brand Logo - Bento style rounded */}
+        <div className="flex items-center gap-3 px-2 mb-6">
+          <div className="w-10 h-10 rounded-2xl bg-[#10172a] border border-white/10 flex items-center justify-center shadow-sm">
+            <img src="/DictLOGO.png" alt="DICT" className="w-7 h-7 object-contain" />
           </div>
-          <Link to="/settings/elgu" className='flex items-center gap-3 hover:text-white transition cursor-pointer'>
-            <FaCog/>eLGU
-          </Link>
-          <Link to="/settings/wifi" className='flex items-center gap-3 hover:text-white transition cursor-pointer'>
-            <FaWifi/>WIFI
-          </Link>
-          <Link to="/settings/pnpki" className='flex items-center gap-3 hover:text-white transition cursor-pointer'>
-            <FaKey/>PNPKI
-          </Link>
-          <Link to="/settings/ilcdb" className='flex items-center gap-3 hover:text-white transition cursor-pointer'>
-            <FaDatabase/>ILCDB
-          </Link>
-          {/* <Link to="/settings/cybersecurity" className='hover:text-white transition cursor-pointer'>
-            CYBERSECURITY
-          </Link> */}
-          <Link to="/settings/egov" className='hover:text-white transition cursor-pointer'>
-            eGOVPH
-          </Link>
-          {/* <Link onClick={handleLogout} className='hover:text-white transition cursor-pointer'>
-            Log out
-          </Link> */}
 
-
-{/* 
-          <li>
-            <button
-              onClick={() => setOpen(!open)}
-              className='w-full flex items-center justify-between px-4 py-4 rounded-2xl bg-gradient-to-r from-[#0d2f88] to-[#2d0f57] border border-blue-500/40 shadow-lg shadow-blue-900/20'
-            >
-              <div className='flex items-center gap-3'>
-                <BiHomeAlt2 className='text-2xl' />
-
-                <span className='font-medium text-lg'>
-                  Overview
-                </span>
-              </div>
-
-              <BiChevronDown
-                className={`text-xl transition-transform duration-300 ${
-                  open ? 'rotate-180' : ''
-                }`}
-              />
-            </button>
-
-
-            {open && (
-              <ul className='flex flex-col pl-6 pt-3 space-y-3 text-gray-300'>
-
-                <Link to="/calendar" className='hover:text-white transition cursor-pointer'>
-                  Calendar
-                </Link>
-                <Link to="/DailyTimeRecord" className='hover:text-white transition cursor-pointer'>
-                  Daily Time Record
-                </Link>
-                <Link to="/" className='hover:text-white transition cursor-pointer'>
-                  Region
-                </Link>
-                <Link to="/albay" className='hover:text-white transition cursor-pointer'>
-                  Albay
-                </Link>
-                <Link to="/sorsogon" className='hover:text-white transition cursor-pointer'>
-                  Sorsogon
-                </Link>
-                <Link to="/camnorte" className='hover:text-white transition cursor-pointer'>
-                  Cam Norte
-                </Link>
-                <Link to="/camsur" className='hover:text-white transition cursor-pointer'>
-                  Cam Sur
-                </Link>
-                <Link to="/masbate" className='hover:text-white transition cursor-pointer'>
-                  Masbate
-                </Link>
-                <Link to="/catanduanes" className='hover:text-white transition cursor-pointer'>
-                  Catanduanes
-                </Link>
-              </ul>
-            )}
-          </li>
-
-          <li className='flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-[#0d1325] transition cursor-pointer text-gray-300 hover:text-white'>
-            <BiUser className='text-2xl' />
-            <span className='text-lg'>Users</span>
-          </li>
-
-          <li className='flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-[#0d1325] transition cursor-pointer text-gray-300 hover:text-white'>
-            <TbBuildingCommunity className='text-2xl' />
-            <span className='text-lg'>eLGU Operations</span>
-          </li>
-
-          <li className='flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-[#0d1325] transition cursor-pointer text-gray-300 hover:text-white'>
-            <BiDownload className='text-2xl' />
-            <span className='text-lg'>Downloads</span>
-          </li>
-
-          <li className='flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-[#0d1325] transition cursor-pointer text-gray-300 hover:text-white'>
-            <BiCalendar className='text-2xl' />
-            <span className='text-lg'>Events & Activities</span>
-          </li>
-
-          <li className='flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-[#0d1325] transition cursor-pointer text-gray-300 hover:text-white'>
-            <BiCreditCard className='text-2xl' />
-            <span className='text-lg'>Payments</span>
-          </li> 
-
-            <button
-              onClick={() => setOpenSettings(!openSettings)}
-              className='w-full flex items-center justify-between px-1 py-2 rounded-2xl bg-gradient-to-r '
-            >
-              <div className='flex items-center gap-3'>
-                <LuSettings className={`text-xl transition-transform duration-300 ${
-                  openSettings ? 'rotate-180' : ''
-                }`} />
-
-                <span className='font-medium text-lg'>
-                  Settings
-                </span>
-              </div>
-              
-              <BiChevronDown
-                className={`text-xl transition-transform duration-300 ${
-                  openSettings ? 'rotate-180' : ''
-                }`}
-              />
-            </button>
-
-            {openSettings && (
-              <ul className='flex flex-col pl-6 pt-3 space-y-3 text-gray-300'>
-                <Link to="/settings/user" className='hover:text-white transition cursor-pointer'>
-                  USERS
-                </Link>
-                <Link to="/settings/elgu" className='hover:text-white transition cursor-pointer'>
-                  eLGU
-                </Link>
-                <Link to="/settings/wifi" className='hover:text-white transition cursor-pointer'>
-                  WIFI
-                </Link>
-                <Link to="/settings/pnpki" className='hover:text-white transition cursor-pointer'>
-                  PNPKI
-                </Link>
-                <Link to="/settings/ilcdb" className='hover:text-white transition cursor-pointer'>
-                  ILCDB
-                </Link>
-                <Link to="/settings/cybersecurity" className='hover:text-white transition cursor-pointer'>
-                  CYBERSECURITY
-                </Link>
-                <Link to="/settings/egov" className='hover:text-white transition cursor-pointer'>
-                  eGOVPH
-                </Link>
-                <Link onClick={handleLogout} className='hover:text-white transition cursor-pointer'>
-                  Log out
-                </Link>
-              </ul>
-            )} */}
-        </ul>
-      </div>
-
-      {/* Bottom Card */}
-      <div className='relative mt-6 rounded-[30px] h-56 overflow-hidden border border-[#1a3d80] bg-gradient-to-b from-[#07152d] to-[#020817] p-6 min-h-[240px] flex flex-col justify-end'>
-
-        {/* Glow */}
-        <div className='absolute w-[300px] h-[300px] bg-blue-700/30 rounded-full blur-3xl -bottom-28 left-1/2 -translate-x-1/2'></div>
-
-        {/* Circle Effect */}
-        <div className='absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_bottom,rgba(59,130,246,0.6),transparent_60%)]'></div>
-
-        <div className='relative z-0 text-center'>
-          
-          <img src="/1.png" alt="" />
-
-          <img src="/eGOV.png" alt="" />
-
-          <p className='text-sm text-gray-300 mt-4 leading-relaxed'>
-            Build. Empower. Transform.
-            <br />
-            eGovPH Ecosystem
-          </p>
+          <div>
+            <h1 className="text-xl font-bold tracking-tight text-white leading-none">
+              DigiGOV
+            </h1>
+            <p className="text-[10px] text-slate-400 font-medium mt-1">Monitoring System</p>
+          </div>
         </div>
+
+        {/* Navigation Links - Rounded bento style */}
+        <nav className="space-y-1">
+          <Link
+            to="/"
+            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-sm font-medium transition-all ${
+              isActive("/")
+                ? "bg-white/10 text-white shadow-sm border border-white/10"
+                : "text-slate-400 hover:text-white hover:bg-white/[0.04]"
+            }`}
+          >
+            <FaGlobeAsia className="text-base text-slate-400" />
+            <span>Region</span>
+          </Link>
+
+          <Link
+            to="/albay"
+            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-sm font-medium transition-all ${
+              isActive("/albay")
+                ? "bg-white/10 text-white shadow-sm border border-white/10"
+                : "text-slate-400 hover:text-white hover:bg-white/[0.04]"
+            }`}
+          >
+            <FaMapMarkedAlt className="text-base text-slate-400" />
+            <span>Albay</span>
+          </Link>
+
+          <Link
+            to="/calendar"
+            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-sm font-medium transition-all ${
+              isActive("/calendar")
+                ? "bg-white/10 text-white shadow-sm border border-white/10"
+                : "text-slate-400 hover:text-white hover:bg-white/[0.04]"
+            }`}
+          >
+            <FaCalendarAlt className="text-base text-slate-400" />
+            <span>Calendar</span>
+          </Link>
+
+          <Link
+            to="/DailyTimeRecord"
+            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-sm font-medium transition-all ${
+              isActive("/DailyTimeRecord")
+                ? "bg-white/10 text-white shadow-sm border border-white/10"
+                : "text-slate-400 hover:text-white hover:bg-white/[0.04]"
+            }`}
+          >
+            <FaClock className="text-base text-slate-400" />
+            <span>Daily Time Record</span>
+          </Link>
+
+          <Link
+            to="/albay-urlShortener"
+            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-sm font-medium transition-all ${
+              isActive("/albay-urlShortener")
+                ? "bg-white/10 text-white shadow-sm border border-white/10"
+                : "text-slate-400 hover:text-white hover:bg-white/[0.04]"
+            }`}
+          >
+            <FaQrcode className="text-base text-slate-400" />
+            <span>URL Shortener</span>
+          </Link>
+
+          {/* Section Divider */}
+          <div className="pt-4 pb-2 px-3">
+            <span className="text-[10px] font-bold tracking-wider text-slate-500 uppercase">Settings</span>
+          </div>
+
+          <Link
+            to="/settings/elgu"
+            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-sm font-medium transition-all ${
+              isActive("/settings/elgu")
+                ? "bg-white/10 text-white shadow-sm border border-white/10"
+                : "text-slate-400 hover:text-white hover:bg-white/[0.04]"
+            }`}
+          >
+            <FaCog className="text-base text-slate-400" />
+            <span>eLGU</span>
+          </Link>
+
+          <Link
+            to="/settings/wifi"
+            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-sm font-medium transition-all ${
+              isActive("/settings/wifi")
+                ? "bg-white/10 text-white shadow-sm border border-white/10"
+                : "text-slate-400 hover:text-white hover:bg-white/[0.04]"
+            }`}
+          >
+            <FaWifi className="text-base text-slate-400" />
+            <span>WIFI</span>
+          </Link>
+
+          <Link
+            to="/settings/pnpki"
+            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-sm font-medium transition-all ${
+              isActive("/settings/pnpki")
+                ? "bg-white/10 text-white shadow-sm border border-white/10"
+                : "text-slate-400 hover:text-white hover:bg-white/[0.04]"
+            }`}
+          >
+            <FaKey className="text-base text-slate-400" />
+            <span>PNPKI</span>
+          </Link>
+
+          <Link
+            to="/settings/ilcdb"
+            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-sm font-medium transition-all ${
+              isActive("/settings/ilcdb")
+                ? "bg-white/10 text-white shadow-sm border border-white/10"
+                : "text-slate-400 hover:text-white hover:bg-white/[0.04]"
+            }`}
+          >
+            <FaDatabase className="text-base text-slate-400" />
+            <span>ILCDB</span>
+          </Link>
+
+          <Link
+            to="/settings/egov"
+            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-sm font-medium transition-all ${
+              isActive("/settings/egov")
+                ? "bg-white/10 text-white shadow-sm border border-white/10"
+                : "text-slate-400 hover:text-white hover:bg-white/[0.04]"
+            }`}
+          >
+            <span className="w-4 text-center text-xs font-bold text-slate-400">e</span>
+            <span>eGOVPH</span>
+          </Link>
+
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-sm font-medium text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-all text-left"
+          >
+            <BiLogOut className="text-base" />
+            <span>Log out</span>
+          </button>
+        </nav>
       </div>
-    </div>
+
+      {/* Bottom Card - Rounded Bento Box */}
+      <div className="relative mt-6 rounded-3xl overflow-hidden border border-white/[0.08] bg-[#0d1424] p-5 text-center shadow-lg">
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <img src="/1.png" alt="" className="h-6 object-contain opacity-80" onError={(e) => e.target.style.display = 'none'} />
+          <img src="/eGOV.png" alt="" className="h-6 object-contain opacity-80" onError={(e) => e.target.style.display = 'none'} />
+        </div>
+        <p className="text-xs text-slate-300 font-semibold leading-relaxed">
+          Build. Empower. Transform.
+        </p>
+        <p className="text-[10px] text-slate-400 mt-0.5">
+          eGovPH Ecosystem
+        </p>
+      </div>
+    </aside>
   )
 }
 

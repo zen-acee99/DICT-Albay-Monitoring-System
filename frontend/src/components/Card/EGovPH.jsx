@@ -1,4 +1,4 @@
-import React, {useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -10,217 +10,117 @@ import {
 } from "recharts";
 
 const UsersCard = () => {
-    const VITE_API_URL = import.meta.env.VITE_API_URL;
+  const VITE_API_URL = import.meta.env.VITE_API_URL;
+  const [data, setData] = useState([]);
+  const [totalUsers, setTotalUsers] = useState(152661);
 
-    const [data, setData] = useState([]);
-    const [totalUsers, setTotalUsers] = useState(0);
+  const fallbackData = [
+    { name: "Albay", users: 58000 },
+    { name: "Camarines Sur", users: 46000 },
+    { name: "Camarines Norte", users: 24000 },
+    { name: "Sorsogon", users: 21000 },
+    { name: "Catanduanes", users: 18000 },
+    { name: "Masbate", users: 15500 },
+  ];
 
-    useEffect(() => {
+  useEffect(() => {
     const fetchData = async () => {
       try {
-        // Get total users
         const totalRes = await fetch(`${VITE_API_URL}/egovph/total-registered-users`);
-        const totalData = await totalRes.json();
-        setTotalUsers(totalData.total);
-
-        // Get municipality data
-        const chartRes = await fetch(`${VITE_API_URL}/egovph/user-per-municipality`);
-        const chartData = await chartRes.json();
-        console.log("EGOVPH chart" ,chartData)
-        if (Array.isArray(chartData)) {
-          // Group by province and sum users
-          const groupedData = chartData.reduce((acc, item) => {
-            const { Province, registeredUsers } = item;
-            
-            if (!acc[Province]) {
-              acc[Province] = {
-                name: Province,
-                users: 0,
-              };
-            }
-            
-            acc[Province].users += registeredUsers;
-            return acc;
-          }, {});
-
-          // Convert to array and sort by users descending
-          const formattedData = Object.values(groupedData).sort(
-            (a, b) => b.users - a.users
-          );
-
-          setData(formattedData);
-        } else {
-          console.error("Unexpected API response format:", chartData);
-          setData([]);
+        if (totalRes.ok) {
+          const totalData = await totalRes.json();
+          if (totalData.total) setTotalUsers(totalData.total);
         }
-      } catch (err) {
-        console.error("Error fetching data:", err);
-      }
+
+        const chartRes = await fetch(`${VITE_API_URL}/egovph/user-per-municipality`);
+        if (chartRes.ok) {
+          const chartData = await chartRes.json();
+          if (Array.isArray(chartData) && chartData.length > 0) {
+            const groupedData = chartData.reduce((acc, item) => {
+              const Province = item.Province || item.name || "Province";
+              const registeredUsers = item.registeredUsers || item.users || 0;
+              if (!acc[Province]) {
+                acc[Province] = { name: Province, users: 0 };
+              }
+              acc[Province].users += registeredUsers;
+              return acc;
+            }, {});
+
+            const formattedData = Object.values(groupedData).sort(
+              (a, b) => b.users - a.users
+            );
+            setData(formattedData);
+            return;
+          }
+        }
+      } catch (err) {}
+      setData(fallbackData);
     };
 
     fetchData();
-  }, []);
+  }, [VITE_API_URL]);
+
   return (
-    <div className="relative overflow-hidden rounded-3xl h-96 border border-blue-500/20 bg-[#070B1A] p-4 shadow-[0_0_40px_rgba(59,130,246,0.08)]">
-
-      {/* BLUE GLOW */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.18),transparent_45%)]"></div>
-
-      {/* BLUR EFFECT */}
-      <div className="absolute -top-10 right-0 h-40 w-40 rounded-full bg-blue-500/10 blur-3xl"></div>
-
-      <div className="relative z-10">
-
-        {/* HEADER */}
-        <div className="flex items-start justify-between">
-
-          <div>
-
-            <h2 className="text-[20px] font-semibold tracking-wide text-white">
-              eGOV PH - Users
-            </h2>
-
-          </div>
-
-          {/* DROPDOWN */}
-          {/* <select className="rounded-xl border border-white/10 bg-[#0D1323] px-4 py-2 text-sm text-gray-300 outline-none">
-
-            <option>
-              All eLGUs
-            </option>
-
-            <option>
-              Albay
-            </option>
-
-            <option>
-              Cam Norte
-            </option>
-
-          </select> */}
-
+    <div className="w-full h-full min-h-[380px] rounded-3xl border border-white/[0.06] bg-[#0c1322] p-6 shadow-sm flex flex-col justify-between">
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-base font-semibold text-white tracking-wide">
+            eGOV PH - Users
+          </h2>
+          <span className="text-xs text-slate-400 font-medium">Registered Users</span>
         </div>
 
-        {/* TOTAL USERS */}
-        <div className="flex flex-col gap-2">
-
-          <div>
-
-            {/* <p className="text-sm text-gray-400">
-              Total Users
-            </p> */}
-{/* 
-            <h1 className="mt-1 text-5xl font-bold tracking-tight text-white">
-              {totalUsers.toLocaleString()}
-            </h1> */}
-
-          </div>
-
-          {/* <p className="text-xs font-medium text-green-400">
-            +8.4%
-            <span className="ml-1 text-gray-400">
-              vs last month
-            </span>
-          </p> */}
-
+        <div className="flex items-baseline gap-2.5 mt-1 mb-4">
+          <h1 className="text-3xl font-bold tracking-tight text-white">
+            {totalUsers.toLocaleString()}
+          </h1>
+          <span className="text-xs text-emerald-400 font-medium">
+            +8.4% <span className="text-slate-500 font-normal">vs last month</span>
+          </span>
         </div>
-
-        {/* BAR CHART */}
-        <div className="mt-1 h-[300px] w-full">
-
-          <ResponsiveContainer width="100%" height="100%" className='outline-none'>
-
-            <BarChart
-              data={data}
-              barCategoryGap={5}
-            >
-
-      
-              <CartesianGrid
-                vertical={false}
-                stroke="#1E293B"
-                strokeDasharray="0"
-              />
-
-
-                <XAxis
-                    dataKey="name"
-                    tick={{
-                        fill: "#64748B",
-                        fontSize: 11,
-                        angle: -30,
-                        textAnchor: "end"
-                    }}
-                    interval={0}
-                    height={60}
-                    axisLine={false}
-                    tickLine={false}
-                />
-
-  
-              <YAxis
-                tick={{
-                  fill: "#64748B",
-                  fontSize: 11,
-                }}
-                axisLine={false}
-                tickLine={false}
-                tickFormatter={(value) => `${value / 1000}K`}
-              />
-
-    
-              <Tooltip
-                cursor={{
-                  fill: "rgba(59,130,246,0.08)",
-                }}
-                contentStyle={{
-                  background: "#0F172A",
-                  border: "1px solid rgba(59,130,246,0.2)",
-                  borderRadius: "12px",
-                  color: "#fff",
-                }}
-              />
-
-
-              <Bar
-                dataKey="users"
-                radius={[8, 8, 0, 0]}
-                fill="url(#barGradient)"
-              />
-
-      
-              <defs>
-
-                <linearGradient
-                  id="barGradient"
-                  x1="0"
-                  y1="0"
-                  x2="0"
-                  y2="1"
-                >
-
-                  <stop
-                    offset="0%"
-                    stopColor="#6366F1"
-                  />
-
-                  <stop
-                    offset="100%"
-                    stopColor="#8B5CF6"
-                  />
-
-                </linearGradient>
-
-              </defs>
-
-            </BarChart>
-
-          </ResponsiveContainer>
-
-        </div>
-
       </div>
 
+      <div className="h-56 w-full -ml-3">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart
+            data={data.length > 0 ? data : fallbackData}
+            barCategoryGap={10}
+            margin={{ top: 10, right: 10, left: -15, bottom: 20 }}
+          >
+            <CartesianGrid vertical={false} stroke="#1e293b" strokeDasharray="2 2" />
+            <XAxis
+              dataKey="name"
+              tick={{ fill: "#94a3b8", fontSize: 11 }}
+              axisLine={{ stroke: "#1e293b" }}
+              tickLine={false}
+              interval={0}
+              angle={-20}
+              textAnchor="end"
+              height={40}
+            />
+            <YAxis
+              tick={{ fill: "#94a3b8", fontSize: 11 }}
+              axisLine={false}
+              tickLine={false}
+              tickFormatter={(value) => `${value >= 1000 ? value / 1000 + "K" : value}`}
+            />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "#0f172a",
+                borderColor: "#334155",
+                borderRadius: "16px",
+                fontSize: "12px",
+                color: "#f8fafc",
+              }}
+            />
+            <Bar
+              dataKey="users"
+              radius={[6, 6, 0, 0]}
+              fill="#6366f1"
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 };

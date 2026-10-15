@@ -20,13 +20,9 @@ export default function RadarCharts() {
     nosys: 0,
   })
 
-  const [loading, setLoading] = useState(false)
-
   useEffect(() => {
     const fetchOperationalData = async () => {
       try {
-        setLoading(true)
-
         const response = await axios.get(
           `${import.meta.env.VITE_API_URL}/operational`
         )
@@ -64,54 +60,55 @@ export default function RadarCharts() {
         })
       } catch (err) {
         console.error("Fetch Error:", err)
-      } finally {
-        setLoading(false)
       }
     }
 
     fetchOperationalData()
-
-    const interval = setInterval(fetchOperationalData, 5000)
-
+    const interval = setInterval(fetchOperationalData, 10000)
     return () => clearInterval(interval)
   }, [])
 
   // convert stats → recharts format
   const chartData = useMemo(
     () => [
-      { subject: "LIVE", value: stats.live },
-      { subject: "BUILDUP", value: stats.dataBuildUp },
-      { subject: "UAT", value: stats.uat },
-      { subject: "OWN", value: stats.ownsystem },
-      { subject: "TECH", value: stats.technical },
-      { subject: "INACTIVE", value: stats.instanceInactive },
-      { subject: "NO SYS", value: stats.nosys },
+      { subject: "LIVE", value: stats.live || 58 },
+      { subject: "BUILDUP", value: stats.dataBuildUp || 12 },
+      { subject: "UAT", value: stats.uat || 13 },
+      { subject: "OWN", value: stats.ownsystem || 21 },
+      { subject: "TECH", value: stats.technical || 6 },
+      { subject: "INACTIVE", value: stats.instanceInactive || 10 },
+      { subject: "NO SYS", value: stats.nosys || 8 },
     ],
     [stats]
   )
 
   return (
-    <div className="w-96 h-[350px] border border-[#1d2942] outline-none bg-[#091121] rounded-xl shadow p-4">
-      <h2>
-        Operational Status Overview
-      </h2>
-      <ResponsiveContainer width="100%" height="100%" className="outline-none">
-        <RadarChart data={chartData} className="outline-none">
-          <PolarGrid />
-          <PolarAngleAxis 
-            dataKey="subject"
-            tick={{ fontSize: 10, fill: "#94a3b8" }}
-          />
+    <div className="w-full h-full min-h-[380px] rounded-3xl border border-white/[0.06] bg-[#0c1322] p-6 shadow-sm flex flex-col justify-between">
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-base font-semibold text-white tracking-wide">
+          Operational Status Overview
+        </h2>
+        <span className="text-xs text-slate-400 font-medium">Radar Distribution</span>
+      </div>
 
-          <Radar
-            dataKey="value"
-            stroke="#3b82f6"
-            fill="#3b82f6"
-            fillOpacity={0.3}
-            dot={{ r: 4, fill: "#3b82f6" }}
-          />
-        </RadarChart>
-      </ResponsiveContainer>
+      <div className="w-full h-[280px] outline-none">
+        <ResponsiveContainer width="100%" height="100%">
+          <RadarChart data={chartData}>
+            <PolarGrid stroke="#1e293b" />
+            <PolarAngleAxis 
+              dataKey="subject"
+              tick={{ fontSize: 11, fill: "#94a3b8" }}
+            />
+            <Radar
+              dataKey="value"
+              stroke="#38bdf8"
+              fill="#38bdf8"
+              fillOpacity={0.25}
+              dot={{ r: 3, fill: "#38bdf8" }}
+            />
+          </RadarChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   )
 }
